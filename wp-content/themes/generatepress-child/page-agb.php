@@ -21,7 +21,7 @@ get_header();
                 <h1 class="sd-contact-hero-title">AGB</h1>
                 <p class="sd-contact-hero-subtitle">
                     Allgemeine Geschäftsbedingungen<br>
-                    für die Nutzung von Spezialist-Für.de.
+                    für die Nutzung von Hofladen-Scout.de.
                 </p>
             </div>
         </div>

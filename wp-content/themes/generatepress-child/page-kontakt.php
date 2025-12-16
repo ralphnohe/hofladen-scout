@@ -20,7 +20,7 @@ get_header();
             <div class="sd-contact-hero-content">
                 <h1 class="sd-contact-hero-title">Kontakt</h1>
                 <p class="sd-contact-hero-subtitle">
-                    Hast Du Fragen zu Spezialist-Für.de oder benötigst Unterstützung?<br>
+                    Hast Du Fragen zu Hofladen-Scout.de oder benötigst Unterstützung?<br>
                     Wir freuen uns auf Deine Nachricht.
                 </p>
             </div>
@@ -51,7 +51,7 @@ get_header();
             <!-- Info Section -->
             <div class="sd-contact-info-section">
                 <!-- Email Card -->
-                <a href="mailto:info@spezialist-fuer.de" class="sd-info-card sd-info-card-clickable">
+                <a href="mailto:info@hofladen-scout.de" class="sd-info-card sd-info-card-clickable">
                     <div class="sd-info-card-icon-wrap">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -60,7 +60,7 @@ get_header();
                     </div>
                     <div class="sd-info-card-content">
                         <span class="sd-info-card-label">E-Mail</span>
-                        <span class="sd-info-card-value">info@spezialist-fuer.de</span>
+                        <span class="sd-info-card-value">info@hofladen-scout.de</span>
                     </div>
                     <svg class="sd-info-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M5 12h14M12 5l7 7-7 7"/>

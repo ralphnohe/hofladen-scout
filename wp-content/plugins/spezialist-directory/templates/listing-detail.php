@@ -45,7 +45,7 @@ $thumbnail_url = '';
 if ( has_post_thumbnail() ) {
     $thumbnail_url = get_the_post_thumbnail_url( $post_id, 'large' );
 } else {
-    $thumbnail_url = home_url( '/wp-content/uploads/2025/11/placeholder.webp' );
+    $thumbnail_url = home_url( '/wp-content/uploads/2025/12/placeholder.webp' );
 }
 
 // Build full address for directions
@@ -59,7 +59,7 @@ $seo_alt_text = sprintf(
     '%s - %s%s',
     get_the_title(),
     $primary_category ? $primary_category . ' in ' : '',
-    $city ?: 'Nürnberg'
+    $city ?: ''
 );
 ?>
 
@@ -82,7 +82,7 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
                         'alt'   => esc_attr( $seo_alt_text ),
                     ) ); ?>
                 <?php else : ?>
-                    <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/11/placeholder.webp' ) ); ?>"
+                    <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/12/placeholder.webp' ) ); ?>"
                          alt="<?php echo esc_attr( $seo_alt_text ); ?>"
                          class="sd-hero-profile-img" />
                 <?php endif; ?>
@@ -562,7 +562,7 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
                         <?php if ( has_post_thumbnail( $similar_id ) ) : ?>
                             <?php echo get_the_post_thumbnail( $similar_id, 'medium', array( 'class' => 'sd-similar-img' ) ); ?>
                         <?php else : ?>
-                            <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/11/placeholder.webp' ) ); ?>"
+                            <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/12/placeholder.webp' ) ); ?>"
                                  alt="<?php esc_attr_e( 'Platzhalterbild', 'spezialist-directory' ); ?>"
                                  class="sd-similar-img" />
                         <?php endif; ?>

@@ -141,7 +141,7 @@ class SD_Leads {
         $listing = get_post( $listing_id );
         if ( ! $listing || 'spezialist' !== $listing->post_type ) {
             wp_send_json_error( array(
-                'message' => __( 'Spezialist nicht gefunden.', 'spezialist-directory' )
+                'message' => __( 'Hofladen nicht gefunden.', 'spezialist-directory' )
             ) );
         }
 
@@ -186,7 +186,7 @@ class SD_Leads {
         $this->send_customer_confirmation( $lead_id, $listing_id );
 
         wp_send_json_success( array(
-            'message' => __( 'Deine Anfrage wurde erfolgreich gesendet! Der Spezialist wird sich in Kürze bei Dir melden.', 'spezialist-directory' )
+            'message' => __( 'Deine Anfrage wurde erfolgreich gesendet! Der Hofladen wird sich in Kürze bei Dir melden.', 'spezialist-directory' )
         ) );
     }
 
@@ -264,7 +264,7 @@ class SD_Leads {
         );
 
         $body = sprintf(
-            __( "Hallo %s,\n\nvielen Dank für Deine Anfrage an %s über %s.\n\nDer Spezialist wurde über Deine Anfrage informiert und wird sich in Kürze bei Dir melden.\n\nMit freundlichen Grüßen,\nDein %s Team", 'spezialist-directory' ),
+            __( "Hallo %s,\n\nvielen Dank für Deine Anfrage an %s über %s.\n\nDer Hofladen wurde über Deine Anfrage informiert und wird sich in Kürze bei Dir melden.\n\nMit freundlichen Grüßen,\nDein %s Team", 'spezialist-directory' ),
             $lead_name,
             $listing->post_title,
             get_bloginfo( 'name' ),
@@ -533,8 +533,8 @@ class SD_Leads {
                     <!-- Header -->
                     <tr>
                         <td style="background: linear-gradient(135deg, #f1c232 0%, #e5b32a 100%); padding: 32px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                            <h1 style="margin: 0; font-size: 24px; font-weight: 700;"><a href="https://nuernberg.spezialist-fuer.de" style="color: #1a1a1a; text-decoration: none;">' . esc_html( $site_name ) . '</a></h1>
-                            <p style="margin: 8px 0 0; color: #1a1a1a; font-size: 14px; opacity: 0.8;">Die besten Spezialisten in Deiner Stadt</p>
+                            <h1 style="margin: 0; font-size: 24px; font-weight: 700;"><a href="https://www.hofladen-scout.de" style="color: #1a1a1a; text-decoration: none;">' . esc_html( $site_name ) . '</a></h1>
+                            <p style="margin: 8px 0 0; color: #1a1a1a; font-size: 14px; opacity: 0.8;">Die besten Hofläden in Deiner Nähe</p>
                         </td>
                     </tr>
 
@@ -606,7 +606,7 @@ class SD_Leads {
                     <!-- Footer -->
                     <tr>
                         <td style="background-color: #F9FAFB; padding: 24px 40px; border-radius: 0 0 12px 12px; border-top: 1px solid #E5E7EB;">
-                            <p style="margin: 0 0 8px; color: #6B7280; font-size: 13px; text-align: center;">Mit freundlichen Grüßen,<br><strong style="color: #374151;">Dein <a href="https://nuernberg.spezialist-fuer.de" style="color: #374151; text-decoration: none;">' . esc_html( $site_name ) . '</a> Team</strong></p>
+                            <p style="margin: 0 0 8px; color: #6B7280; font-size: 13px; text-align: center;">Mit freundlichen Grüßen,<br><strong style="color: #374151;">Dein <a href="https://www.hofladen-scout.de" style="color: #374151; text-decoration: none;">' . esc_html( $site_name ) . '</a> Team</strong></p>
                             <p style="margin: 0; color: #9CA3AF; font-size: 12px; text-align: center;">Diese E-Mail wurde automatisch versendet.</p>
                         </td>
                     </tr>
@@ -632,7 +632,7 @@ class SD_Leads {
             'Max Mustermann'
         );
 
-        $dashboard_url = 'https://nuernberg.spezialist-fuer.de/mein-dashboard/?tab=leads';
+        $dashboard_url = 'https://www.hofladen-scout.de/mein-dashboard/?tab=leads';
         $site_name = get_bloginfo( 'name' );
 
         $body = self::get_lead_notification_html(

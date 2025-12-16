@@ -60,38 +60,38 @@ class SD_CPT_Spezialist {
      */
     public function register_post_type() {
         $labels = array(
-            'name'                  => _x( 'Spezialisten', 'Post Type General Name', 'spezialist-directory' ),
-            'singular_name'         => _x( 'Spezialist', 'Post Type Singular Name', 'spezialist-directory' ),
-            'menu_name'             => __( 'Spezialisten', 'spezialist-directory' ),
-            'name_admin_bar'        => __( 'Spezialist', 'spezialist-directory' ),
-            'archives'              => __( 'Spezialist Archiv', 'spezialist-directory' ),
-            'attributes'            => __( 'Spezialist Attribute', 'spezialist-directory' ),
-            'parent_item_colon'     => __( 'Übergeordneter Spezialist:', 'spezialist-directory' ),
-            'all_items'             => __( 'Alle Spezialisten', 'spezialist-directory' ),
-            'add_new_item'          => __( 'Neuen Spezialist hinzufügen', 'spezialist-directory' ),
+            'name'                  => _x( 'Hofläden', 'Post Type General Name', 'spezialist-directory' ),
+            'singular_name'         => _x( 'Hofladen', 'Post Type Singular Name', 'spezialist-directory' ),
+            'menu_name'             => __( 'Hofläden', 'spezialist-directory' ),
+            'name_admin_bar'        => __( 'Hofladen', 'spezialist-directory' ),
+            'archives'              => __( 'Hofladen Archiv', 'spezialist-directory' ),
+            'attributes'            => __( 'Hofladen Attribute', 'spezialist-directory' ),
+            'parent_item_colon'     => __( 'Übergeordneter Hofladen:', 'spezialist-directory' ),
+            'all_items'             => __( 'Alle Hofläden', 'spezialist-directory' ),
+            'add_new_item'          => __( 'Neuen Hofladen hinzufügen', 'spezialist-directory' ),
             'add_new'               => __( 'Neu hinzufügen', 'spezialist-directory' ),
-            'new_item'              => __( 'Neuer Spezialist', 'spezialist-directory' ),
-            'edit_item'             => __( 'Spezialist bearbeiten', 'spezialist-directory' ),
-            'update_item'           => __( 'Spezialist aktualisieren', 'spezialist-directory' ),
-            'view_item'             => __( 'Spezialist ansehen', 'spezialist-directory' ),
-            'view_items'            => __( 'Spezialisten ansehen', 'spezialist-directory' ),
-            'search_items'          => __( 'Spezialist suchen', 'spezialist-directory' ),
+            'new_item'              => __( 'Neuer Hofladen', 'spezialist-directory' ),
+            'edit_item'             => __( 'Hofladen bearbeiten', 'spezialist-directory' ),
+            'update_item'           => __( 'Hofladen aktualisieren', 'spezialist-directory' ),
+            'view_item'             => __( 'Hofladen ansehen', 'spezialist-directory' ),
+            'view_items'            => __( 'Hofläden ansehen', 'spezialist-directory' ),
+            'search_items'          => __( 'Hofladen suchen', 'spezialist-directory' ),
             'not_found'             => __( 'Nicht gefunden', 'spezialist-directory' ),
             'not_found_in_trash'    => __( 'Nicht im Papierkorb gefunden', 'spezialist-directory' ),
             'featured_image'        => __( 'Profilbild', 'spezialist-directory' ),
             'set_featured_image'    => __( 'Profilbild festlegen', 'spezialist-directory' ),
             'remove_featured_image' => __( 'Profilbild entfernen', 'spezialist-directory' ),
             'use_featured_image'    => __( 'Als Profilbild verwenden', 'spezialist-directory' ),
-            'insert_into_item'      => __( 'In Spezialist einfügen', 'spezialist-directory' ),
-            'uploaded_to_this_item' => __( 'Hochgeladen zu diesem Spezialist', 'spezialist-directory' ),
-            'items_list'            => __( 'Spezialisten Liste', 'spezialist-directory' ),
-            'items_list_navigation' => __( 'Spezialisten Listen Navigation', 'spezialist-directory' ),
-            'filter_items_list'     => __( 'Spezialisten Liste filtern', 'spezialist-directory' ),
+            'insert_into_item'      => __( 'In Hofladen einfügen', 'spezialist-directory' ),
+            'uploaded_to_this_item' => __( 'Hochgeladen zu diesem Hofladen', 'spezialist-directory' ),
+            'items_list'            => __( 'Hofläden Liste', 'spezialist-directory' ),
+            'items_list_navigation' => __( 'Hofläden Listen Navigation', 'spezialist-directory' ),
+            'filter_items_list'     => __( 'Hofläden Liste filtern', 'spezialist-directory' ),
         );
 
         $args = array(
-            'label'                 => __( 'Spezialist', 'spezialist-directory' ),
-            'description'           => __( 'Spezialisten Einträge', 'spezialist-directory' ),
+            'label'                 => __( 'Hofladen', 'spezialist-directory' ),
+            'description'           => __( 'Hofladen Einträge', 'spezialist-directory' ),
             'labels'                => $labels,
             'supports'              => array( 'title', 'editor', 'thumbnail', 'author', 'revisions' ),
             'taxonomies'            => array( 'spezialist_category', 'spezialist_location', 'spezialist_tag' ),
@@ -296,7 +296,7 @@ class SD_CPT_Spezialist {
         $post_id = intval( $atts['id'] );
 
         if ( ! $post_id || self::POST_TYPE !== get_post_type( $post_id ) ) {
-            return '<p>' . __( 'Spezialist nicht gefunden.', 'spezialist-directory' ) . '</p>';
+            return '<p>' . __( 'Hofladen nicht gefunden.', 'spezialist-directory' ) . '</p>';
         }
 
         ob_start();

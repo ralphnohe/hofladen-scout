@@ -20,7 +20,7 @@ get_header();
             <div class="sd-contact-hero-content">
                 <h1 class="sd-contact-hero-title">Merkliste</h1>
                 <p class="sd-contact-hero-subtitle">
-                    Deine gespeicherten Spezialisten<br>
+                    Deine gespeicherten Hofläden<br>
                     auf einen Blick.
                 </p>
             </div>

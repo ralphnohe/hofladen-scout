@@ -431,7 +431,7 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
                     </svg>
                 </div>
                 <h3><?php _e( 'Noch keine Einträge', 'spezialist-directory' ); ?></h3>
-                <p><?php _e( 'Du hast noch keine Spezialist-Einträge erstellt.', 'spezialist-directory' ); ?></p>
+                <p><?php _e( 'Du hast noch keine Hofladen-Einträge erstellt.', 'spezialist-directory' ); ?></p>
                 <a href="<?php echo esc_url( home_url( '/spezialist-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
                     <?php _e( 'Ersten Eintrag erstellen', 'spezialist-directory' ); ?>
                 </a>

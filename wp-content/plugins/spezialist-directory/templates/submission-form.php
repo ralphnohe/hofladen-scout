@@ -13,15 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$categories = SD_User_Submissions::get_categories();
-$locations = SD_User_Submissions::get_locations();
+$tags = SD_User_Submissions::get_tags();
+$bundeslaender = SD_User_Submissions::get_bundeslaender();
 ?>
 
 <div class="sd-submission-form-container">
     <div class="sd-submission-header">
-        <h2><?php _e( 'Neuen Spezialist-Eintrag hinzufügen', 'spezialist-directory' ); ?></h2>
+        <h2><?php _e( 'Neuen Hofladen eintragen', 'spezialist-directory' ); ?></h2>
         <p class="sd-submission-description">
-            <?php _e( 'Füll das Formular aus, um Deinen Spezialist-Eintrag einzureichen. Alle mit * markierten Felder sind Pflichtfelder.', 'spezialist-directory' ); ?>
+            <?php _e( 'Füll das Formular aus, um Deinen Hofladen-Eintrag einzureichen. Alle mit * markierten Felder sind Pflichtfelder.', 'spezialist-directory' ); ?>
         </p>
     </div>
 
@@ -65,26 +65,33 @@ $locations = SD_User_Submissions::get_locations();
             </div>
 
             <div class="sd-form-row">
-                <div class="sd-form-group sd-form-group-half">
-                    <label for="sd_category"><?php _e( 'Kategorie', 'spezialist-directory' ); ?> <span class="sd-required">*</span></label>
-                    <select id="sd_category" name="category[]" class="sd-select" multiple required>
-                        <?php foreach ( $categories as $category ) : ?>
-                            <option value="<?php echo esc_attr( $category->term_id ); ?>">
-                                <?php echo esc_html( $category->name ); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <div class="sd-form-group sd-form-group-full">
+                    <label for="sd_tags"><?php _e( 'Schlagworte / Tags', 'spezialist-directory' ); ?></label>
+                    <p class="sd-field-description"><?php _e( 'Wähle passende Tags aus oder füge neue hinzu (optional).', 'spezialist-directory' ); ?></p>
 
-                <div class="sd-form-group sd-form-group-half">
-                    <label for="sd_location"><?php _e( 'Stadtteil', 'spezialist-directory' ); ?> <span class="sd-required">*</span></label>
-                    <select id="sd_location" name="location[]" class="sd-select" multiple required>
-                        <?php foreach ( $locations as $location ) : ?>
-                            <option value="<?php echo esc_attr( $location->term_id ); ?>">
-                                <?php echo esc_html( $location->name ); ?>
-                            </option>
-                        <?php endforeach; ?>
+                    <!-- Bestehende Tags auswählen -->
+                    <select id="sd_tags" name="tags[]" class="sd-select sd-tags-select" multiple>
+                        <?php if ( ! empty( $tags ) && ! is_wp_error( $tags ) ) : ?>
+                            <?php foreach ( $tags as $tag ) : ?>
+                                <option value="<?php echo esc_attr( $tag->term_id ); ?>">
+                                    <?php echo esc_html( $tag->name ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </select>
+
+                    <!-- Neue Tags hinzufügen -->
+                    <div class="sd-tags-add-row">
+                        <input type="text" id="sd-new-tag" class="sd-input" placeholder="<?php esc_attr_e( 'Neuen Tag eingeben...', 'spezialist-directory' ); ?>">
+                        <button type="button" class="sd-button sd-button-secondary sd-add-tag">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
+                            </svg>
+                            <?php _e( 'Hinzufügen', 'spezialist-directory' ); ?>
+                        </button>
+                    </div>
+                    <div id="sd-new-tags-list" class="sd-new-tags-list"></div>
+                    <input type="hidden" name="new_tags" id="sd-new-tags-hidden" value="">
                 </div>
             </div>
 
@@ -185,9 +192,25 @@ $locations = SD_User_Submissions::get_locations();
                         name="city"
                         class="sd-input"
                         required
-                        value="Nürnberg"
-                        placeholder="Nürnberg"
+                        value=""
+                        placeholder=""
                     >
+                </div>
+            </div>
+
+            <div class="sd-form-row">
+                <div class="sd-form-group sd-form-group-full">
+                    <label for="sd_bundesland"><?php _e( 'Bundesland', 'spezialist-directory' ); ?> <span class="sd-required">*</span></label>
+                    <select id="sd_bundesland" name="bundesland" class="sd-select" required>
+                        <option value=""><?php _e( 'Bitte wählen...', 'spezialist-directory' ); ?></option>
+                        <?php if ( ! empty( $bundeslaender ) && ! is_wp_error( $bundeslaender ) ) : ?>
+                            <?php foreach ( $bundeslaender as $land ) : ?>
+                                <option value="<?php echo esc_attr( $land->term_id ); ?>">
+                                    <?php echo esc_html( $land->name ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
                 </div>
             </div>
         </div>

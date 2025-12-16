@@ -304,7 +304,7 @@ class SD_Claim_System {
                 <h1>' . __( 'Neue Claim-Anfrage', 'spezialist-directory' ) . '</h1>
             </div>
             <div class="email-body">
-                <p>' . __( 'Ein Nutzer möchte einen Spezialist-Eintrag beanspruchen. Bitte überprüfe die Anfrage.', 'spezialist-directory' ) . '</p>
+                <p>' . __( 'Ein Nutzer möchte einen Hofladen-Eintrag beanspruchen. Bitte überprüfe die Anfrage.', 'spezialist-directory' ) . '</p>
 
                 <table class="info-table">
                     <tr>

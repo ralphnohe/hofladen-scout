@@ -18,9 +18,9 @@ get_header();
     <section class="sd-contact-hero">
         <div class="sd-contact-hero-inner">
             <div class="sd-contact-hero-content">
-                <h1 class="sd-contact-hero-title">Spezialist hinzufügen</h1>
+                <h1 class="sd-contact-hero-title">Hofladen eintragen</h1>
                 <p class="sd-contact-hero-subtitle">
-                    Trage Dein Unternehmen ein<br>
+                    Trage Deinen Hofladen ein<br>
                     und werde von Kunden gefunden.
                 </p>
             </div>

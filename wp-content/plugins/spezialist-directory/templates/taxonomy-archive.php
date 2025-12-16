@@ -45,7 +45,7 @@ $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
                     <?php
                     if ( $term ) {
                         printf(
-                            _n( '%d Spezialist', '%d Spezialisten', $term->count, 'spezialist-directory' ),
+                            _n( '%d Hofladen', '%d Hofläden', $term->count, 'spezialist-directory' ),
                             $term->count
                         );
                         if ( $term->description ) {
@@ -133,7 +133,7 @@ $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
                     '%s - %s%s',
                     get_the_title(),
                     $first_category ? $first_category . ' in ' : '',
-                    $city ?: 'Nürnberg'
+                    $city ?: ''
                 );
             ?>
                 <article class="sd-listing-card <?php echo $is_premium ? 'sd-listing-premium' : ''; ?>"
@@ -174,7 +174,7 @@ $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
                                     'alt'     => esc_attr( $listing_alt_text ),
                                 ) ); ?>
                             <?php else : ?>
-                                <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/11/placeholder.webp' ) ); ?>"
+                                <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/12/placeholder.webp' ) ); ?>"
                                      alt="<?php echo esc_attr( $listing_alt_text ); ?>"
                                      class="sd-listing-thumbnail"
                                      loading="lazy" />
@@ -192,7 +192,7 @@ $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
                             <?php if ( $neighborhood ) :
                                 $location_url = add_query_arg( 'sd_location', urlencode( $neighborhood ), home_url( '/' ) );
                             ?>
-                                <a href="<?php echo esc_url( $location_url ); ?>" class="sd-listing-meta-location" title="<?php printf( esc_attr__( 'Alle Spezialisten in %s anzeigen', 'spezialist-directory' ), $neighborhood ); ?>">
+                                <a href="<?php echo esc_url( $location_url ); ?>" class="sd-listing-meta-location" title="<?php printf( esc_attr__( 'Alle Hofläden in %s anzeigen', 'spezialist-directory' ), $neighborhood ); ?>">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
                                     </svg>
@@ -285,10 +285,10 @@ $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
 
     <?php else : ?>
         <div class="sd-no-results">
-            <h3><?php _e( 'Keine Spezialisten gefunden', 'spezialist-directory' ); ?></h3>
+            <h3><?php _e( 'Keine Hofläden gefunden', 'spezialist-directory' ); ?></h3>
             <p><?php _e( 'In dieser Kategorie gibt es noch keine Einträge.', 'spezialist-directory' ); ?></p>
             <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="sd-button sd-button-primary">
-                <?php _e( 'Alle Spezialisten anzeigen', 'spezialist-directory' ); ?>
+                <?php _e( 'Alle Hofläden anzeigen', 'spezialist-directory' ); ?>
             </a>
         </div>
     <?php endif; ?>

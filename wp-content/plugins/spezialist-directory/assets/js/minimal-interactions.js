@@ -2326,7 +2326,7 @@
                     // Remove category tag from input field (sync with sd-active-chip)
                     $('#sd-category-tag').remove();
                     $('#sd_search').removeClass('has-category-tag');
-                    $('#sd_search').attr('placeholder', 'Spezialist, Kategorie...');
+                    $('#sd_search').attr('placeholder', 'Hofladen, Produkt...');
                 } else if (filterType === 'location') {
                     $('#sd_location').prop('selectedIndex', 0);
                 }
@@ -2434,8 +2434,8 @@
 
         updateResultsCount: function(count) {
             const text = count === 1
-                ? count + ' Spezialist gefunden'
-                : count + ' Spezialisten gefunden';
+                ? count + ' Hofladen gefunden'
+                : count + ' Hofläden gefunden';
             $('.sd-results-count').text(text);
         },
 
@@ -2518,7 +2518,7 @@
                                     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
                                     </svg>
-                                    <h3>Keine Spezialisten gefunden</h3>
+                                    <h3>Keine Hofläden gefunden</h3>
                                     <p>Versuche es mit anderen Suchbegriffen oder Filtern.</p>
                                 </div>
                             `);
@@ -2964,7 +2964,7 @@
             // Listings section
             if (this.results.listings && this.results.listings.length > 0) {
                 html += '<div class="sd-autocomplete-section">';
-                html += '<div class="sd-autocomplete-section-title">Spezialisten</div>';
+                html += '<div class="sd-autocomplete-section-title">Hofläden</div>';
                 this.results.listings.forEach(function(listing) {
                     html += '<div class="sd-autocomplete-item" data-type="listing" data-id="' + listing.id + '" data-title="' + self.escapeHtml(listing.title) + '">';
                     html += '<span class="sd-autocomplete-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/></svg></span>';
@@ -3058,7 +3058,7 @@
             $('#sd-category-tag').remove();
             const $input = $('#sd_search');
             $input.removeClass('has-category-tag');
-            $input.attr('placeholder', 'Spezialist, Kategorie...');
+            $input.attr('placeholder', 'Hofladen, Produkt...');
 
             // Reset dropdowns
             $('#sd_category_dropdown').val($('#sd_category_dropdown option:first').val());
@@ -3790,6 +3790,94 @@
     };
 
     /**
+     * Tags Module
+     * Handles add/remove custom tags for submission form
+     */
+    const SDTags = {
+        newTags: [],
+
+        init: function() {
+            this.bindEvents();
+        },
+
+        bindEvents: function() {
+            const self = this;
+
+            // Add tag on button click
+            $(document).on('click', '.sd-add-tag', function(e) {
+                e.preventDefault();
+                const $input = $('#sd-new-tag');
+                const value = $input.val().trim();
+
+                if (value && !self.tagExists(value)) {
+                    self.addTag(value);
+                    $input.val('').focus();
+                }
+            });
+
+            // Add tag on Enter key
+            $(document).on('keypress', '#sd-new-tag', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('.sd-add-tag').click();
+                }
+            });
+
+            // Remove tag
+            $(document).on('click', '.sd-remove-tag', function(e) {
+                e.preventDefault();
+                const $item = $(this).closest('.sd-tag-item');
+                const tagName = $item.find('.sd-tag-text').text().trim();
+
+                // Remove from array
+                self.newTags = self.newTags.filter(t => t !== tagName);
+                self.updateHiddenField();
+
+                $item.fadeOut(200, function() {
+                    $(this).remove();
+                });
+            });
+        },
+
+        tagExists: function(value) {
+            // Check if already in newTags array
+            if (this.newTags.includes(value)) {
+                return true;
+            }
+            // Check if already selected in dropdown
+            const selectedOptions = $('#sd_tags').val() || [];
+            const existingNames = [];
+            $('#sd_tags option:selected').each(function() {
+                existingNames.push($(this).text().toLowerCase());
+            });
+            return existingNames.includes(value.toLowerCase());
+        },
+
+        addTag: function(value) {
+            this.newTags.push(value);
+            this.updateHiddenField();
+
+            const escapedValue = $('<div>').text(value).html();
+            const $item = $(`
+                <span class="sd-tag-item">
+                    <span class="sd-tag-text">${escapedValue}</span>
+                    <button type="button" class="sd-remove-tag" title="Entfernen">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </span>
+            `);
+
+            $('#sd-new-tags-list').append($item);
+        },
+
+        updateHiddenField: function() {
+            $('#sd-new-tags-hidden').val(this.newTags.join(','));
+        }
+    };
+
+    /**
      * Review Response Handlers (Dashboard)
      */
     const SDReviewResponses = {
@@ -4429,6 +4517,7 @@
         SDChipsScroll.init();
         SDFavorites.init();
         SDServices.init();
+        SDTags.init();
         SDReviewResponses.init();
         SDLightbox.init();
         SDGalleryPreview.init();

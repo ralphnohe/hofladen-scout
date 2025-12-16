@@ -355,7 +355,7 @@ class SD_Ajax_Filter {
                 'loading' => 'lazy'
             ) );
         } else {
-            $thumbnail = '<img src="' . esc_url( home_url( '/wp-content/uploads/2025/11/placeholder.webp' ) ) . '" alt="' . esc_attr__( 'Platzhalterbild', 'spezialist-directory' ) . '" class="sd-listing-thumbnail" loading="lazy" />';
+            $thumbnail = '<img src="' . esc_url( home_url( '/wp-content/uploads/2025/12/placeholder.webp' ) ) . '" alt="' . esc_attr__( 'Platzhalterbild', 'spezialist-directory' ) . '" class="sd-listing-thumbnail" loading="lazy" />';
         }
 
         ob_start();
@@ -406,7 +406,7 @@ class SD_Ajax_Filter {
                         $location_filter = $display_location_slug ? $display_location_slug : $display_location;
                         $location_url = add_query_arg( 'sd_location', urlencode( $location_filter ), home_url( '/' ) );
                     ?>
-                        <a href="<?php echo esc_url( $location_url ); ?>" class="sd-listing-meta-location" title="<?php printf( esc_attr__( 'Alle Spezialisten in %s anzeigen', 'spezialist-directory' ), $display_location ); ?>">
+                        <a href="<?php echo esc_url( $location_url ); ?>" class="sd-listing-meta-location" title="<?php printf( esc_attr__( 'Alle Hofläden in %s anzeigen', 'spezialist-directory' ), $display_location ); ?>">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
                             </svg>
@@ -575,7 +575,7 @@ class SD_Ajax_Filter {
                 if ( has_post_thumbnail( $post_id ) ) {
                     $thumbnail = get_the_post_thumbnail_url( $post_id, 'thumbnail' );
                 } else {
-                    $thumbnail = home_url( '/wp-content/uploads/2025/11/placeholder.webp' );
+                    $thumbnail = home_url( '/wp-content/uploads/2025/12/placeholder.webp' );
                 }
 
                 // Additional fields for compare feature

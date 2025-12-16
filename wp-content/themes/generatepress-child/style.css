@@ -3057,6 +3057,79 @@ button.sd-action-link svg {
     color: var(--sd-grey-500);
 }
 
+/* Tags Add Row */
+.sd-tags-add-row {
+    display: flex;
+    gap: var(--sd-spacing-sm);
+    margin-top: var(--sd-spacing-md);
+}
+
+.sd-tags-add-row .sd-input {
+    flex: 1;
+}
+
+.sd-tags-add-row .sd-button {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sd-spacing-xs);
+}
+
+/* New Tags List */
+.sd-new-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sd-spacing-sm);
+    margin-top: var(--sd-spacing-md);
+}
+
+.sd-tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sd-spacing-xs);
+    padding: 6px 10px;
+    background-color: var(--sd-yellow);
+    color: var(--sd-black);
+    border-radius: var(--sd-radius-full);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.sd-tag-item .sd-tag-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sd-tag-item .sd-remove-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: var(--sd-radius-full);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.sd-tag-item .sd-remove-tag:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.sd-tag-item .sd-remove-tag svg {
+    width: 10px;
+    height: 10px;
+}
+
+/* Tags Select Styling */
+.sd-tags-select {
+    min-height: 100px;
+}
+
 /* ==========================================
    PAGE TITLE - CLEAN MODERN
    ========================================== */

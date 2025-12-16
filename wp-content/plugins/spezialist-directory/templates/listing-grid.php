@@ -60,19 +60,19 @@ $current_orderby = isset( $_GET['sd_orderby'] ) ? sanitize_text_field( $_GET['sd
 $current_min_rating = isset( $_GET['sd_min_rating'] ) ? floatval( $_GET['sd_min_rating'] ) : 0;
 
 // Generate dynamic H1 title based on active filters (SEO optimization)
-$hero_title = __( 'Spezialist in Nürnberg finden!', 'spezialist-directory' );
+$hero_title = __( 'Hofläden in Deiner Nähe finden!', 'spezialist-directory' );
 if ( $current_category && $current_location ) {
     // Get category term name for display
     $cat_term = get_term_by( 'slug', $current_category, 'spezialist_category' );
     $cat_name = $cat_term ? $cat_term->name : ucfirst( $current_category );
-    $hero_title = sprintf( __( '%s in %s finden!', 'spezialist-directory' ), esc_html( $cat_name ), esc_html( $current_location ) );
+    $hero_title = sprintf( __( '%s in %s entdecken!', 'spezialist-directory' ), esc_html( $cat_name ), esc_html( $current_location ) );
 } elseif ( $current_category ) {
     // Get category term name for display
     $cat_term = get_term_by( 'slug', $current_category, 'spezialist_category' );
     $cat_name = $cat_term ? $cat_term->name : ucfirst( $current_category );
-    $hero_title = sprintf( __( '%s in Nürnberg finden!', 'spezialist-directory' ), esc_html( $cat_name ) );
+    $hero_title = sprintf( __( '%s entdecken!', 'spezialist-directory' ), esc_html( $cat_name ) );
 } elseif ( $current_location ) {
-    $hero_title = sprintf( __( 'Spezialist in %s finden!', 'spezialist-directory' ), esc_html( $current_location ) );
+    $hero_title = sprintf( __( 'Hofläden in %s entdecken!', 'spezialist-directory' ), esc_html( $current_location ) );
 }
 ?>
 
@@ -100,7 +100,7 @@ if ( $current_category && $current_location ) {
                         type="text"
                         id="sd_search"
                         name="sd_search"
-                        placeholder="<?php echo $current_category ? '' : esc_attr__( 'Spezialist, Kategorie...', 'spezialist-directory' ); ?>"
+                        placeholder="<?php echo $current_category ? '' : esc_attr__( 'Hofladen, Produkt...', 'spezialist-directory' ); ?>"
                         value="<?php echo isset( $_GET['sd_search'] ) ? esc_attr( $_GET['sd_search'] ) : ''; ?>"
                         class="sd-hero-input<?php echo $current_category ? ' has-category-tag' : ''; ?>"
                         autocomplete="off"
@@ -111,7 +111,7 @@ if ( $current_category && $current_location ) {
                 <div class="sd-hero-divider"></div>
                 <div class="sd-hero-field sd-hero-field-where">
                     <select id="sd_location" name="sd_location" class="sd-hero-select">
-                        <option value=""><?php _e( 'Ganz Nürnberg', 'spezialist-directory' ); ?></option>
+                        <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
                         <?php if ( ! empty( $all_neighborhoods ) ) :
                             foreach ( $all_neighborhoods as $slug ) :
                                 $selected = $current_location === $slug ? 'selected' : '';
@@ -285,8 +285,8 @@ if ( $current_category && $current_location ) {
                 <?php
                 printf(
                     _n(
-                        '%d Spezialist gefunden',
-                        '%d Spezialisten gefunden',
+                        '%d Hofladen gefunden',
+                        '%d Hofläden gefunden',
                         $listings->found_posts,
                         'spezialist-directory'
                     ),
@@ -384,7 +384,7 @@ if ( $current_category && $current_location ) {
                     '%s - %s%s',
                     get_the_title(),
                     $first_category ? $first_category . ' in ' : '',
-                    $city ?: 'Nürnberg'
+                    $city ?: ''
                 );
             ?>
                 <article class="sd-listing-card <?php echo $is_premium ? 'sd-listing-premium' : ''; ?>"
@@ -425,7 +425,7 @@ if ( $current_category && $current_location ) {
                                     'alt'     => esc_attr( $listing_alt_text ),
                                 ) ); ?>
                             <?php else : ?>
-                                <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/11/placeholder.webp' ) ); ?>"
+                                <img src="<?php echo esc_url( home_url( '/wp-content/uploads/2025/12/placeholder.webp' ) ); ?>"
                                      alt="<?php echo esc_attr( $listing_alt_text ); ?>"
                                      class="sd-listing-thumbnail"
                                      loading="lazy" />
@@ -459,7 +459,7 @@ if ( $current_category && $current_location ) {
                                 $location_filter = $display_location_slug ? $display_location_slug : $display_location;
                                 $location_url = add_query_arg( 'sd_location', urlencode( $location_filter ), home_url( '/' ) );
                             ?>
-                                <a href="<?php echo esc_url( $location_url ); ?>" class="sd-listing-meta-location" title="<?php printf( esc_attr__( 'Alle Spezialisten in %s anzeigen', 'spezialist-directory' ), $display_location ); ?>">
+                                <a href="<?php echo esc_url( $location_url ); ?>" class="sd-listing-meta-location" title="<?php printf( esc_attr__( 'Alle Hofläden in %s anzeigen', 'spezialist-directory' ), $display_location ); ?>">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
                                     </svg>
@@ -604,7 +604,7 @@ if ( $current_category && $current_location ) {
                     <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
                 </svg>
             </div>
-            <h3><?php _e( 'Keine Spezialisten gefunden', 'spezialist-directory' ); ?></h3>
+            <h3><?php _e( 'Keine Hofläden gefunden', 'spezialist-directory' ); ?></h3>
             <p><?php _e( 'Versuch es mit anderen Suchbegriffen oder Filtern.', 'spezialist-directory' ); ?></p>
             <a href="<?php echo esc_url( strtok( $_SERVER['REQUEST_URI'], '?' ) ); ?>" class="sd-button sd-button-primary">
                 <?php _e( 'Filter zurücksetzen', 'spezialist-directory' ); ?>
@@ -670,7 +670,7 @@ if ( $current_category && $current_location ) {
             <div class="sd-drawer-section">
                 <div class="sd-drawer-section-title"><?php _e( 'Stadtteil', 'spezialist-directory' ); ?></div>
                 <select id="sd-drawer-location" class="sd-drawer-select">
-                    <option value=""><?php _e( 'Ganz Nürnberg', 'spezialist-directory' ); ?></option>
+                    <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
                     <?php if ( ! empty( $all_neighborhoods ) ) :
                         foreach ( $all_neighborhoods as $slug ) :
                             $selected = $current_location === $slug ? 'selected' : '';
@@ -711,7 +711,7 @@ if ( $current_category && $current_location ) {
             <div class="sd-drawer-section">
                 <div class="sd-drawer-section-title"><?php _e( 'Premium', 'spezialist-directory' ); ?></div>
                 <label class="sd-drawer-toggle">
-                    <span class="sd-drawer-toggle-label"><?php _e( 'Nur Premium Spezialisten', 'spezialist-directory' ); ?></span>
+                    <span class="sd-drawer-toggle-label"><?php _e( 'Nur Premium Hofläden', 'spezialist-directory' ); ?></span>
                     <div class="sd-premium-toggle">
                         <input
                             type="checkbox"

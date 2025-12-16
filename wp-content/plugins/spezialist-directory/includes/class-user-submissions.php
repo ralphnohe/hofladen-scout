@@ -63,7 +63,7 @@ class SD_User_Submissions {
         if ( ! $allow_guest && ! is_user_logged_in() ) {
             $login_url = sd_get_page_url( 'anmelden/?redirect_to=' . urlencode( get_permalink() ) );
             return '<div class="sd-notice sd-notice-warning">' .
-                   '<p>' . __( 'Du musst angemeldet sein, um einen Spezialist-Eintrag einzureichen.', 'spezialist-directory' ) . '</p>' .
+                   '<p>' . __( 'Du musst angemeldet sein, um einen Hofladen-Eintrag einzureichen.', 'spezialist-directory' ) . '</p>' .
                    '<p><a href="' . esc_url( $login_url ) . '" class="sd-button">' . __( 'Jetzt anmelden', 'spezialist-directory' ) . '</a></p>' .
                    '</div>';
         }
@@ -128,13 +128,11 @@ class SD_User_Submissions {
             $errors[] = __( 'Stadt ist erforderlich.', 'spezialist-directory' );
         }
 
-        if ( empty( $_POST['category'] ) ) {
-            $errors[] = __( 'Kategorie ist erforderlich.', 'spezialist-directory' );
+        if ( empty( $_POST['bundesland'] ) ) {
+            $errors[] = __( 'Bundesland ist erforderlich.', 'spezialist-directory' );
         }
 
-        if ( empty( $_POST['location'] ) ) {
-            $errors[] = __( 'Stadtteil ist erforderlich.', 'spezialist-directory' );
-        }
+        // Tags sind optional - keine Validierung erforderlich
 
         if ( ! empty( $errors ) ) {
             wp_send_json_error( array(
@@ -163,21 +161,36 @@ class SD_User_Submissions {
         // Save meta data
         $this->save_submission_meta( $post_id, $_POST );
 
-        // Handle taxonomies
-        if ( ! empty( $_POST['category'] ) ) {
-            $categories = array_map( 'intval', (array) $_POST['category'] );
-            wp_set_object_terms( $post_id, $categories, 'spezialist_category' );
+        // Handle tags (bestehende auswählen)
+        if ( ! empty( $_POST['tags'] ) ) {
+            $tags = array_map( 'intval', (array) $_POST['tags'] );
+            wp_set_object_terms( $post_id, $tags, 'spezialist_tag' );
         }
 
-        if ( ! empty( $_POST['location'] ) ) {
-            $locations = array_map( 'intval', (array) $_POST['location'] );
-            wp_set_object_terms( $post_id, $locations, 'spezialist_location' );
+        // Handle neue Tags (vom User eingegeben)
+        if ( ! empty( $_POST['new_tags'] ) ) {
+            $new_tags = array_filter( array_map( 'sanitize_text_field', explode( ',', $_POST['new_tags'] ) ) );
+            foreach ( $new_tags as $tag_name ) {
+                $tag_name = trim( $tag_name );
+                if ( empty( $tag_name ) ) continue;
 
-            // Speichere den ersten ausgewählten Stadtteil-Namen in _sd_neighborhood
-            $first_location = get_term( $locations[0], 'spezialist_location' );
-            if ( $first_location && ! is_wp_error( $first_location ) ) {
-                update_post_meta( $post_id, '_sd_neighborhood', $first_location->name );
+                // Prüfen ob Tag existiert, sonst erstellen
+                $existing = term_exists( $tag_name, 'spezialist_tag' );
+                if ( $existing ) {
+                    wp_set_object_terms( $post_id, (int) $existing['term_id'], 'spezialist_tag', true );
+                } else {
+                    $new_term = wp_insert_term( $tag_name, 'spezialist_tag' );
+                    if ( ! is_wp_error( $new_term ) ) {
+                        wp_set_object_terms( $post_id, (int) $new_term['term_id'], 'spezialist_tag', true );
+                    }
+                }
             }
+        }
+
+        // Handle Bundesland (spezialist_category)
+        if ( ! empty( $_POST['bundesland'] ) ) {
+            $bundesland_id = intval( $_POST['bundesland'] );
+            wp_set_object_terms( $post_id, $bundesland_id, 'spezialist_category', true );
         }
 
         // Handle image upload
@@ -482,12 +495,12 @@ class SD_User_Submissions {
         $admin_email = get_option( 'admin_email' );
 
         $subject = sprintf(
-            __( '[%s] Neuer Spezialist-Eintrag eingereicht', 'spezialist-directory' ),
+            __( '[%s] Neuer Hofladen-Eintrag eingereicht', 'spezialist-directory' ),
             get_bloginfo( 'name' )
         );
 
         $message = sprintf(
-            __( "Ein neuer Spezialist-Eintrag wurde eingereicht:\n\nTitel: %s\n\nEintrag überprüfen: %s", 'spezialist-directory' ),
+            __( "Ein neuer Hofladen-Eintrag wurde eingereicht:\n\nTitel: %s\n\nEintrag überprüfen: %s", 'spezialist-directory' ),
             $post->post_title,
             admin_url( 'post.php?post=' . $post_id . '&action=edit' )
         );
@@ -516,6 +529,39 @@ class SD_User_Submissions {
         return get_terms( array(
             'taxonomy'   => 'spezialist_location',
             'hide_empty' => false,
+        ) );
+    }
+
+    /**
+     * Get all tags for form
+     *
+     * @return array
+     */
+    public static function get_tags() {
+        return get_terms( array(
+            'taxonomy'   => 'spezialist_tag',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        ) );
+    }
+
+    /**
+     * Get all Bundesländer for form
+     *
+     * @return array
+     */
+    public static function get_bundeslaender() {
+        $parent = get_term_by( 'slug', 'bundesland', 'spezialist_category' );
+        if ( ! $parent ) {
+            return array();
+        }
+        return get_terms( array(
+            'taxonomy'   => 'spezialist_category',
+            'parent'     => $parent->term_id,
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
         ) );
     }
 }
