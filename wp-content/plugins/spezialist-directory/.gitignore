@@ -1,0 +1,20 @@
+# Composer
+/vendor/
+composer.lock
+
+# Node modules (falls später benötigt)
+node_modules/
+package-lock.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log

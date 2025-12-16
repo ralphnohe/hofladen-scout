@@ -1,0 +1,69 @@
+/**
+ * Spezialist Directory - Admin Styles
+ *
+ * @package Spezialist_Directory
+ * @since 1.0.0
+ */
+
+/* ====================
+   Meta Boxes
+   ==================== */
+.sd-meta-box-fields p {
+    margin: 0 0 16px;
+}
+
+.sd-meta-box-fields p:last-child {
+    margin-bottom: 0;
+}
+
+.sd-meta-box-fields label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.sd-meta-box-fields .widefat {
+    width: 100%;
+}
+
+.sd-meta-box-fields .description {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* ====================
+   Claims Admin Page
+   ==================== */
+.sd-claims-page .wrap {
+    max-width: 1400px;
+}
+
+.sd-claims-page h1 {
+    margin-bottom: 20px;
+}
+
+/* ====================
+   Settings Page
+   ==================== */
+.sd-settings-page .form-table th {
+    width: 240px;
+}
+
+.sd-settings-page .form-table input[type="text"],
+.sd-settings-page .form-table input[type="password"] {
+    width: 100%;
+    max-width: 500px;
+}
+
+.sd-settings-page h2 {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.sd-settings-page h2:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}

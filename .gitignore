@@ -1,0 +1,114 @@
+# Environment files with credentials
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# WordPress specific
+wp-config.php
+.htaccess
+.htaccess.bk
+.user.ini
+wordfence-waf.php
+
+# Database backups
+*.sql
+*.sql.gz
+db-dumps/
+
+# System files
+.DS_Store
+Thumbs.db
+._*
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+error_log
+debug.log
+
+# Temporary files
+*~
+*.swp
+*.tmp
+
+# Node modules (if using any build tools)
+node_modules/
+package-lock.json
+
+# Composer vendor (keep in plugins)
+# wp-content/plugins/*/vendor/
+# wp-content/themes/*/vendor/
+
+# Upload directory (optional - remove if you want to track uploads)
+wp-content/uploads/
+
+# Cache directories
+wp-content/cache/
+wp-content/advanced-cache.php
+wp-content/object-cache.php
+
+# Backup plugins
+wp-content/ai1wm-backups/
+wp-content/updraft/
+
+# WordPress upgrade temp folder
+wp-content/upgrade/
+
+# Claude Code
+.claude/
+claude-cli-settings.json
+
+# Import/utility scripts (local only)
+Import_spezialisten_posts.html
+wp-content/plugins/spezialist-directory/batch-featured-images.php
+wp-content/plugins/spezialist-directory/import-spezialisten.php
+
+# Local assets and data files
+hero*.webp
+place-id-neighborhood.*
+.playwright-mcp/
+
+# Claude backup files
+.claude.backup-*/
+CLAUDE.md.backup-*
+
+# WordPress language files (auto-updated by WordPress)
+wp-content/languages/
+
+# Parent theme (managed via WordPress updates, not git)
+wp-content/themes/generatepress/
+
+# Commercial/Premium plugins (not tracked in git)
+wp-content/plugins/gp-premium/
+Spezialist_Für_Importfile_Dec2025.xlsx
+
+# Third-party plugins (managed via WordPress updates, not git)
+wp-content/plugins/classic-editor-addon/
+wp-content/plugins/contact-form-7/
+wp-content/plugins/elementor/
+wp-content/plugins/google-sitemap-generator/
+wp-content/plugins/litespeed-cache/
+wp-content/plugins/wordfence/
+wp-content/plugins/wp-all-import-pro/
+wp-content/plugins/wp-mail-smtp/
+wp-content/plugins/insert-php-code-snippet/
+wp-content/plugins/wp-file-manager/
+
+# Litespeed cache files
+wp-content/litespeed/
+
+# Wordfence logs
+wp-content/wflogs/
+
+# Old/backup content
+wp-content_old/
+
+# Local graphics folder
+grafiken/
