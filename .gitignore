@@ -5,9 +5,26 @@
 .env.production
 .env.development
 
-# WordPress specific
-wp-config.php
+# WordPress Core (managed by WordPress updates, not git)
 wp-admin/
+wp-includes/
+wp-config.php
+wp-config-sample.php
+wp-activate.php
+wp-blog-header.php
+wp-comments-post.php
+wp-cron.php
+wp-links-opml.php
+wp-load.php
+wp-login.php
+wp-mail.php
+wp-settings.php
+wp-signup.php
+wp-trackback.php
+xmlrpc.php
+index.php
+license.txt
+readme.html
 .htaccess
 .htaccess.bk
 .user.ini
