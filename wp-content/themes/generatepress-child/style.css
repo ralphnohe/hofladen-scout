@@ -833,9 +833,9 @@ body.page-template-default .entry-content {
 
 .sd-hero-wrapper {
     position: relative;
-    background-image: url('images/hero-1200.webp');
+    background-image: url('/wp-content/uploads/2025/12/hofladen-hero.webp');
     background-size: cover;
-    background-position: center calc(50%);
+    background-position: center bottom;
     background-repeat: no-repeat;
     padding: 50px;
     margin-left: calc(50% - 50vw);

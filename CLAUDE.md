@@ -10,7 +10,7 @@ Hofladen-Scout.de is a German professional directory/marketplace WordPress site 
 
 - **Core System:** 6 custom plugins (spezialist-* prefix)
 - **Theme:** GeneratePress child theme with extensive CSS customization
-- **Database:** Remote MySQL production system (no Docker, no local dev)
+- **Database:** Remote MySQL production + Local MySQL development
 - **Build Tools:** Composer for Stripe SDK only, no Node.js pipeline
 - **Payment:** Stripe integration for premium subscriptions
 
@@ -66,9 +66,25 @@ wp-content/themes/generatepress-child/
 
 ## Database
 
+### Production (Remote)
+- **Host:** `localhost:3306` (auf Produktionsserver)
+- **Credentials:** In `wp-config.php` (User: `5pHY2RCF8nweny`)
+
+### Local Development
+- **Database:** `hofladen_db1`
+- **User:** `wpuser`
+- **Password:** `wp_secure_pass_2025`
+- **Host:** `localhost`
+- **Tabellen:** 61 (Import vom 16.12.2025)
+
+### Schema
 - **Prefix:** `wp_`
 - **Custom Table:** `wp_sd_claims` (listing claim requests)
 - **Meta Keys:** All prefixed `_sd_*` (e.g., `_sd_phone`, `_sd_premium_until`)
+
+### DB-Dumps
+- **Speicherort:** `db-dumps/`
+- **Aktueller Dump:** `Prod-DB_Dec16_2025__XOFjH3Tqa8NoiJ.sql` (~45MB)
 
 ## Key Integrations
 
@@ -78,10 +94,32 @@ wp-content/themes/generatepress-child/
 - **Elementor:** Page building (dequeued on watchlist page)
 - **OpenStreetMap:** Geocoding & mapping
 
+## Local Development
+
+```bash
+# Start local dev server
+php -S localhost:8000 wp-router.php
+
+# MySQL-Befehle für lokale DB
+mysql -u wpuser -pwp_secure_pass_2025 hofladen_db1
+
+# SQL-Dump importieren
+mysql -u wpuser -pwp_secure_pass_2025 hofladen_db1 < db-dumps/FILENAME.sql
+
+# SQL-Dump exportieren
+mysqldump -u wpuser -pwp_secure_pass_2025 hofladen_db1 > db-dumps/Local-DB_$(date +%b%d_%Y).sql
+```
+
+**Wichtig:** Für lokale Entwicklung muss `wp-config.php` angepasst werden:
+- `DB_NAME` auf `hofladen_db1`
+- `DB_USER` auf `wpuser`
+- `DB_PASSWORD` auf `wp_secure_pass_2025`
+
 ## Important Notes
 
-- Production-only environment (no staging/dev server)
+- Production + Local Development möglich
 - All UI strings in German
 - User registration enabled for directory submissions
 - Premium listings via Stripe subscription model
 - LiteSpeed Cache enabled for performance
+- die production url lautet: https://www.hofladen-scout.de
