@@ -118,9 +118,11 @@ wp-content/plugins/wp-all-import-pro/
 wp-content/plugins/wp-mail-smtp/
 wp-content/plugins/insert-php-code-snippet/
 wp-content/plugins/wp-file-manager/
+wp-content/plugins/wpforms-lite/
 
 # Litespeed cache files
 wp-content/litespeed/
+wp-content/.litespeed_conf.dat
 
 # Wordfence logs
 wp-content/wflogs/
