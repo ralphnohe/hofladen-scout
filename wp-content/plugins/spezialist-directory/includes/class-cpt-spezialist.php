@@ -212,6 +212,15 @@ class SD_CPT_Spezialist {
             );
         }
 
+        // Tag filter uses spezialist_tag taxonomy
+        if ( isset( $_GET['sd_tag'] ) && ! empty( $_GET['sd_tag'] ) ) {
+            $tax_query[] = array(
+                'taxonomy' => 'spezialist_tag',
+                'field'    => 'slug',
+                'terms'    => sanitize_text_field( $_GET['sd_tag'] ),
+            );
+        }
+
         if ( ! empty( $tax_query ) ) {
             $query_args['tax_query'] = $tax_query;
         }

@@ -2205,6 +2205,7 @@
     const SDFilter = {
         isLoading: false,
         currentPage: 1,
+        currentTag: '',
         debounceTimer: null,
 
         init: function() {
@@ -2261,20 +2262,28 @@
                 self.fetchListings();
             });
 
-            // Category chips
+            // Tag chips (quick filter chips on frontpage)
             $(document).on('click', '.sd-chip', function(e) {
                 e.preventDefault();
                 const $chip = $(this);
                 const href = $chip.attr('href');
                 const urlParams = new URLSearchParams(href.split('?')[1] || '');
-                const category = urlParams.get('sd_category') || '';
+                const tag = urlParams.get('sd_tag') || '';
 
-                // Toggle: If chip is already active, clear category
+                // Toggle: If chip is already active, clear tag filter
                 if ($chip.hasClass('active')) {
-                    SDAutocomplete.removeCategoryTag();
+                    // Clear tag and reload
+                    self.currentTag = '';
+                    $('.sd-chip').removeClass('active');
+                    self.currentPage = 1;
+                    self.fetchListings();
                 } else {
-                    // Use selectCategory() for full sync (tag, mobile drawer, etc.)
-                    SDAutocomplete.selectCategory(category);
+                    // Set tag filter
+                    self.currentTag = tag;
+                    $('.sd-chip').removeClass('active');
+                    $chip.addClass('active');
+                    self.currentPage = 1;
+                    self.fetchListings();
                 }
             });
 
@@ -2322,11 +2331,16 @@
                     $('#sd_search').val('');
                 } else if (filterType === 'category') {
                     $('#sd_category_dropdown').prop('selectedIndex', 0);
-                    $('.sd-chip').removeClass('active');
                     // Remove category tag from input field (sync with sd-active-chip)
                     $('#sd-category-tag').remove();
                     $('#sd_search').removeClass('has-category-tag');
                     $('#sd_search').attr('placeholder', 'Hofladen, Produkt...');
+                } else if (filterType === 'tag') {
+                    self.currentTag = '';
+                    $('.sd-chip').removeClass('active');
+                    // Remove tag from input field if shown there
+                    $('#sd-tag-tag').remove();
+                    $('#sd_search').removeClass('has-tag');
                 } else if (filterType === 'location') {
                     $('#sd_location').prop('selectedIndex', 0);
                 }
@@ -2343,6 +2357,20 @@
             const urlParams = new URLSearchParams(window.location.search);
             const urlCategory = urlParams.get('sd_category') || '';
             const urlLocation = urlParams.get('sd_location') || '';
+            const urlTag = urlParams.get('sd_tag') || '';
+
+            // Sync tag with URL
+            if (urlTag) {
+                this.currentTag = urlTag;
+                // Mark the correct chip as active
+                $('.sd-chip').each(function() {
+                    const href = $(this).attr('href');
+                    if (href && href.includes('sd_tag=' + urlTag)) {
+                        $(this).addClass('active');
+                        return false;
+                    }
+                });
+            }
 
             // Sync category dropdown with URL
             if (urlCategory) {
@@ -2373,6 +2401,7 @@
             return {
                 search: $('#sd_search').val() || '',
                 category: category,
+                tag: this.currentTag || '',
                 location: $('#sd_location').val() || '',
                 premium: $('.sd-toggle-input[name="sd_premium"]').is(':checked') ? '1' : '',
                 min_rating: $('#sd_min_rating').val() || '',
@@ -2393,6 +2422,7 @@
             $('#sd-category-tag').remove();
             $('#sd_search').removeClass('has-category-tag');
             $('#sd_search').attr('placeholder', 'Spezialist, Kategorie...');
+            this.currentTag = '';
             this.currentPage = 1;
             this.fetchListings();
         },
@@ -2460,6 +2490,13 @@
                 }
             }
 
+            if (filters.tag) {
+                // Get tag name from active chip
+                const $activeChip = $('.sd-chip.active');
+                const tagName = $activeChip.length ? $activeChip.text().trim() : filters.tag;
+                html += `<span class="sd-active-chip">${tagName} <a href="#" class="sd-chip-remove" data-filter="tag">×</a></span>`;
+            }
+
             if (html) {
                 html += '<a href="#" class="sd-clear-filters">Alle löschen</a>';
             }
@@ -2500,6 +2537,7 @@
                     nonce: sdAjax.filterNonce,
                     search: filters.search,
                     category: filters.category,
+                    tag: filters.tag,
                     location: filters.location,
                     premium: filters.premium,
                     min_rating: filters.min_rating,
@@ -2572,13 +2610,14 @@
             const url = new URL(window.location.href);
 
             // Clear existing params
-            ['sd_search', 'sd_category', 'sd_location', 'sd_premium', 'sd_min_rating', 'sd_orderby', 'paged'].forEach(function(param) {
+            ['sd_search', 'sd_category', 'sd_tag', 'sd_location', 'sd_premium', 'sd_min_rating', 'sd_orderby', 'paged'].forEach(function(param) {
                 url.searchParams.delete(param);
             });
 
             // Set new params
             if (filters.search) url.searchParams.set('sd_search', filters.search);
             if (filters.category) url.searchParams.set('sd_category', filters.category);
+            if (filters.tag) url.searchParams.set('sd_tag', filters.tag);
             if (filters.location) url.searchParams.set('sd_location', filters.location);
             if (filters.premium) url.searchParams.set('sd_premium', filters.premium);
             if (filters.min_rating) url.searchParams.set('sd_min_rating', filters.min_rating);

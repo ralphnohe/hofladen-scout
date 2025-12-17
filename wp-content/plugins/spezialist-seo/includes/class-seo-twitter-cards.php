@@ -152,17 +152,17 @@ class SDSEO_Twitter_Cards {
         $location_filter = isset( $_GET['sd_location'] ) ? sanitize_text_field( $_GET['sd_location'] ) : '';
 
         // Build title
-        $twitter_title = 'Spezialisten-Verzeichnis Nürnberg | ' . $site_name;
+        $twitter_title = $site_name . ' | Deutschland';
         if ( $category_filter && $location_filter ) {
             $twitter_title = sprintf( '%s in %s | %s', $category_filter, $location_filter, $site_name );
         } elseif ( $category_filter ) {
-            $twitter_title = sprintf( '%s - Spezialisten | %s', $category_filter, $site_name );
+            $twitter_title = sprintf( '%s | %s', $category_filter, $site_name );
         } elseif ( $location_filter ) {
-            $twitter_title = sprintf( 'Spezialisten in %s | %s', $location_filter, $site_name );
+            $twitter_title = sprintf( 'Hofläden in %s | %s', $location_filter, $site_name );
         }
 
         // Build description
-        $twitter_description = 'Finden Sie qualifizierte Spezialisten in Deutschland. Durchsuchen Sie unser Verzeichnis nach Kategorie oder Standort.';
+        $twitter_description = 'Finden Sie Hofläden und regionale Erzeuger in Deutschland. Durchsuchen Sie unser Verzeichnis nach Kategorie oder Standort.';
 
         // Allow filtering for OG Screenshots plugin
         $twitter_image = apply_filters( 'spezialist_seo_twitter_image', SDSEO()->get_placeholder_image(), null );

@@ -177,30 +177,30 @@ class SDSEO_Open_Graph {
         $location_filter = isset( $_GET['sd_location'] ) ? sanitize_text_field( $_GET['sd_location'] ) : '';
 
         // Build title
-        $og_title = 'Spezialisten-Verzeichnis Nürnberg';
+        $og_title = $site_name . ' | Deutschland';
         if ( $category_filter && $location_filter ) {
-            $og_title = sprintf( '%s in %s', $category_filter, $location_filter );
+            $og_title = sprintf( '%s in %s | %s', $category_filter, $location_filter, $site_name );
         } elseif ( $category_filter ) {
-            $og_title = sprintf( '%s - Spezialisten finden', $category_filter );
+            $og_title = sprintf( '%s | %s', $category_filter, $site_name );
         } elseif ( $location_filter ) {
-            $og_title = sprintf( 'Spezialisten in %s', $location_filter );
+            $og_title = sprintf( 'Hofläden in %s | %s', $location_filter, $site_name );
         }
 
         // Build description
-        $og_description = 'Finden Sie qualifizierte Spezialisten in Deutschland. Durchsuchen Sie unser Verzeichnis nach Kategorie oder Standort.';
+        $og_description = 'Finden Sie Hofläden und regionale Erzeuger in Deutschland. Durchsuchen Sie unser Verzeichnis nach Kategorie oder Standort.';
         if ( $category_filter && $location_filter ) {
-            $og_description = sprintf( 'Finden Sie qualifizierte %s in %s. Vergleichen Sie Profile und kontaktieren Sie Experten.', $category_filter, $location_filter );
+            $og_description = sprintf( 'Finden Sie %s in %s. Vergleichen Sie Profile und kontaktieren Sie Anbieter.', $category_filter, $location_filter );
         } elseif ( $category_filter ) {
             $og_description = sprintf( '%s in ganz Deutschland finden. Kostenlose Kontaktaufnahme.', $category_filter );
         } elseif ( $location_filter ) {
-            $og_description = sprintf( 'Alle Spezialisten in %s auf einen Blick. Finden Sie lokale Experten.', $location_filter );
+            $og_description = sprintf( 'Alle Hofläden in %s auf einen Blick. Finden Sie lokale Anbieter.', $location_filter );
         }
 
         // Get logo as image (allow filtering for OG Screenshots plugin)
         $og_image = apply_filters( 'spezialist_seo_og_image', SDSEO()->get_placeholder_image(), null );
 
         echo '<meta property="og:type" content="website">' . "\n";
-        echo '<meta property="og:title" content="' . esc_attr( $og_title ) . ' | ' . esc_attr( $site_name ) . '">' . "\n";
+        echo '<meta property="og:title" content="' . esc_attr( $og_title ) . '">' . "\n";
         echo '<meta property="og:description" content="' . esc_attr( $og_description ) . '">' . "\n";
         echo '<meta property="og:url" content="' . esc_url( home_url( '/' ) ) . '">' . "\n";
         echo '<meta property="og:image" content="' . esc_url( $og_image ) . '">' . "\n";

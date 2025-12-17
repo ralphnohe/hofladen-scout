@@ -96,9 +96,13 @@ wp-content/themes/generatepress-child/
 
 ## Local Development
 
+**Standard Port:** `localhost:8001`
+
+**Quick Start:** Sage "starte localhost" um den lokalen Server zu starten.
+
 ```bash
-# Start local dev server
-php -S localhost:8000 wp-router.php
+# Start local dev server (Default Port 8001)
+php -S localhost:8001 wp-router.php
 
 # MySQL-Befehle für lokale DB
 mysql -u wpuser -pwp_secure_pass_2025 hofladen_db1

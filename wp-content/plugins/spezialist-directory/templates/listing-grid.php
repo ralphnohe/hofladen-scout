@@ -15,14 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <?php
-// Fetch categories for quick chips (top 8 by count)
+// Fetch categories for dropdown filter
 $all_categories = get_terms( array(
     'taxonomy'   => 'spezialist_category',
     'hide_empty' => false,
     'orderby'    => 'count',
     'order'      => 'DESC',
 ) );
-$top_categories = ! is_wp_error( $all_categories ) ? array_slice( $all_categories, 0, 8 ) : array();
+
+// Fetch tags for quick chips (top 8 by count)
+$all_tags = get_terms( array(
+    'taxonomy'   => 'spezialist_tag',
+    'hide_empty' => true,
+    'orderby'    => 'count',
+    'order'      => 'DESC',
+) );
+$top_tags = ! is_wp_error( $all_tags ) ? array_slice( $all_tags, 0, 8 ) : array();
 
 // Fetch ALL location terms with at least 1 listing (Nürnberg, Bezirke, Stadtteile)
 $all_location_terms = get_terms( array(
@@ -50,12 +58,14 @@ if ( ! is_wp_error( $all_location_terms ) ) {
 $has_active_filters = ! empty( $_GET['sd_search'] ) ||
                       ! empty( $_GET['sd_category'] ) ||
                       ! empty( $_GET['sd_location'] ) ||
+                      ! empty( $_GET['sd_tag'] ) ||
                       ! empty( $_GET['sd_premium'] ) ||
                       ! empty( $_GET['sd_min_rating'] ) ||
                       ( isset( $_GET['sd_orderby'] ) && $_GET['sd_orderby'] !== 'date_desc' );
 
 $current_category = isset( $_GET['sd_category'] ) ? sanitize_text_field( $_GET['sd_category'] ) : '';
 $current_location = isset( $_GET['sd_location'] ) ? sanitize_text_field( $_GET['sd_location'] ) : '';
+$current_tag = isset( $_GET['sd_tag'] ) ? sanitize_text_field( $_GET['sd_tag'] ) : '';
 $current_orderby = isset( $_GET['sd_orderby'] ) ? sanitize_text_field( $_GET['sd_orderby'] ) : 'date_desc';
 $current_min_rating = isset( $_GET['sd_min_rating'] ) ? floatval( $_GET['sd_min_rating'] ) : 0;
 
@@ -132,8 +142,8 @@ if ( $current_category && $current_location ) {
             </div>
         </form>
 
-        <!-- Category Quick Chips -->
-        <?php if ( ! empty( $top_categories ) ) : ?>
+        <!-- Tag Quick Chips -->
+        <?php if ( ! empty( $top_tags ) ) : ?>
             <div class="sd-chips-scroll-container">
                 <button class="sd-chips-chevron sd-chips-chevron--left hidden" aria-label="<?php esc_attr_e( 'Nach links scrollen', 'spezialist-directory' ); ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -143,12 +153,12 @@ if ( $current_category && $current_location ) {
                 <div class="sd-chips-viewport">
                     <div class="sd-category-chips">
                         <span class="sd-chips-label"><?php _e( 'Beliebt:', 'spezialist-directory' ); ?></span>
-                        <?php foreach ( $top_categories as $cat ) :
-                            $chip_class = ( $current_category === $cat->slug ) ? 'sd-chip active' : 'sd-chip';
-                            $chip_url = add_query_arg( 'sd_category', $cat->slug, strtok( $_SERVER['REQUEST_URI'], '?' ) );
+                        <?php foreach ( $top_tags as $tag ) :
+                            $chip_class = ( $current_tag === $tag->slug ) ? 'sd-chip active' : 'sd-chip';
+                            $chip_url = add_query_arg( 'sd_tag', $tag->slug, strtok( $_SERVER['REQUEST_URI'], '?' ) );
                         ?>
                             <a href="<?php echo esc_url( $chip_url ); ?>" class="<?php echo esc_attr( $chip_class ); ?>">
-                                <?php echo esc_html( $cat->name ); ?>
+                                <?php echo esc_html( $tag->name ); ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
@@ -263,6 +273,15 @@ if ( $current_category && $current_location ) {
                             <a href="<?php echo esc_url( remove_query_arg( 'sd_location' ) ); ?>" class="sd-chip-remove">×</a>
                         </span>
                     <?php endif; ?>
+                    <?php if ( ! empty( $current_tag ) ) :
+                        $tag_obj = get_term_by( 'slug', $current_tag, 'spezialist_tag' );
+                        if ( $tag_obj ) :
+                    ?>
+                        <span class="sd-active-chip">
+                            <?php echo esc_html( $tag_obj->name ); ?>
+                            <a href="<?php echo esc_url( remove_query_arg( 'sd_tag' ) ); ?>" class="sd-chip-remove">×</a>
+                        </span>
+                    <?php endif; endif; ?>
                     <?php if ( $current_min_rating > 0 ) : ?>
                         <span class="sd-active-chip">
                             <?php echo esc_html( $current_min_rating ); ?>+ ★
@@ -620,6 +639,7 @@ if ( $current_category && $current_location ) {
     if ( ! empty( $_GET['sd_search'] ) ) $active_filter_count++;
     if ( ! empty( $current_category ) ) $active_filter_count++;
     if ( ! empty( $current_location ) ) $active_filter_count++;
+    if ( ! empty( $current_tag ) ) $active_filter_count++;
     if ( isset( $_GET['sd_premium'] ) && '1' === $_GET['sd_premium'] ) $active_filter_count++;
     if ( isset( $_GET['sd_orderby'] ) && $_GET['sd_orderby'] !== 'date_desc' ) $active_filter_count++;
     ?>

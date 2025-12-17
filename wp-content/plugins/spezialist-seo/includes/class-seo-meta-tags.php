@@ -118,10 +118,10 @@ class SDSEO_Meta_Tags {
             }
 
             if ( $location_filter ) {
-                return sprintf( 'Spezialisten in %s | %s', $location_filter, $site_name );
+                return sprintf( 'Hofläden in %s | %s', $location_filter, $site_name );
             }
 
-            return sprintf( 'Spezialisten-Verzeichnis Nürnberg | %s', $site_name );
+            return sprintf( '%s | Deutschland', $site_name );
         }
 
         // Category archive

@@ -148,6 +148,7 @@ class SD_Ajax_Filter {
         // Get filter parameters
         $search     = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
         $category   = isset( $_POST['category'] ) ? sanitize_text_field( $_POST['category'] ) : '';
+        $tag        = isset( $_POST['tag'] ) ? sanitize_text_field( $_POST['tag'] ) : '';
         $location   = isset( $_POST['location'] ) ? sanitize_text_field( $_POST['location'] ) : '';
         $premium    = isset( $_POST['premium'] ) && '1' === $_POST['premium'];
         $min_rating = isset( $_POST['min_rating'] ) ? floatval( $_POST['min_rating'] ) : 0;
@@ -179,6 +180,14 @@ class SD_Ajax_Filter {
                 'taxonomy' => 'spezialist_location',
                 'field'    => 'slug',
                 'terms'    => $location,
+            );
+        }
+
+        if ( ! empty( $tag ) ) {
+            $tax_query[] = array(
+                'taxonomy' => 'spezialist_tag',
+                'field'    => 'slug',
+                'terms'    => $tag,
             );
         }
 
