@@ -110,7 +110,7 @@ class SD_CPT_Spezialist {
             'capability_type'       => 'post',
             'show_in_rest'          => true,
             'rewrite'               => array(
-                'slug'       => 'spezialist',
+                'slug'       => 'hofladen',
                 'with_front' => false,
             ),
         );
@@ -360,9 +360,9 @@ class SD_CPT_Spezialist {
 
             // Check if permalink structure includes index.php
             if ( strpos( $permalink_structure, 'index.php' ) !== false ) {
-                $post_link = home_url( '/index.php/spezialist/' . $post->post_name . '/' );
+                $post_link = home_url( '/index.php/hofladen/' . $post->post_name . '/' );
             } else {
-                $post_link = home_url( '/spezialist/' . $post->post_name . '/' );
+                $post_link = home_url( '/hofladen/' . $post->post_name . '/' );
             }
         }
         return $post_link;

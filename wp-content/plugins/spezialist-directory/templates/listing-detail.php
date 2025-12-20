@@ -547,7 +547,7 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
     if ( ! empty( $similar_listings ) ) :
     ?>
     <div class="sd-similar-specialists">
-        <h2><?php _e( 'Ähnliche Spezialisten', 'spezialist-directory' ); ?></h2>
+        <h2><?php _e( 'Diese Einträge könnten Dich auch interessieren', 'spezialist-directory' ); ?></h2>
         <div class="sd-similar-grid">
             <?php foreach ( $similar_listings as $similar_post ) :
                 $similar_id = $similar_post->ID;
