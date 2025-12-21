@@ -95,7 +95,7 @@ class SD_Analytics {
 
         $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
 
-        if ( ! $post_id || get_post_type( $post_id ) !== 'spezialist' ) {
+        if ( ! $post_id || get_post_type( $post_id ) !== 'hofladen' ) {
             wp_send_json_error( array( 'message' => 'Invalid post' ) );
         }
 
@@ -121,7 +121,7 @@ class SD_Analytics {
         $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
         $type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : '';
 
-        if ( ! $post_id || get_post_type( $post_id ) !== 'spezialist' ) {
+        if ( ! $post_id || get_post_type( $post_id ) !== 'hofladen' ) {
             wp_send_json_error( array( 'message' => 'Invalid post' ) );
         }
 
@@ -411,7 +411,7 @@ class SD_Analytics {
             "SELECT COUNT(DISTINCT p.ID)
              FROM {$wpdb->posts} p
              LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = %s
-             WHERE p.post_type = 'spezialist'
+             WHERE p.post_type = 'hofladen'
                AND p.post_status = 'publish'
                AND (CAST(pm.meta_value AS UNSIGNED) > %d OR (pm.meta_value IS NULL AND %d > 0))",
             self::META_VIEWS,
@@ -423,7 +423,7 @@ class SD_Analytics {
         $total = $wpdb->get_var(
             "SELECT COUNT(*)
              FROM {$wpdb->posts}
-             WHERE post_type = 'spezialist'
+             WHERE post_type = 'hofladen'
                AND post_status = 'publish'"
         );
 

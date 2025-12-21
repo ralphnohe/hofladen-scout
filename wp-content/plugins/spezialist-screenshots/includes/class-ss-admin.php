@@ -243,7 +243,7 @@ class SS_Admin {
         $total = $wpdb->get_var("
             SELECT COUNT(*)
             FROM {$wpdb->posts}
-            WHERE post_type = 'spezialist'
+            WHERE post_type = 'hofladen'
             AND post_status = 'publish'
         ");
 
@@ -252,7 +252,7 @@ class SS_Admin {
             SELECT COUNT(*)
             FROM {$wpdb->posts} p
             LEFT JOIN {$wpdb->postmeta} tm ON (p.ID = tm.post_id AND tm.meta_key = '_thumbnail_id')
-            WHERE p.post_type = 'spezialist'
+            WHERE p.post_type = 'hofladen'
             AND p.post_status = 'publish'
             AND tm.meta_id IS NULL
         ");
@@ -263,7 +263,7 @@ class SS_Admin {
             FROM {$wpdb->posts} p
             INNER JOIN {$wpdb->postmeta} pm ON (p.ID = pm.post_id AND pm.meta_key = '_sd_website')
             LEFT JOIN {$wpdb->postmeta} tm ON (p.ID = tm.post_id AND tm.meta_key = '_thumbnail_id')
-            WHERE p.post_type = 'spezialist'
+            WHERE p.post_type = 'hofladen'
             AND p.post_status = 'publish'
             AND tm.meta_id IS NULL
             AND pm.meta_value IS NOT NULL
@@ -330,7 +330,7 @@ class SS_Admin {
             FROM {$wpdb->posts} p
             INNER JOIN {$wpdb->postmeta} pm ON (p.ID = pm.post_id AND pm.meta_key = '_sd_website')
             LEFT JOIN {$wpdb->postmeta} tm ON (p.ID = tm.post_id AND tm.meta_key = '_thumbnail_id')
-            WHERE p.post_type = 'spezialist'
+            WHERE p.post_type = 'hofladen'
             AND p.post_status = 'publish'
             AND tm.meta_id IS NULL
             AND pm.meta_value IS NOT NULL

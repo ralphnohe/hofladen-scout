@@ -54,7 +54,7 @@ class SD_Meta_Boxes {
             'sd_contact_info',
             __( 'Kontaktinformationen', 'spezialist-directory' ),
             array( $this, 'render_contact_info_meta_box' ),
-            'spezialist',
+            'hofladen',
             'normal',
             'high'
         );
@@ -64,7 +64,7 @@ class SD_Meta_Boxes {
             'sd_business_hours',
             __( 'Öffnungszeiten', 'spezialist-directory' ),
             array( $this, 'render_business_hours_meta_box' ),
-            'spezialist',
+            'hofladen',
             'normal',
             'default'
         );
@@ -74,7 +74,7 @@ class SD_Meta_Boxes {
             'sd_services',
             __( 'Angebotene Leistungen', 'spezialist-directory' ),
             array( $this, 'render_services_meta_box' ),
-            'spezialist',
+            'hofladen',
             'normal',
             'default'
         );
@@ -84,7 +84,7 @@ class SD_Meta_Boxes {
             'sd_social_media',
             __( 'Social Media Links', 'spezialist-directory' ),
             array( $this, 'render_social_media_meta_box' ),
-            'spezialist',
+            'hofladen',
             'normal',
             'default'
         );
@@ -94,7 +94,7 @@ class SD_Meta_Boxes {
             'sd_premium_status',
             __( 'Premium Status', 'spezialist-directory' ),
             array( $this, 'render_premium_status_meta_box' ),
-            'spezialist',
+            'hofladen',
             'side',
             'high'
         );
@@ -105,7 +105,7 @@ class SD_Meta_Boxes {
                 'sd_claim_info',
                 __( 'Claim Informationen', 'spezialist-directory' ),
                 array( $this, 'render_claim_info_meta_box' ),
-                'spezialist',
+                'hofladen',
                 'side',
                 'default'
             );
@@ -115,7 +115,7 @@ class SD_Meta_Boxes {
                 'sd_verification_status',
                 __( 'Verifizierung', 'spezialist-directory' ),
                 array( $this, 'render_verification_status_meta_box' ),
-                'spezialist',
+                'hofladen',
                 'side',
                 'high'
             );

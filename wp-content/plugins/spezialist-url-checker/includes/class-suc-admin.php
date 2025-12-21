@@ -166,7 +166,7 @@ class SUC_Admin {
         // Total posts
         $total = $wpdb->get_var( $wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish'",
-            'spezialist'
+            'hofladen'
         ) );
 
         // Posts with website
@@ -179,7 +179,7 @@ class SUC_Admin {
              AND pm.meta_key = '_sd_website'
              AND pm.meta_value != ''
              AND pm.meta_value IS NOT NULL",
-            'spezialist'
+            'hofladen'
         ) );
 
         wp_send_json_success( array(
@@ -210,7 +210,7 @@ class SUC_Admin {
              AND pm.meta_value != ''
              AND pm.meta_value IS NOT NULL
              ORDER BY p.post_title ASC",
-            'spezialist'
+            'hofladen'
         ) );
 
         $posts = array();

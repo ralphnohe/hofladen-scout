@@ -49,7 +49,7 @@ class SDSEO_Twitter_Cards {
      */
     public function output_twitter_cards() {
         // Single specialist page
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $this->output_specialist_twitter();
             return;
         }

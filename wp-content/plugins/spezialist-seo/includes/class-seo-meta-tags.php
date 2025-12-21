@@ -79,7 +79,7 @@ class SDSEO_Meta_Tags {
         $site_name = get_bloginfo( 'name' );
 
         // Single specialist page
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $post_id = get_the_ID();
             $name = get_the_title();
             $city = get_post_meta( $post_id, '_sd_city', true );
@@ -162,7 +162,7 @@ class SDSEO_Meta_Tags {
      */
     private function get_meta_description() {
         // Single specialist page
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             return $this->get_specialist_description();
         }
 
@@ -307,7 +307,7 @@ class SDSEO_Meta_Tags {
      * Output geo meta tags for local SEO
      */
     public function output_geo_meta() {
-        if ( ! is_singular( 'spezialist' ) ) {
+        if ( ! is_singular( 'hofladen' ) ) {
             return;
         }
 
@@ -334,7 +334,7 @@ class SDSEO_Meta_Tags {
         $canonical = '';
 
         // Single specialist
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $canonical = get_permalink();
         }
 

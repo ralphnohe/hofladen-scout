@@ -233,9 +233,9 @@ echo '
         </div>
 
         <div style="margin-top: 30px; text-align: center;">
-            <a href="' . admin_url('edit-tags.php?taxonomy=spezialist_category&post_type=spezialist') . '" class="btn">Kategorien anzeigen</a>
-            <a href="' . admin_url('edit-tags.php?taxonomy=spezialist_location&post_type=spezialist') . '" class="btn">Standorte anzeigen</a>
-            <a href="' . admin_url('edit.php?post_type=spezialist') . '" class="btn">Zu den Spezialisten</a>
+            <a href="' . admin_url('edit-tags.php?taxonomy=spezialist_category&post_type=hofladen') . '" class="btn">Kategorien anzeigen</a>
+            <a href="' . admin_url('edit-tags.php?taxonomy=spezialist_location&post_type=hofladen') . '" class="btn">Standorte anzeigen</a>
+            <a href="' . admin_url('edit.php?post_type=hofladen') . '" class="btn">Zu den Spezialisten</a>
         </div>
 
         <div class="success" style="margin-top: 30px;">

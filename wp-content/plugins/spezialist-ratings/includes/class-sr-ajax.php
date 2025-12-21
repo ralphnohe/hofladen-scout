@@ -67,7 +67,7 @@ class SR_Ajax {
 
         // Get and validate post_id
         $post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
-        if ( ! $post_id || 'spezialist' !== get_post_type( $post_id ) ) {
+        if ( ! $post_id || 'hofladen' !== get_post_type( $post_id ) ) {
             wp_send_json_error( array(
                 'message' => __( 'Ungültiger Eintrag.', 'spezialist-ratings' ),
             ) );

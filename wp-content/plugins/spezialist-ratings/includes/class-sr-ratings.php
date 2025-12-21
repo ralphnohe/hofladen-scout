@@ -763,7 +763,7 @@ class SR_Ratings {
 
         // Get all posts owned by user or claimed by user
         $owned_posts = $wpdb->get_col( $wpdb->prepare(
-            "SELECT ID FROM {$wpdb->posts} WHERE post_author = %d AND post_type = 'spezialist' AND post_status = 'publish'",
+            "SELECT ID FROM {$wpdb->posts} WHERE post_author = %d AND post_type = 'hofladen' AND post_status = 'publish'",
             $user_id
         ) );
 

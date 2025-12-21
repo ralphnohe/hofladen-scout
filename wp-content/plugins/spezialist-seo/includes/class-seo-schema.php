@@ -50,7 +50,7 @@ class SDSEO_Schema {
      */
     public function output_schema() {
         // Single specialist page
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $this->output_specialist_schema();
             $this->output_breadcrumb_schema();
             return;
@@ -525,7 +525,7 @@ class SDSEO_Schema {
         );
 
         // Single specialist
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $post_id = get_the_ID();
             $categories = Spezialist_SEO::get_specialist_categories( $post_id );
 

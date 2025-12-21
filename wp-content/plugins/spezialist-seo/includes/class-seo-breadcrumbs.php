@@ -92,7 +92,7 @@ class SDSEO_Breadcrumbs {
         }
 
         // Single specialist page
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $post_id = get_the_ID();
 
             // Add category

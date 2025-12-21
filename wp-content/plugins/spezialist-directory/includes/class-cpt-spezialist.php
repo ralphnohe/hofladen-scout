@@ -30,7 +30,7 @@ class SD_CPT_Spezialist {
      *
      * @var string
      */
-    const POST_TYPE = 'spezialist';
+    const POST_TYPE = 'hofladen';
 
     /**
      * Main Instance

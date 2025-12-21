@@ -30,7 +30,7 @@ class OGS_Discovery {
      */
     const TYPE_PAGE = 'page';
     const TYPE_POST = 'post';
-    const TYPE_SPEZIALIST = 'spezialist';
+    const TYPE_SPEZIALIST = 'hofladen';
     const TYPE_CATEGORY = 'spezialist_category';
     const TYPE_LOCATION = 'spezialist_location';
     const TYPE_TAG = 'spezialist_tag';

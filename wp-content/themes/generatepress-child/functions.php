@@ -63,7 +63,7 @@ function sd_enable_user_registration() {
 add_filter( 'body_class', 'sd_custom_body_classes' );
 function sd_custom_body_classes( $classes ) {
 	// Add class when on any directory page
-	if ( is_singular( 'spezialist' ) || is_post_type_archive( 'spezialist' ) ) {
+	if ( is_singular( 'hofladen' ) || is_post_type_archive( 'hofladen' ) ) {
 		$classes[] = 'spezialist-directory-page';
 	}
 
@@ -73,7 +73,7 @@ function sd_custom_body_classes( $classes ) {
 // Customize excerpt length for specialist listings
 add_filter( 'excerpt_length', 'sd_custom_excerpt_length', 999 );
 function sd_custom_excerpt_length( $length ) {
-	if ( is_post_type_archive( 'spezialist' ) || ( is_search() && get_post_type() === 'spezialist' ) ) {
+	if ( is_post_type_archive( 'hofladen' ) || ( is_search() && get_post_type() === 'hofladen' ) ) {
 		return 20;
 	}
 	return $length;
@@ -82,7 +82,7 @@ function sd_custom_excerpt_length( $length ) {
 // Remove "..." from excerpt
 add_filter( 'excerpt_more', 'sd_excerpt_more' );
 function sd_excerpt_more( $more ) {
-	if ( get_post_type() === 'spezialist' ) {
+	if ( get_post_type() === 'hofladen' ) {
 		return '...';
 	}
 	return $more;

@@ -255,7 +255,7 @@ final class Spezialist_Directory {
                                is_tax( 'spezialist_tag' );
 
         // Only enqueue on relevant pages
-        if ( ! is_singular( 'spezialist' ) && ! has_shortcode( $post_content, 'spezialist_listings' )
+        if ( ! is_singular( 'hofladen' ) && ! has_shortcode( $post_content, 'spezialist_listings' )
              && ! has_shortcode( $post_content, 'spezialist_submit' )
              && ! has_shortcode( $post_content, 'spezialist_dashboard' )
              && ! has_shortcode( $post_content, 'spezialist_login' )
@@ -273,7 +273,7 @@ final class Spezialist_Directory {
         );
 
         // Enqueue Leaflet CSS and JS for pages with maps (listings page + single spezialist)
-        $needs_leaflet = is_singular( 'spezialist' ) ||
+        $needs_leaflet = is_singular( 'hofladen' ) ||
                          has_shortcode( $post_content, 'spezialist_listings' ) ||
                          is_front_page();
 
@@ -332,7 +332,7 @@ final class Spezialist_Directory {
     public function enqueue_admin_assets( $hook ) {
         // Only on spezialist post type edit screens
         global $post_type;
-        if ( 'spezialist' !== $post_type ) {
+        if ( 'hofladen' !== $post_type ) {
             return;
         }
 

@@ -49,7 +49,7 @@ class SDSEO_Open_Graph {
      */
     public function output_open_graph() {
         // Single specialist page
-        if ( is_singular( 'spezialist' ) ) {
+        if ( is_singular( 'hofladen' ) ) {
             $this->output_specialist_og();
             return;
         }

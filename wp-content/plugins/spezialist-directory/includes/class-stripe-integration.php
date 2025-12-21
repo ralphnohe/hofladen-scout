@@ -62,7 +62,7 @@ class SD_Stripe_Integration {
      */
     public function add_settings_page() {
         add_submenu_page(
-            'edit.php?post_type=spezialist',
+            'edit.php?post_type=hofladen',
             __( 'Stripe Einstellungen', 'spezialist-directory' ),
             __( 'Stripe Einstellungen', 'spezialist-directory' ),
             'manage_options',
@@ -907,7 +907,7 @@ class SD_Stripe_Integration {
 
         // Find post with this subscription
         $posts = get_posts( array(
-            'post_type' => 'spezialist',
+            'post_type' => 'hofladen',
             'meta_key' => '_sd_stripe_subscription_id',
             'meta_value' => $subscription_id,
             'posts_per_page' => 1,

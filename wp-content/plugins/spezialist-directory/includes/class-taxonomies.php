@@ -158,7 +158,7 @@ class SD_Taxonomies {
             'update_count_callback'      => '_update_post_term_count',
         );
 
-        register_taxonomy( 'spezialist_category', array( 'spezialist' ), $args );
+        register_taxonomy( 'spezialist_category', array( 'hofladen' ), $args );
     }
 
     /**
@@ -205,7 +205,7 @@ class SD_Taxonomies {
             'update_count_callback'      => '_update_post_term_count',
         );
 
-        register_taxonomy( 'spezialist_location', array( 'spezialist' ), $args );
+        register_taxonomy( 'spezialist_location', array( 'hofladen' ), $args );
     }
 
     /**
@@ -249,7 +249,7 @@ class SD_Taxonomies {
             'update_count_callback'      => '_update_post_term_count',
         );
 
-        register_taxonomy( 'spezialist_tag', array( 'spezialist' ), $args );
+        register_taxonomy( 'spezialist_tag', array( 'hofladen' ), $args );
     }
 
     /**

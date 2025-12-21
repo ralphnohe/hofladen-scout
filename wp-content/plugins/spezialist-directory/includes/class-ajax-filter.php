@@ -82,7 +82,7 @@ class SD_Ajax_Filter {
         global $wpdb;
 
         // Only modify for spezialist post type searches
-        if ( ! $query->is_search() || 'spezialist' !== $query->get( 'post_type' ) ) {
+        if ( ! $query->is_search() || 'hofladen' !== $query->get( 'post_type' ) ) {
             return $search;
         }
 

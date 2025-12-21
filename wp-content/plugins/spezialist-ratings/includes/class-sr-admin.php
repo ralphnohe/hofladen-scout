@@ -58,7 +58,7 @@ class SR_Admin {
         }
 
         add_submenu_page(
-            'edit.php?post_type=spezialist',
+            'edit.php?post_type=hofladen',
             __( 'Bewertungen verwalten', 'spezialist-ratings' ),
             $menu_title,
             'manage_options',
@@ -188,19 +188,19 @@ class SR_Admin {
 
             <!-- Filter Buttons -->
             <div class="sr-admin-filters">
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings' ) ); ?>"
                    class="button <?php echo ! $status_filter ? 'button-primary' : ''; ?>">
                     <?php _e( 'Alle', 'spezialist-ratings' ); ?>
                 </a>
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&status=pending' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&status=pending' ) ); ?>"
                    class="button <?php echo $status_filter === 'pending' ? 'button-primary' : ''; ?>">
                     <?php _e( 'Ausstehend', 'spezialist-ratings' ); ?> (<?php echo esc_html( $counts['pending'] ); ?>)
                 </a>
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&status=approved' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&status=approved' ) ); ?>"
                    class="button <?php echo $status_filter === 'approved' ? 'button-primary' : ''; ?>">
                     <?php _e( 'Genehmigt', 'spezialist-ratings' ); ?>
                 </a>
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&status=rejected' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&status=rejected' ) ); ?>"
                    class="button <?php echo $status_filter === 'rejected' ? 'button-primary' : ''; ?>">
                     <?php _e( 'Abgelehnt', 'spezialist-ratings' ); ?>
                 </a>
@@ -294,24 +294,24 @@ class SR_Admin {
                                 <td>
                                     <div class="sr-action-buttons">
                                         <?php if ( $rating->status === 'pending' ) : ?>
-                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&action=approve&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
+                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&action=approve&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
                                                class="button button-small button-primary"
                                                title="<?php esc_attr_e( 'Genehmigen', 'spezialist-ratings' ); ?>">
                                                 <span class="dashicons dashicons-yes"></span>
                                             </a>
-                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&action=reject&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
+                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&action=reject&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
                                                class="button button-small"
                                                title="<?php esc_attr_e( 'Ablehnen', 'spezialist-ratings' ); ?>">
                                                 <span class="dashicons dashicons-no-alt"></span>
                                             </a>
                                         <?php elseif ( $rating->status === 'rejected' ) : ?>
-                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&action=approve&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
+                                            <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&action=approve&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
                                                class="button button-small"
                                                title="<?php esc_attr_e( 'Doch genehmigen', 'spezialist-ratings' ); ?>">
                                                 <span class="dashicons dashicons-yes"></span>
                                             </a>
                                         <?php endif; ?>
-                                        <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&action=delete&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
+                                        <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&action=delete&rating_id=' . $rating->id ), 'sr_mod_action' ) ); ?>"
                                            class="button button-small sr-delete-btn"
                                            title="<?php esc_attr_e( 'Löschen', 'spezialist-ratings' ); ?>"
                                            onclick="return confirm('<?php esc_attr_e( 'Bewertung wirklich löschen?', 'spezialist-ratings' ); ?>');">
