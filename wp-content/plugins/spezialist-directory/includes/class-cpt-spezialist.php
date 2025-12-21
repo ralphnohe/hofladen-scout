@@ -157,10 +157,20 @@ class SD_CPT_Spezialist {
             $paged = 1;
         }
 
+        // Handle per_page from URL parameter (user preference)
+        $per_page = intval( $atts['per_page'] );
+        if ( isset( $_GET['sd_per_page'] ) ) {
+            $requested_per_page = intval( $_GET['sd_per_page'] );
+            // Validate to allowed values
+            if ( in_array( $requested_per_page, array( 12, 50, 100 ), true ) ) {
+                $per_page = $requested_per_page;
+            }
+        }
+
         // Build query args
         $query_args = array(
             'post_type'      => self::POST_TYPE,
-            'posts_per_page' => intval( $atts['per_page'] ),
+            'posts_per_page' => $per_page,
             'paged'          => $paged,
             'post_status'    => 'publish',
             'orderby'        => sanitize_text_field( $atts['orderby'] ),
@@ -203,13 +213,44 @@ class SD_CPT_Spezialist {
         }
 
         // Location filter uses spezialist_location taxonomy (includes child terms)
+        // Falls back to meta field search if no taxonomy term exists
         if ( isset( $_GET['sd_location'] ) && ! empty( $_GET['sd_location'] ) ) {
-            $tax_query[] = array(
-                'taxonomy'         => 'spezialist_location',
-                'field'            => 'slug',
-                'terms'            => sanitize_text_field( $_GET['sd_location'] ),
-                'include_children' => true, // Include child terms (Stadtteile under Bezirke)
-            );
+            $location_value = sanitize_text_field( $_GET['sd_location'] );
+
+            // Check if this location exists as a taxonomy term
+            $location_term = get_term_by( 'slug', $location_value, 'spezialist_location' );
+            if ( ! $location_term ) {
+                // Also try by name (for non-slug URLs like "Christdorf")
+                $location_term = get_term_by( 'name', $location_value, 'spezialist_location' );
+            }
+
+            if ( $location_term ) {
+                // Use taxonomy query
+                $tax_query[] = array(
+                    'taxonomy'         => 'spezialist_location',
+                    'field'            => 'slug',
+                    'terms'            => $location_term->slug,
+                    'include_children' => true,
+                );
+            } else {
+                // Fallback: search in meta fields (_sd_city or _sd_neighborhood)
+                if ( ! isset( $query_args['meta_query'] ) ) {
+                    $query_args['meta_query'] = array();
+                }
+                $query_args['meta_query'][] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => '_sd_city',
+                        'value'   => $location_value,
+                        'compare' => 'LIKE',
+                    ),
+                    array(
+                        'key'     => '_sd_neighborhood',
+                        'value'   => $location_value,
+                        'compare' => 'LIKE',
+                    ),
+                );
+            }
         }
 
         // Tag filter uses spezialist_tag taxonomy

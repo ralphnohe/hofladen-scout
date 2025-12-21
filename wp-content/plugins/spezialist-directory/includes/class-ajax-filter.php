@@ -156,9 +156,17 @@ class SD_Ajax_Filter {
         $paged      = isset( $_POST['paged'] ) ? absint( $_POST['paged'] ) : 1;
         $per_page   = Spezialist_Directory::get_option( 'listings_per_page', 12 );
 
+        // Override per_page if provided via AJAX
+        if ( isset( $_POST['per_page'] ) ) {
+            $requested_per_page = absint( $_POST['per_page'] );
+            if ( in_array( $requested_per_page, array( 12, 50, 100 ), true ) ) {
+                $per_page = $requested_per_page;
+            }
+        }
+
         // Build query args
         $query_args = array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'posts_per_page' => $per_page,
             'paged'          => $paged,
             'post_status'    => 'publish',
@@ -176,11 +184,35 @@ class SD_Ajax_Filter {
         }
 
         if ( ! empty( $location ) ) {
-            $tax_query[] = array(
-                'taxonomy' => 'spezialist_location',
-                'field'    => 'slug',
-                'terms'    => $location,
-            );
+            // Check if this location exists as a taxonomy term
+            $location_term = get_term_by( 'slug', $location, 'spezialist_location' );
+            if ( ! $location_term ) {
+                $location_term = get_term_by( 'name', $location, 'spezialist_location' );
+            }
+
+            if ( $location_term ) {
+                $tax_query[] = array(
+                    'taxonomy'         => 'spezialist_location',
+                    'field'            => 'slug',
+                    'terms'            => $location_term->slug,
+                    'include_children' => true,
+                );
+            } else {
+                // Fallback: search in meta fields
+                $meta_query[] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => '_sd_city',
+                        'value'   => $location,
+                        'compare' => 'LIKE',
+                    ),
+                    array(
+                        'key'     => '_sd_neighborhood',
+                        'value'   => $location,
+                        'compare' => 'LIKE',
+                    ),
+                );
+            }
         }
 
         if ( ! empty( $tag ) ) {
@@ -558,7 +590,7 @@ class SD_Ajax_Filter {
 
         // Query posts
         $args = array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'post__in'       => $post_ids,
             'posts_per_page' => count( $post_ids ),
             'post_status'    => 'publish',
@@ -674,7 +706,7 @@ class SD_Ajax_Filter {
 
         // Search listings (exclude paused)
         $listings_query = new WP_Query( array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'posts_per_page' => 5,
             's'              => $term,
             'post_status'    => 'publish',

@@ -10,6 +10,12 @@
 (function($) {
     'use strict';
 
+    // Guard against multiple script execution
+    if (window.sdDirectoryLoaded) {
+        return;
+    }
+    window.sdDirectoryLoaded = true;
+
     /**
      * Show notice message
      */
@@ -2207,6 +2213,7 @@
         currentPage: 1,
         currentTag: '',
         debounceTimer: null,
+        isInitialized: false, // Flag to prevent auto-fetch during page load
 
         init: function() {
             const self = this;
@@ -2236,8 +2243,10 @@
                 }, 400);
             });
 
-            // Location dropdown
-            $('#sd_location').on('change', function() {
+            // Bundesland dropdown (was location, now category)
+            // Trigger AJAX on change - the isInitialized flag already prevents
+            // unwanted AJAX calls during page load
+            $('#sd_location').on('change', function(e) {
                 self.currentPage = 1;
                 self.fetchListings();
             });
@@ -2252,6 +2261,12 @@
 
             // Sort dropdown
             $('#sd_orderby').on('change', function() {
+                self.currentPage = 1;
+                self.fetchListings();
+            });
+
+            // Per page dropdown
+            $('#sd_per_page').on('change', function() {
                 self.currentPage = 1;
                 self.fetchListings();
             });
@@ -2351,13 +2366,25 @@
 
             // Initialize dropdowns from URL parameters
             this.initFromURL();
+
+            // Mark as initialized after a delay to prevent browser autofill from triggering AJAX
+            // This ensures server-rendered content is preserved on initial page load
+            setTimeout(function() {
+                self.isInitialized = true;
+                console.log('SDFilter initialized - AJAX now enabled');
+            }, 1000);
         },
 
         initFromURL: function() {
             const urlParams = new URLSearchParams(window.location.search);
             const urlCategory = urlParams.get('sd_category') || '';
-            const urlLocation = urlParams.get('sd_location') || '';
             const urlTag = urlParams.get('sd_tag') || '';
+            const urlPaged = urlParams.get('paged') || '';
+
+            // Sync page number with URL
+            if (urlPaged) {
+                this.currentPage = parseInt(urlPaged) || 1;
+            }
 
             // Sync tag with URL
             if (urlTag) {
@@ -2372,48 +2399,35 @@
                 });
             }
 
-            // Sync category dropdown with URL
+            // Sync category (Bundesland) dropdown with URL
+            // #sd_location is now the Bundesland dropdown in hero section
             if (urlCategory) {
-                $('#sd_category_dropdown option').each(function() {
-                    const optUrl = $(this).val();
-                    if (optUrl.includes('sd_category=' + urlCategory)) {
-                        $('#sd_category_dropdown').val(optUrl);
-                        return false;
-                    }
-                });
-                // Also sync mobile drawer
+                $('#sd_location').val(urlCategory);
                 $('#sd-drawer-category').val(urlCategory);
-            }
-
-            // Sync location dropdown with URL
-            if (urlLocation) {
-                $('#sd_location').val(urlLocation);
-                $('#sd-drawer-location').val(urlLocation);
             }
         },
 
         getFilters: function() {
-            // Get category from dropdown URL
-            const categoryUrl = $('#sd_category_dropdown').val() || '';
-            const categoryMatch = categoryUrl.match(/sd_category=([^&]+)/);
-            const category = categoryMatch ? categoryMatch[1] : '';
+            // Get category (Bundesland) from hero dropdown or mobile drawer
+            const category = $('#sd_location').val() || $('#sd-drawer-category').val() || '';
 
             return {
                 search: $('#sd_search').val() || '',
                 category: category,
                 tag: this.currentTag || '',
-                location: $('#sd_location').val() || '',
+                location: '', // Location filter removed, using category for Bundesland
                 premium: $('.sd-toggle-input[name="sd_premium"]').is(':checked') ? '1' : '',
                 min_rating: $('#sd_min_rating').val() || '',
                 orderby: $('#sd_orderby').val() || 'date_desc',
+                per_page: $('#sd_per_page').val() || 12,
                 paged: this.currentPage
             };
         },
 
         clearFilters: function() {
             $('#sd_search').val('');
-            $('#sd_category_dropdown').prop('selectedIndex', 0);
-            $('#sd_location').prop('selectedIndex', 0);
+            $('#sd_location').prop('selectedIndex', 0); // Hero Bundesland dropdown
+            $('#sd-drawer-category').prop('selectedIndex', 0); // Mobile Bundesland dropdown
             $('#sd_orderby').val('date_desc');
             $('#sd_min_rating').prop('selectedIndex', 0);
             $('.sd-toggle-input[name="sd_premium"]').prop('checked', false);
@@ -2516,7 +2530,12 @@
             }
         },
 
-        fetchListings: function(scrollAfterLoad) {
+        fetchListings: function(scrollAfterLoad, forceLoad) {
+            // Prevent AJAX calls during initial page load (preserve server-rendered content)
+            if (!this.isInitialized && !forceLoad) {
+                return;
+            }
+
             if (this.isLoading) return;
 
             const self = this;
@@ -2610,7 +2629,7 @@
             const url = new URL(window.location.href);
 
             // Clear existing params
-            ['sd_search', 'sd_category', 'sd_tag', 'sd_location', 'sd_premium', 'sd_min_rating', 'sd_orderby', 'paged'].forEach(function(param) {
+            ['sd_search', 'sd_category', 'sd_tag', 'sd_location', 'sd_premium', 'sd_min_rating', 'sd_orderby', 'sd_per_page', 'paged'].forEach(function(param) {
                 url.searchParams.delete(param);
             });
 
@@ -2622,6 +2641,7 @@
             if (filters.premium) url.searchParams.set('sd_premium', filters.premium);
             if (filters.min_rating) url.searchParams.set('sd_min_rating', filters.min_rating);
             if (filters.orderby && filters.orderby !== 'date_desc') url.searchParams.set('sd_orderby', filters.orderby);
+            if (filters.per_page && filters.per_page != 12) url.searchParams.set('sd_per_page', filters.per_page);
             if (filters.paged > 1) url.searchParams.set('paged', filters.paged);
 
             // Update URL without reload

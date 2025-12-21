@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <?php
-// Fetch categories for dropdown filter
+// Fetch categories (Bundesländer) for dropdown filter - only with listings
 $all_categories = get_terms( array(
     'taxonomy'   => 'spezialist_category',
-    'hide_empty' => false,
-    'orderby'    => 'count',
-    'order'      => 'DESC',
+    'hide_empty' => true, // Only show categories with listings
+    'orderby'    => 'name',
+    'order'      => 'ASC',
 ) );
 
 // Fetch tags for quick chips (top 8 by count)
@@ -68,6 +68,11 @@ $current_location = isset( $_GET['sd_location'] ) ? sanitize_text_field( $_GET['
 $current_tag = isset( $_GET['sd_tag'] ) ? sanitize_text_field( $_GET['sd_tag'] ) : '';
 $current_orderby = isset( $_GET['sd_orderby'] ) ? sanitize_text_field( $_GET['sd_orderby'] ) : 'date_desc';
 $current_min_rating = isset( $_GET['sd_min_rating'] ) ? floatval( $_GET['sd_min_rating'] ) : 0;
+$current_per_page = isset( $_GET['sd_per_page'] ) ? intval( $_GET['sd_per_page'] ) : 12;
+// Validate per_page to allowed values
+if ( ! in_array( $current_per_page, array( 12, 50, 100 ), true ) ) {
+    $current_per_page = 12;
+}
 
 // Generate dynamic H1 title based on active filters (SEO optimization)
 $hero_title = __( 'Hofläden in Deiner Nähe finden!', 'spezialist-directory' );
@@ -120,15 +125,14 @@ if ( $current_category && $current_location ) {
                 </div>
                 <div class="sd-hero-divider"></div>
                 <div class="sd-hero-field sd-hero-field-where">
-                    <select id="sd_location" name="sd_location" class="sd-hero-select">
+                    <select id="sd_location" name="sd_category" class="sd-hero-select">
                         <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
-                        <?php if ( ! empty( $all_neighborhoods ) ) :
-                            foreach ( $all_neighborhoods as $slug ) :
-                                $selected = $current_location === $slug ? 'selected' : '';
-                                $display_name = isset( $neighborhood_names[ $slug ] ) ? $neighborhood_names[ $slug ] : $slug;
+                        <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
+                            foreach ( $all_categories as $category ) :
+                                $selected = $current_category === $category->slug ? 'selected' : '';
                         ?>
-                            <option value="<?php echo esc_attr( $slug ); ?>" <?php echo $selected; ?>>
-                                <?php echo esc_html( $display_name ); ?>
+                            <option value="<?php echo esc_attr( $category->slug ); ?>" <?php echo $selected; ?>>
+                                <?php echo esc_html( $category->name ); ?>
                             </option>
                         <?php endforeach; endif; ?>
                     </select>
@@ -175,23 +179,6 @@ if ( $current_category && $current_location ) {
     <!-- Filter Bar -->
     <div class="sd-filter-bar">
         <div class="sd-filter-bar-left">
-            <!-- Category Filter (if not using chips) -->
-            <div class="sd-filter-dropdown">
-                <label for="sd_category_dropdown" class="sd-sr-only"><?php _e( 'Kategorie', 'spezialist-directory' ); ?></label>
-                <select id="sd_category_dropdown" name="sd_category_filter" class="sd-filter-select sd-auto-submit" onchange="window.location.href=this.value">
-                    <option value="<?php echo esc_url( remove_query_arg( 'sd_category' ) ); ?>"><?php _e( 'Alle Kategorien', 'spezialist-directory' ); ?></option>
-                    <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
-                        foreach ( $all_categories as $category ) :
-                            $cat_url = add_query_arg( 'sd_category', $category->slug, strtok( $_SERVER['REQUEST_URI'], '?' ) );
-                            $selected = $current_category === $category->slug ? 'selected' : '';
-                    ?>
-                        <option value="<?php echo esc_url( $cat_url ); ?>" <?php echo $selected; ?>>
-                            <?php echo esc_html( $category->name ); ?> (<?php echo esc_html( $category->count ); ?>)
-                        </option>
-                    <?php endforeach; endif; ?>
-                </select>
-            </div>
-
             <!-- Sort Dropdown -->
             <div class="sd-filter-dropdown">
                 <label for="sd_orderby" class="sd-sr-only"><?php _e( 'Sortierung', 'spezialist-directory' ); ?></label>
@@ -208,6 +195,26 @@ if ( $current_category && $current_location ) {
                     );
                     foreach ( $sort_options as $value => $label ) :
                         $selected = $current_orderby === $value ? 'selected' : '';
+                    ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php echo $selected; ?>>
+                            <?php echo esc_html( $label ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Per Page Dropdown -->
+            <div class="sd-filter-dropdown">
+                <label for="sd_per_page" class="sd-sr-only"><?php _e( 'Pro Seite', 'spezialist-directory' ); ?></label>
+                <select id="sd_per_page" name="sd_per_page" class="sd-filter-select sd-auto-submit">
+                    <?php
+                    $per_page_options = array(
+                        12  => '12 ' . __( 'pro Seite', 'spezialist-directory' ),
+                        50  => '50 ' . __( 'pro Seite', 'spezialist-directory' ),
+                        100 => '100 ' . __( 'pro Seite', 'spezialist-directory' ),
+                    );
+                    foreach ( $per_page_options as $value => $label ) :
+                        $selected = $current_per_page === $value ? 'selected' : '';
                     ?>
                         <option value="<?php echo esc_attr( $value ); ?>" <?php echo $selected; ?>>
                             <?php echo esc_html( $label ); ?>
@@ -670,34 +677,17 @@ if ( $current_category && $current_location ) {
         </div>
 
         <div class="sd-drawer-content">
-            <!-- Category Section -->
+            <!-- Bundesland Section -->
             <div class="sd-drawer-section">
-                <div class="sd-drawer-section-title"><?php _e( 'Kategorie', 'spezialist-directory' ); ?></div>
+                <div class="sd-drawer-section-title"><?php _e( 'Bundesland', 'spezialist-directory' ); ?></div>
                 <select id="sd-drawer-category" class="sd-drawer-select">
-                    <option value=""><?php _e( 'Alle Kategorien', 'spezialist-directory' ); ?></option>
+                    <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
                     <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
                         foreach ( $all_categories as $category ) :
                             $selected = $current_category === $category->slug ? 'selected' : '';
                     ?>
                         <option value="<?php echo esc_attr( $category->slug ); ?>" <?php echo $selected; ?>>
-                            <?php echo esc_html( $category->name ); ?> (<?php echo esc_html( $category->count ); ?>)
-                        </option>
-                    <?php endforeach; endif; ?>
-                </select>
-            </div>
-
-            <!-- Location Section -->
-            <div class="sd-drawer-section">
-                <div class="sd-drawer-section-title"><?php _e( 'Stadtteil', 'spezialist-directory' ); ?></div>
-                <select id="sd-drawer-location" class="sd-drawer-select">
-                    <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
-                    <?php if ( ! empty( $all_neighborhoods ) ) :
-                        foreach ( $all_neighborhoods as $slug ) :
-                            $selected = $current_location === $slug ? 'selected' : '';
-                            $display_name = isset( $neighborhood_names[ $slug ] ) ? $neighborhood_names[ $slug ] : $slug;
-                    ?>
-                        <option value="<?php echo esc_attr( $slug ); ?>" <?php echo $selected; ?>>
-                            <?php echo esc_html( $display_name ); ?>
+                            <?php echo esc_html( $category->name ); ?>
                         </option>
                     <?php endforeach; endif; ?>
                 </select>
