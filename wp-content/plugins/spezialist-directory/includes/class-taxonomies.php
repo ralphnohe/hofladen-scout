@@ -47,6 +47,62 @@ class SD_Taxonomies {
         // Term meta for FAQ-Schema Snippet
         add_action( 'spezialist_category_edit_form_fields', array( $this, 'render_faq_snippet_field' ), 10, 2 );
         add_action( 'edited_spezialist_category', array( $this, 'save_faq_snippet_field' ), 10, 2 );
+
+        // Custom term link for category taxonomy (without prefix slug)
+        add_filter( 'term_link', array( $this, 'custom_category_term_link' ), 10, 3 );
+
+        // Add custom rewrite rules for Bundesland taxonomy
+        add_action( 'init', array( $this, 'add_bundesland_rewrite_rules' ), 20 );
+    }
+
+    /**
+     * Add rewrite rules for Bundesland category URLs
+     */
+    public function add_bundesland_rewrite_rules() {
+        // Rule for /bundesland/[bundesland-name]/ -> spezialist_category archive
+        // Maps to the top-level terms with -2 suffix (e.g., 'brandenburg-2')
+        add_rewrite_rule(
+            '^bundesland/([^/]+)/?$',
+            'index.php?spezialist_category=$matches[1]-2',
+            'top'
+        );
+
+        // Also add rules for top-level category terms (like bundesland itself)
+        add_rewrite_rule(
+            '^bundesland/?$',
+            'index.php?spezialist_category=bundesland',
+            'top'
+        );
+    }
+
+    /**
+     * Custom term link for spezialist_category taxonomy
+     * Generates URLs like /bundesland/bayern/ instead of /spezialist_category/bundesland/bayern/
+     *
+     * @param string $termlink Term link URL
+     * @param object $term Term object
+     * @param string $taxonomy Taxonomy slug
+     * @return string
+     */
+    public function custom_category_term_link( $termlink, $term, $taxonomy ) {
+        if ( 'spezialist_category' !== $taxonomy ) {
+            return $termlink;
+        }
+
+        // Build hierarchical path
+        $slugs = array();
+        $current_term = $term;
+
+        while ( $current_term ) {
+            array_unshift( $slugs, $current_term->slug );
+            if ( $current_term->parent ) {
+                $current_term = get_term( $current_term->parent, $taxonomy );
+            } else {
+                $current_term = null;
+            }
+        }
+
+        return home_url( '/' . implode( '/', $slugs ) . '/' );
     }
 
     /**
@@ -95,10 +151,11 @@ class SD_Taxonomies {
             'show_tagcloud'              => false,
             'show_in_rest'               => true,
             'rewrite'                    => array(
-                'slug'         => 'spezialist-kategorie',
+                'slug'         => '',
                 'with_front'   => false,
                 'hierarchical' => true,
             ),
+            'update_count_callback'      => '_update_post_term_count',
         );
 
         register_taxonomy( 'spezialist_category', array( 'spezialist' ), $args );
@@ -145,6 +202,7 @@ class SD_Taxonomies {
                 'with_front'   => false,
                 'hierarchical' => true,
             ),
+            'update_count_callback'      => '_update_post_term_count',
         );
 
         register_taxonomy( 'spezialist_location', array( 'spezialist' ), $args );
@@ -188,6 +246,7 @@ class SD_Taxonomies {
                 'slug'         => 'schlagwort',
                 'with_front'   => false,
             ),
+            'update_count_callback'      => '_update_post_term_count',
         );
 
         register_taxonomy( 'spezialist_tag', array( 'spezialist' ), $args );
