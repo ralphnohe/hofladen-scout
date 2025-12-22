@@ -40,7 +40,7 @@ $paged = get_query_var( 'paged' ) ? absint( get_query_var( 'paged' ) ) : 1;
                     SDSEO_Breadcrumbs::render();
                 }
                 ?>
-                <h1 class="sd-contact-hero-title"><?php single_term_title(); ?></h1>
+                <h1 class="sd-contact-hero-title">Hofläden in <?php single_term_title(); ?> entdecken!</h1>
                 <p class="sd-contact-hero-subtitle">
                     <?php
                     if ( $term ) {

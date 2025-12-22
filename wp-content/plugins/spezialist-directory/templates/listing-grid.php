@@ -85,7 +85,7 @@ if ( $current_category && $current_location ) {
     // Get category term name for display
     $cat_term = get_term_by( 'slug', $current_category, 'spezialist_category' );
     $cat_name = $cat_term ? $cat_term->name : ucfirst( $current_category );
-    $hero_title = sprintf( __( '%s entdecken!', 'spezialist-directory' ), esc_html( $cat_name ) );
+    $hero_title = sprintf( __( 'Hofläden in %s entdecken!', 'spezialist-directory' ), esc_html( $cat_name ) );
 } elseif ( $current_location ) {
     $hero_title = sprintf( __( 'Hofläden in %s entdecken!', 'spezialist-directory' ), esc_html( $current_location ) );
 }
@@ -125,7 +125,7 @@ if ( $current_category && $current_location ) {
                 </div>
                 <div class="sd-hero-divider"></div>
                 <div class="sd-hero-field sd-hero-field-where">
-                    <select id="sd_location" name="sd_category" class="sd-hero-select">
+                    <select id="sd_category_dropdown" name="sd_category" class="sd-hero-select">
                         <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
                         <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
                             foreach ( $all_categories as $category ) :

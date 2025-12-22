@@ -2243,19 +2243,26 @@
                 }, 400);
             });
 
-            // Bundesland dropdown (was location, now category)
-            // Trigger AJAX on change - the isInitialized flag already prevents
-            // unwanted AJAX calls during page load
-            $('#sd_location').on('change', function(e) {
-                self.currentPage = 1;
-                self.fetchListings();
-            });
-
-            // Category dropdown
+            // Bundesland/Category dropdown
+            // Trigger AJAX on change and show/hide category tag
             $('#sd_category_dropdown').on('change', function(e) {
                 e.preventDefault();
-                // Don't navigate, use AJAX instead
                 self.currentPage = 1;
+
+                // Show/hide category tag based on selection
+                var selectedVal = $(this).val();
+                var selectedText = $(this).find('option:selected').text().trim();
+
+                if (selectedVal) {
+                    // Use SDAutocomplete's showCategoryTag method
+                    if (typeof SDAutocomplete !== 'undefined' && SDAutocomplete.showCategoryTag) {
+                        SDAutocomplete.showCategoryTag(selectedVal, selectedText);
+                    }
+                } else {
+                    $('#sd-category-tag').remove();
+                    $('#sd_search').removeClass('has-category-tag').attr('placeholder', 'Hofladen, Produkt...');
+                }
+
                 self.fetchListings();
             });
 
@@ -2356,8 +2363,6 @@
                     // Remove tag from input field if shown there
                     $('#sd-tag-tag').remove();
                     $('#sd_search').removeClass('has-tag');
-                } else if (filterType === 'location') {
-                    $('#sd_location').prop('selectedIndex', 0);
                 }
 
                 self.currentPage = 1;
@@ -2400,16 +2405,15 @@
             }
 
             // Sync category (Bundesland) dropdown with URL
-            // #sd_location is now the Bundesland dropdown in hero section
             if (urlCategory) {
-                $('#sd_location').val(urlCategory);
+                $('#sd_category_dropdown').val(urlCategory);
                 $('#sd-drawer-category').val(urlCategory);
             }
         },
 
         getFilters: function() {
             // Get category (Bundesland) from hero dropdown or mobile drawer
-            const category = $('#sd_location').val() || $('#sd-drawer-category').val() || '';
+            var category = $('#sd_category_dropdown').val() || $('#sd-drawer-category').val() || '';
 
             return {
                 search: $('#sd_search').val() || '',
@@ -2426,7 +2430,7 @@
 
         clearFilters: function() {
             $('#sd_search').val('');
-            $('#sd_location').prop('selectedIndex', 0); // Hero Bundesland dropdown
+            $('#sd_category_dropdown').prop('selectedIndex', 0); // Hero Bundesland dropdown
             $('#sd-drawer-category').prop('selectedIndex', 0); // Mobile Bundesland dropdown
             $('#sd_orderby').val('date_desc');
             $('#sd_min_rating').prop('selectedIndex', 0);

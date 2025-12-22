@@ -60,10 +60,10 @@ class SD_Taxonomies {
      */
     public function add_bundesland_rewrite_rules() {
         // Rule for /bundesland/[bundesland-name]/ -> spezialist_category archive
-        // Maps to the top-level terms with -2 suffix (e.g., 'brandenburg-2')
+        // Maps to the top-level Bundesland terms (e.g., 'bayern', 'sachsen')
         add_rewrite_rule(
             '^bundesland/([^/]+)/?$',
-            'index.php?spezialist_category=$matches[1]-2',
+            'index.php?spezialist_category=$matches[1]',
             'top'
         );
 
@@ -100,6 +100,11 @@ class SD_Taxonomies {
             } else {
                 $current_term = null;
             }
+        }
+
+        // Für Top-Level-Kategorien (Bundesländer ohne Parent): /bundesland/ Präfix
+        if ( count( $slugs ) === 1 && $term->parent === 0 ) {
+            return home_url( '/bundesland/' . $slugs[0] . '/' );
         }
 
         return home_url( '/' . implode( '/', $slugs ) . '/' );
