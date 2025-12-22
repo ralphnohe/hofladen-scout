@@ -7103,7 +7103,7 @@ a.wp-block-button__link:not(.has-background) {
 /* Floating List Toggle Button */
 .sd-kartensuche-list-toggle {
     position: absolute;
-    bottom: var(--sd-spacing-xl);
+    bottom: 30px !important;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -7133,6 +7133,17 @@ a.wp-block-button__link:not(.has-background) {
     display: none !important; /* Hide when list panel is open */
 }
 
+/* Adjust for WordPress Admin Bar */
+.admin-bar .sd-kartensuche-list-toggle {
+    bottom: 62px !important; /* 30px + 32px admin bar */
+}
+
+@media screen and (max-width: 782px) {
+    .admin-bar .sd-kartensuche-list-toggle {
+        bottom: 76px !important; /* 30px + 46px mobile admin bar */
+    }
+}
+
 .sd-kartensuche-list-toggle svg {
     width: 18px;
     height: 18px;
@@ -7152,7 +7163,7 @@ a.wp-block-button__link:not(.has-background) {
 /* List Panel - Side Slide (Desktop) */
 .sd-kartensuche-list-panel {
     position: fixed;
-    top: 90px;
+    top: 87px !important;
     bottom: 0;
     right: 0;
     width: 0;
@@ -7163,8 +7174,22 @@ a.wp-block-button__link:not(.has-background) {
     box-shadow: -4px 0 30px rgba(0, 0, 0, 0.12);
 }
 
+/* Adjust for WordPress Admin Bar */
+.admin-bar .sd-kartensuche-list-panel {
+    top: 119px !important; /* 87px + 32px admin bar */
+}
+
 .sd-kartensuche-list-panel.active {
     width: 450px;
+}
+
+/* Move search header left when list panel is open (Desktop) */
+@media (min-width: 1025px) {
+    .sd-kartensuche-wrapper.list-open .sd-kartensuche-header {
+        left: calc((100% - 450px) / 2) !important; /* Center in remaining space (viewport - panel width) */
+        transform: translateX(-50%) !important;
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
 }
 
 /* Drag Handle (hidden on desktop) */
@@ -7621,7 +7646,7 @@ a.wp-block-button__link:not(.has-background) {
 @media (max-width: 1024px) {
     /* List panel from bottom on tablet */
     .sd-kartensuche-list-panel {
-        top: auto;
+        top: auto !important;
         bottom: 0;
         left: 0;
         right: 0;
@@ -7631,13 +7656,19 @@ a.wp-block-button__link:not(.has-background) {
         transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .sd-kartensuche-list-panel.active {
-        height: 65vh;
+    .admin-bar .sd-kartensuche-list-panel {
+        top: auto !important;
     }
 
+    .sd-kartensuche-list-panel.active {
+        height: 55vh;
+    }
+
+    /* Keep map visible when list is open - map takes remaining space above list panel */
     .sd-kartensuche-map-container.list-open {
-        right: 0;
-        height: calc(100vh - 64px - 65vh) !important;
+        height: 45vh !important;
+        right: 0 !important; /* Full width on tablet/mobile */
+        width: 100% !important;
     }
 
     .sd-list-drag-handle {
@@ -7681,7 +7712,7 @@ a.wp-block-button__link:not(.has-background) {
 @media (max-width: 768px) {
     /* Floating header adjustments for mobile */
     .sd-kartensuche-header {
-        top: 72px;
+        top: 5px;
         width: calc(100% - 24px);
         padding: var(--sd-spacing-xs) var(--sd-spacing-sm);
     }
