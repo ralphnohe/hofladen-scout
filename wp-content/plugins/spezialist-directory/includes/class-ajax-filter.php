@@ -137,6 +137,39 @@ class SD_Ajax_Filter {
     }
 
     /**
+     * Get post IDs within geographic bounds
+     *
+     * @param float $north Northern latitude boundary
+     * @param float $south Southern latitude boundary
+     * @param float $east Eastern longitude boundary
+     * @param float $west Western longitude boundary
+     * @return array Array of post IDs within bounds
+     */
+    private function get_posts_in_bounds( $north, $south, $east, $west ) {
+        global $wpdb;
+
+        // Query posts where lat/lng are within bounds
+        $post_ids = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT DISTINCT p.ID
+                FROM {$wpdb->posts} p
+                INNER JOIN {$wpdb->postmeta} lat_meta ON p.ID = lat_meta.post_id AND lat_meta.meta_key = '_sd_latitude'
+                INNER JOIN {$wpdb->postmeta} lng_meta ON p.ID = lng_meta.post_id AND lng_meta.meta_key = '_sd_longitude'
+                WHERE p.post_type = 'hofladen'
+                AND p.post_status = 'publish'
+                AND CAST(lat_meta.meta_value AS DECIMAL(10, 7)) BETWEEN %f AND %f
+                AND CAST(lng_meta.meta_value AS DECIMAL(10, 7)) BETWEEN %f AND %f",
+                $south,
+                $north,
+                $west,
+                $east
+            )
+        );
+
+        return $post_ids ? $post_ids : array();
+    }
+
+    /**
      * Handle AJAX filter request
      */
     public function handle_filter_request() {
@@ -156,6 +189,12 @@ class SD_Ajax_Filter {
         $paged      = isset( $_POST['paged'] ) ? absint( $_POST['paged'] ) : 1;
         $per_page   = Spezialist_Directory::get_option( 'listings_per_page', 12 );
 
+        // Map bounds filter (for Kartensuche)
+        $bounds_north = isset( $_POST['bounds_north'] ) ? floatval( $_POST['bounds_north'] ) : null;
+        $bounds_south = isset( $_POST['bounds_south'] ) ? floatval( $_POST['bounds_south'] ) : null;
+        $bounds_east  = isset( $_POST['bounds_east'] ) ? floatval( $_POST['bounds_east'] ) : null;
+        $bounds_west  = isset( $_POST['bounds_west'] ) ? floatval( $_POST['bounds_west'] ) : null;
+
         // Override per_page if provided via AJAX
         if ( isset( $_POST['per_page'] ) ) {
             $requested_per_page = absint( $_POST['per_page'] );
@@ -164,11 +203,18 @@ class SD_Ajax_Filter {
             }
         }
 
+        // For map bounds queries, load more results to show all markers in view
+        // Limit to 500 for performance
+        $is_bounds_query = ( $bounds_north !== null && $bounds_south !== null && $bounds_east !== null && $bounds_west !== null );
+        if ( $is_bounds_query ) {
+            $per_page = 500; // Load up to 500 results within bounds
+        }
+
         // Build query args
         $query_args = array(
             'post_type'      => 'hofladen',
             'posts_per_page' => $per_page,
-            'paged'          => $paged,
+            'paged'          => $is_bounds_query ? 1 : $paged, // No pagination for bounds queries
             'post_status'    => 'publish',
         );
 
@@ -265,6 +311,25 @@ class SD_Ajax_Filter {
                 $query_args['post__in'] = $rated_post_ids;
             } else {
                 // No posts match the rating criteria - return empty
+                $query_args['post__in'] = array( 0 );
+            }
+        }
+
+        // Geo bounds filter - get post IDs within map bounds
+        if ( $bounds_north !== null && $bounds_south !== null && $bounds_east !== null && $bounds_west !== null ) {
+            $geo_post_ids = $this->get_posts_in_bounds( $bounds_north, $bounds_south, $bounds_east, $bounds_west );
+            if ( ! empty( $geo_post_ids ) ) {
+                // Intersect with existing post__in if set
+                if ( isset( $query_args['post__in'] ) ) {
+                    $query_args['post__in'] = array_intersect( $query_args['post__in'], $geo_post_ids );
+                    if ( empty( $query_args['post__in'] ) ) {
+                        $query_args['post__in'] = array( 0 );
+                    }
+                } else {
+                    $query_args['post__in'] = $geo_post_ids;
+                }
+            } else {
+                // No posts in bounds - return empty
                 $query_args['post__in'] = array( 0 );
             }
         }

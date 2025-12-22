@@ -4582,8 +4582,11 @@
         isListVisible: false,
         debounceTimer: null,
         isLoading: false,
-        defaultCenter: [51.1657, 10.4515], // Germany center
-        defaultZoom: 6,
+        defaultCenter: [50.1109, 8.6821], // Frankfurt am Main (Innenstadt) as fallback
+        defaultZoom: 10, // ~50km radius
+        isInitialLoad: true, // Flag to prevent fitBounds on initial load
+        userLocationMarker: null, // Blue dot for user's location
+        mapMoveTimer: null, // Timer for debouncing map movement
 
         init: function() {
             const $mapContainer = $('#sd-kartensuche-map');
@@ -4595,9 +4598,57 @@
                 return;
             }
 
-            this.createMap();
-            this.bindEvents();
-            this.loadInitialListings();
+            const self = this;
+
+            // Try to get user's location first
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Success: Use user's location
+                        self.defaultCenter = [position.coords.latitude, position.coords.longitude];
+                        self.createMap();
+                        self.addUserLocationMarker(position.coords.latitude, position.coords.longitude);
+                        self.bindEvents();
+                        self.loadInitialListings();
+                    },
+                    function(error) {
+                        // Error or denied: Use Frankfurt am Main
+                        console.log('Geolocation not available, using Frankfurt as default');
+                        self.createMap();
+                        self.bindEvents();
+                        self.loadInitialListings();
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 5000,
+                        maximumAge: 300000 // 5 minutes cache
+                    }
+                );
+            } else {
+                // Geolocation not supported: Use Frankfurt
+                this.createMap();
+                this.bindEvents();
+                this.loadInitialListings();
+            }
+        },
+
+        addUserLocationMarker: function(lat, lng) {
+            // Create a blue pulsing dot for user's location
+            const userIcon = L.divIcon({
+                className: 'sd-user-marker-wrapper',
+                html: '<div class="sd-user-location-marker"><div class="sd-user-location-pulse"></div></div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+
+            this.userLocationMarker = L.marker([lat, lng], {
+                icon: userIcon,
+                zIndexOffset: 1000 // Above other markers
+            }).addTo(this.map);
+
+            this.userLocationMarker.bindPopup('Dein Standort', {
+                className: 'sd-user-location-popup'
+            });
         },
 
         createMap: function() {
@@ -4608,6 +4659,7 @@
                 center: this.defaultCenter,
                 zoom: this.defaultZoom,
                 zoomControl: false, // Use custom controls
+                scrollWheelZoom: false, // Disable scroll zoom
                 attributionControl: true
             });
 
@@ -4619,6 +4671,21 @@
 
             // Create marker layer group
             this.markerLayer = L.layerGroup().addTo(this.map);
+
+            // Fix popup z-index: lower header z-index when popup is open
+            this.map.on('popupopen', function() {
+                var header = document.querySelector('.sd-kartensuche-header');
+                var controls = document.querySelector('.sd-kartensuche-controls');
+                if (header) header.style.zIndex = '1';
+                if (controls) controls.style.zIndex = '1';
+            });
+
+            this.map.on('popupclose', function() {
+                var header = document.querySelector('.sd-kartensuche-header');
+                var controls = document.querySelector('.sd-kartensuche-controls');
+                if (header) header.style.zIndex = '';
+                if (controls) controls.style.zIndex = '';
+            });
 
             // Handle window resize
             $(window).on('resize', function() {
@@ -4703,16 +4770,36 @@
                     self.hideListPanel();
                 }
             });
+
+            // Map move/zoom events - update markers based on visible bounds
+            this.map.on('moveend', function() {
+                // Debounce map movement to avoid too many requests
+                clearTimeout(self.mapMoveTimer);
+                self.mapMoveTimer = setTimeout(function() {
+                    self.fetchListings();
+                }, 300);
+            });
         },
 
         getFilters: function() {
-            return {
+            const filters = {
                 search: $('#sd-kartensuche-search').val() || '',
                 category: $('#sd-kartensuche-category').val() || '',
                 premium: $('.sd-kartensuche-premium-toggle input').is(':checked') ? '1' : '',
                 orderby: 'date_desc',
                 per_page: 200 // Load more for map view
             };
+
+            // Add map bounds if map exists
+            if (this.map) {
+                const bounds = this.map.getBounds();
+                filters.bounds_north = bounds.getNorth();
+                filters.bounds_south = bounds.getSouth();
+                filters.bounds_east = bounds.getEast();
+                filters.bounds_west = bounds.getWest();
+            }
+
+            return filters;
         },
 
         fetchListings: function() {
@@ -4735,7 +4822,11 @@
                     premium: filters.premium,
                     orderby: filters.orderby,
                     per_page: filters.per_page,
-                    paged: 1
+                    paged: 1,
+                    bounds_north: filters.bounds_north,
+                    bounds_south: filters.bounds_south,
+                    bounds_east: filters.bounds_east,
+                    bounds_west: filters.bounds_west
                 },
                 success: function(response) {
                     if (response.success) {
@@ -4805,18 +4896,11 @@
                     marker.postId = postId;
                     self.markers.push(marker);
                     self.markerLayer.addLayer(marker);
-                    bounds.push([lat, lng]);
                 }
             });
 
-            // Fit map to markers
-            if (bounds.length > 0) {
-                if (bounds.length === 1) {
-                    this.map.setView(bounds[0], 14);
-                } else {
-                    this.map.fitBounds(bounds, { padding: [50, 50] });
-                }
-            }
+            // Note: We don't fitBounds anymore - markers are loaded based on current map view
+            // The user controls the map position, markers update dynamically
         },
 
         createMarkerIcon: function(isPremium) {

@@ -46,19 +46,6 @@ get_header();
                     >
                 </div>
 
-                <!-- Bundesland Dropdown -->
-                <select id="sd-kartensuche-category" name="sd_category" class="sd-kartensuche-select">
-                    <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
-                    <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
-                        foreach ( $all_categories as $cat ) :
-                            $selected = $current_category === $cat->slug ? 'selected' : '';
-                    ?>
-                        <option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo $selected; ?>>
-                            <?php echo esc_html( $cat->name ); ?>
-                        </option>
-                    <?php endforeach; endif; ?>
-                </select>
-
                 <!-- Submit Button (icon only) -->
                 <button type="submit" class="sd-kartensuche-submit" aria-label="<?php esc_attr_e( 'Suchen', 'spezialist-directory' ); ?>">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,23 +74,23 @@ get_header();
         <!-- Custom Zoom Controls -->
         <div class="sd-kartensuche-controls">
             <button type="button" class="sd-kartensuche-control" id="sd-karte-zoom-in" title="<?php esc_attr_e( 'Vergrößern', 'spezialist-directory' ); ?>">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#222"/>
                 </svg>
             </button>
             <button type="button" class="sd-kartensuche-control" id="sd-karte-zoom-out" title="<?php esc_attr_e( 'Verkleinern', 'spezialist-directory' ); ?>">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 13H5v-2h14v2z" fill="currentColor"/>
+                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 13H5v-2h14v2z" fill="#222"/>
                 </svg>
             </button>
             <button type="button" class="sd-kartensuche-control" id="sd-karte-fit-all" title="<?php esc_attr_e( 'Alle anzeigen', 'spezialist-directory' ); ?>">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z" fill="currentColor"/>
+                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z" fill="#222"/>
                 </svg>
             </button>
             <button type="button" class="sd-kartensuche-control" id="sd-karte-location" title="<?php esc_attr_e( 'Mein Standort', 'spezialist-directory' ); ?>">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" fill="currentColor"/>
+                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" fill="#222"/>
                 </svg>
             </button>
         </div>

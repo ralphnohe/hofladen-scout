@@ -129,3 +129,6 @@ mysqldump -u wpuser -pwp_secure_pass_2025 hofladen_db1 > db-dumps/Local-DB_$(dat
 - die production url lautet: https://www.hofladen-scout.de
 - es gibt lokal keine wp-admin seite, das admin-login erfolgt über /einloggen
 - arbeite immer nur und aussliesslich über localhost, niemals über die production site
+- *never* test on the production site, *always* test on localhost only.
+- arbeite *unter keinen Umständen* auf der prodcution site hofladen-finder.de
+- arbeite immer und und ohne Ausnahme auf localhost:8001
