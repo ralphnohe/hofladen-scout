@@ -4633,6 +4633,12 @@
         },
 
         addUserLocationMarker: function(lat, lng) {
+            // Remove existing marker if any
+            if (this.userLocationMarker) {
+                this.map.removeLayer(this.userLocationMarker);
+                this.userLocationMarker = null;
+            }
+
             // Create a blue pulsing dot for user's location
             const userIcon = L.divIcon({
                 className: 'sd-user-marker-wrapper',
@@ -4882,15 +4888,11 @@
                             className: 'sd-kartensuche-popup'
                         })
                         .on('mouseover', function() {
+                            // Only highlight list card on hover, don't open popup
                             self.highlightListCard(postId);
-                            this.openPopup();
                         })
                         .on('mouseout', function() {
                             self.unhighlightListCard(postId);
-                        })
-                        .on('click', function() {
-                            // Keep popup open on click
-                            this.openPopup();
                         });
 
                     marker.postId = postId;
@@ -5003,22 +5005,28 @@
                     const lng = position.coords.longitude;
                     self.map.setView([lat, lng], 12);
 
-                    // Add temporary user location marker
+                    // Remove any existing user location markers first
+                    if (self.userLocationMarker) {
+                        self.map.removeLayer(self.userLocationMarker);
+                        self.userLocationMarker = null;
+                    }
+
+                    // Create user location marker
                     const userIcon = L.divIcon({
                         html: '<div class="sd-user-location-marker"><div class="sd-user-location-pulse"></div></div>',
                         className: 'sd-user-marker-wrapper',
-                        iconSize: [20, 20],
-                        iconAnchor: [10, 10]
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20]
                     });
 
-                    // Remove previous user marker if exists
-                    if (self.userMarker) {
-                        self.map.removeLayer(self.userMarker);
-                    }
-
-                    self.userMarker = L.marker([lat, lng], { icon: userIcon })
+                    self.userLocationMarker = L.marker([lat, lng], {
+                        icon: userIcon,
+                        zIndexOffset: 1000
+                    })
                         .addTo(self.map)
-                        .bindPopup('Dein Standort')
+                        .bindPopup('Dein Standort', {
+                            className: 'sd-user-location-popup'
+                        })
                         .openPopup();
                 },
                 function(error) {
@@ -5108,16 +5116,11 @@
         },
 
         highlightMarker: function(postId) {
-            const self = this;
             this.markers.forEach(function(marker) {
                 if (marker.postId === postId) {
-                    $(marker._icon).find('.sd-map-marker').addClass('active');
-                    marker.openPopup();
-
-                    // Pan to marker if not in view
-                    if (!self.map.getBounds().contains(marker.getLatLng())) {
-                        self.map.panTo(marker.getLatLng());
-                    }
+                    // Add highlighted class (red background, white icon)
+                    $(marker._icon).find('.sd-map-marker').addClass('highlighted');
+                    // Don't open popup on hover, don't pan map
                 }
             });
         },
@@ -5125,8 +5128,8 @@
         unhighlightMarker: function(postId) {
             this.markers.forEach(function(marker) {
                 if (marker.postId === postId) {
-                    $(marker._icon).find('.sd-map-marker').removeClass('active');
-                    marker.closePopup();
+                    $(marker._icon).find('.sd-map-marker').removeClass('highlighted');
+                    // Don't close popup on unhover
                 }
             });
         },
