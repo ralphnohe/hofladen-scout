@@ -4678,21 +4678,6 @@
             // Create marker layer group
             this.markerLayer = L.layerGroup().addTo(this.map);
 
-            // Fix popup z-index: lower header z-index when popup is open
-            this.map.on('popupopen', function() {
-                var header = document.querySelector('.sd-kartensuche-header');
-                var controls = document.querySelector('.sd-kartensuche-controls');
-                if (header) header.style.zIndex = '1';
-                if (controls) controls.style.zIndex = '1';
-            });
-
-            this.map.on('popupclose', function() {
-                var header = document.querySelector('.sd-kartensuche-header');
-                var controls = document.querySelector('.sd-kartensuche-controls');
-                if (header) header.style.zIndex = '';
-                if (controls) controls.style.zIndex = '';
-            });
-
             // Handle window resize
             $(window).on('resize', function() {
                 if (self.map) {
