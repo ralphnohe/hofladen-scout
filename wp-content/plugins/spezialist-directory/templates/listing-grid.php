@@ -410,9 +410,13 @@ if ( $current_category && $current_location ) {
                         $display_location_slug = $best_term->slug;
                     }
                 }
-                // Fallback to meta field if no taxonomy term found
-                if ( empty( $display_location ) && $neighborhood ) {
-                    $display_location = $neighborhood;
+                // Fallback to meta fields if no taxonomy term found
+                if ( empty( $display_location ) ) {
+                    if ( $city ) {
+                        $display_location = $city;
+                    } elseif ( $neighborhood ) {
+                        $display_location = $neighborhood;
+                    }
                 }
 
                 // SEO-optimized alt text for listing images
