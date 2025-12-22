@@ -2145,7 +2145,7 @@
             this.markers.forEach(function(marker) {
                 if (marker.postId === postId) {
                     $(marker._icon).find('.sd-map-marker').removeClass('active');
-                    marker.closePopup();
+                    // Don't close popup on card mouseleave
                 }
             });
         },
@@ -4764,9 +4764,17 @@
 
             // Map move/zoom events - update markers based on visible bounds
             this.map.on('moveend', function() {
+                // Don't fetch if a popup is currently open (prevents popup closing on marker click)
+                if (self.map._popup && self.map._popup.isOpen()) {
+                    return;
+                }
                 // Debounce map movement to avoid too many requests
                 clearTimeout(self.mapMoveTimer);
                 self.mapMoveTimer = setTimeout(function() {
+                    // Double-check popup state after debounce
+                    if (self.map._popup && self.map._popup.isOpen()) {
+                        return;
+                    }
                     self.fetchListings();
                 }, 300);
             });
@@ -4878,6 +4886,21 @@
                         })
                         .on('mouseout', function() {
                             self.unhighlightListCard(postId);
+                        })
+                        .on('click', function(e) {
+                            // When list panel is open, center map on clicked marker
+                            if (self.isListVisible) {
+                                const markerLatLng = this.getLatLng();
+                                self.map.setView(markerLatLng, self.map.getZoom(), { animate: true });
+
+                                // On mobile (≤768px), disable popup when list is open
+                                if (window.innerWidth <= 768) {
+                                    e.originalEvent.preventDefault();
+                                    e.originalEvent.stopPropagation();
+                                    this.closePopup();
+                                    return false;
+                                }
+                            }
                         });
 
                     marker.postId = postId;
@@ -5061,10 +5084,12 @@
             const self = this;
             const $panel = $('#sd-list-panel');
             const $mapContainer = $('#sd-kartensuche-map-container');
+            const $wrapper = $('.sd-kartensuche-wrapper');
             const $toggle = $('#sd-list-toggle');
 
             $panel.addClass('active').attr('aria-hidden', 'false');
             $mapContainer.addClass('list-open');
+            $wrapper.addClass('list-open');
             $toggle.find('.sd-toggle-text').text('Zur Karte');
             $toggle.addClass('active');
             this.isListVisible = true;
@@ -5081,10 +5106,12 @@
             const self = this;
             const $panel = $('#sd-list-panel');
             const $mapContainer = $('#sd-kartensuche-map-container');
+            const $wrapper = $('.sd-kartensuche-wrapper');
             const $toggle = $('#sd-list-toggle');
 
             $panel.removeClass('active').attr('aria-hidden', 'true');
             $mapContainer.removeClass('list-open');
+            $wrapper.removeClass('list-open');
             $toggle.find('.sd-toggle-text').text('Listenansicht');
             $toggle.removeClass('active');
             this.isListVisible = false;

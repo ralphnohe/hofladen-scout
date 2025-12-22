@@ -1680,7 +1680,7 @@ body.page-template-default .entry-content {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: calc(2 * 18px * 1.35);
+    min-height: 1.3em;
 }
 
 .sd-listing-title a {
@@ -7361,13 +7361,14 @@ a.wp-block-button__link:not(.has-background) {
     flex-direction: column;
     padding: var(--sd-spacing-sm) var(--sd-spacing-md) !important;
     min-width: 0;
+    gap: 4px !important;
 }
 
 .sd-kartensuche-list-content .sd-listing-card .sd-listing-title {
     font-size: 14px !important;
-    font-weight: 600;
+    font-weight: 700 !important;
     line-height: 1.3;
-    margin: 0 0 6px 0 !important;
+    margin: 0 !important;
     order: 1;
 }
 
@@ -7380,19 +7381,39 @@ a.wp-block-button__link:not(.has-background) {
     overflow: hidden;
 }
 
-.sd-kartensuche-list-content .sd-listing-card .sd-listing-meta {
-    display: none !important;
+/* City row - between title and categories */
+.sd-kartensuche-list-content .sd-listing-card .sd-listing-city {
+    display: flex !important;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--sd-black);
+    margin: 0 !important;
+    padding: 0 !important;
+    order: 2;
 }
 
-/* Categories container - positioned directly below title */
+.sd-kartensuche-list-content .sd-listing-card .sd-listing-city svg {
+    flex-shrink: 0;
+    color: var(--sd-grey-500);
+}
+
+.sd-kartensuche-list-content .sd-listing-card .sd-listing-meta {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Categories container - positioned below city */
 .sd-kartensuche-list-content .sd-listing-card .sd-listing-categories {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0;
-    order: 2;
+    margin: 0 !important;
+    padding: 0 !important;
+    order: 3;
 }
 
 /* Category badges - Match frontpage styling */
@@ -7722,6 +7743,18 @@ a.wp-block-button__link:not(.has-background) {
     .sd-kartensuche-list-toggle {
         padding: var(--sd-spacing-sm) var(--sd-spacing-md);
         font-size: 13px;
+    }
+
+    /* When list panel is open on mobile: hide stats, position header at bottom of map */
+    .sd-kartensuche-map-container.list-open ~ .sd-kartensuche-header .sd-kartensuche-stats,
+    .sd-kartensuche-wrapper.list-open .sd-kartensuche-stats {
+        display: none !important;
+    }
+
+    .sd-kartensuche-wrapper.list-open .sd-kartensuche-header {
+        top: auto !important;
+        bottom: calc(70vh + 5px) !important;
+        margin-bottom: 5px !important;
     }
 }
 
