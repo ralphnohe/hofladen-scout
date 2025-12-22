@@ -260,7 +260,9 @@ final class Spezialist_Directory {
              && ! has_shortcode( $post_content, 'spezialist_dashboard' )
              && ! has_shortcode( $post_content, 'spezialist_login' )
              && ! has_shortcode( $post_content, 'spezialist_favorites' )
-             && ! $is_taxonomy_archive ) {
+             && ! $is_taxonomy_archive
+             && ! is_page_template( 'page-kartensuche.php' )
+             && ! is_front_page() ) {
             return;
         }
 
@@ -272,10 +274,11 @@ final class Spezialist_Directory {
             SD_VERSION
         );
 
-        // Enqueue Leaflet CSS and JS for pages with maps (listings page + single spezialist)
+        // Enqueue Leaflet CSS and JS for pages with maps (listings page + single spezialist + kartensuche)
         $needs_leaflet = is_singular( 'hofladen' ) ||
                          has_shortcode( $post_content, 'spezialist_listings' ) ||
-                         is_front_page();
+                         is_front_page() ||
+                         is_page_template( 'page-kartensuche.php' );
 
         if ( $needs_leaflet ) {
             wp_enqueue_style(

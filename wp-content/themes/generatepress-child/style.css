@@ -6741,3 +6741,741 @@ a.button,
 a.wp-block-button__link:not(.has-background) {
     border-radius: 5px;
 }
+
+/* ==========================================
+   KARTENSUCHE - MAP-FIRST SEARCH PAGE
+   ========================================== */
+
+/* Page wrapper - full viewport height */
+.sd-kartensuche-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    overflow: hidden;
+    background: var(--sd-grey-100);
+}
+
+/* Compact Search Header */
+.sd-kartensuche-header {
+    position: fixed;
+    top: 64px; /* Below GP header */
+    left: 0;
+    right: 0;
+    z-index: 1100;
+    background: var(--sd-white);
+    box-shadow: var(--sd-shadow-md);
+    padding: var(--sd-spacing-sm) var(--sd-spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sd-spacing-md);
+    height: 60px;
+}
+
+/* Logo/Home link */
+.sd-kartensuche-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--sd-grey-100);
+    border-radius: var(--sd-radius-md);
+    color: var(--sd-grey-600);
+    transition: all var(--sd-transition-base);
+    flex-shrink: 0;
+}
+
+.sd-kartensuche-logo:hover {
+    background: var(--sd-yellow);
+    color: var(--sd-black);
+}
+
+/* Search Form */
+.sd-kartensuche-search {
+    display: flex;
+    align-items: center;
+    gap: var(--sd-spacing-sm);
+    flex: 1;
+    max-width: 900px;
+}
+
+.sd-kartensuche-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+}
+
+.sd-kartensuche-input-wrapper input {
+    width: 100%;
+    height: 42px;
+    padding: 0 var(--sd-spacing-md) 0 40px;
+    border: 2px solid var(--sd-grey-300);
+    border-radius: var(--sd-radius-lg);
+    font-size: 14px;
+    font-family: var(--sd-font-body);
+    transition: all var(--sd-transition-base);
+    background: var(--sd-white);
+}
+
+.sd-kartensuche-input-wrapper input:focus {
+    border-color: var(--sd-yellow);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--sd-yellow-rgb), 0.2);
+}
+
+.sd-kartensuche-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--sd-grey-400);
+    pointer-events: none;
+}
+
+/* Bundesland Dropdown */
+.sd-kartensuche-select {
+    height: 42px;
+    padding: 0 var(--sd-spacing-xl) 0 var(--sd-spacing-md);
+    border: 2px solid var(--sd-grey-300);
+    border-radius: var(--sd-radius-lg);
+    font-size: 14px;
+    font-family: var(--sd-font-body);
+    background: var(--sd-white);
+    cursor: pointer;
+    min-width: 160px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%23737373'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: all var(--sd-transition-base);
+}
+
+.sd-kartensuche-select:focus {
+    border-color: var(--sd-yellow);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--sd-yellow-rgb), 0.2);
+}
+
+/* Premium Toggle */
+.sd-kartensuche-premium-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--sd-spacing-xs);
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 0 var(--sd-spacing-sm);
+}
+
+.sd-kartensuche-premium-toggle input {
+    display: none;
+}
+
+.sd-kartensuche-toggle-slider {
+    width: 40px;
+    height: 22px;
+    background: var(--sd-grey-300);
+    border-radius: 11px;
+    position: relative;
+    transition: background var(--sd-transition-base);
+    flex-shrink: 0;
+}
+
+.sd-kartensuche-toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--sd-white);
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform var(--sd-transition-base);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.sd-kartensuche-premium-toggle input:checked + .sd-kartensuche-toggle-slider {
+    background: var(--sd-yellow);
+}
+
+.sd-kartensuche-premium-toggle input:checked + .sd-kartensuche-toggle-slider::after {
+    transform: translateX(18px);
+}
+
+.sd-kartensuche-toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sd-grey-700);
+}
+
+/* Submit Button */
+.sd-kartensuche-submit {
+    display: flex;
+    align-items: center;
+    gap: var(--sd-spacing-xs);
+    height: 42px;
+    padding: 0 var(--sd-spacing-lg);
+    background: var(--sd-yellow);
+    color: var(--sd-black);
+    border: none;
+    border-radius: var(--sd-radius-lg);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--sd-font-body);
+    cursor: pointer;
+    transition: all var(--sd-transition-base);
+    white-space: nowrap;
+}
+
+.sd-kartensuche-submit:hover {
+    background: var(--sd-yellow-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--sd-shadow-md);
+}
+
+.sd-kartensuche-submit svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Stats Display */
+.sd-kartensuche-stats {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sd-grey-600);
+    white-space: nowrap;
+    padding-right: var(--sd-spacing-sm);
+}
+
+.sd-kartensuche-stats span {
+    color: var(--sd-black);
+    font-weight: 700;
+}
+
+/* Full-Screen Map Container */
+.sd-kartensuche-map-container {
+    position: fixed;
+    top: 124px; /* GP header (64px) + search header (60px) */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sd-kartensuche-map-container.list-open {
+    right: 450px;
+}
+
+.sd-kartensuche-map {
+    width: 100%;
+    height: 100%;
+    background: var(--sd-grey-200);
+}
+
+/* Loading Overlay */
+.sd-kartensuche-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.92);
+    z-index: 1000;
+    gap: var(--sd-spacing-md);
+}
+
+.sd-kartensuche-loading.active {
+    display: flex;
+}
+
+.sd-kartensuche-loading span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--sd-grey-600);
+}
+
+/* Spinner */
+.sd-kartensuche-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--sd-grey-300);
+    border-top-color: var(--sd-yellow);
+    border-radius: 50%;
+    animation: sd-kartensuche-spin 0.8s linear infinite;
+}
+
+@keyframes sd-kartensuche-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Custom Zoom Controls */
+.sd-kartensuche-controls {
+    position: absolute;
+    bottom: 100px;
+    right: var(--sd-spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sd-spacing-xs);
+    z-index: 1000;
+}
+
+.sd-kartensuche-control {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sd-white);
+    border: 1px solid var(--sd-grey-300);
+    border-radius: var(--sd-radius-md);
+    color: var(--sd-grey-700);
+    cursor: pointer;
+    box-shadow: var(--sd-shadow-md);
+    transition: all var(--sd-transition-fast);
+}
+
+.sd-kartensuche-control:hover {
+    background: var(--sd-grey-50);
+    border-color: var(--sd-grey-400);
+    color: var(--sd-black);
+}
+
+.sd-kartensuche-control:active {
+    transform: scale(0.95);
+}
+
+.sd-kartensuche-control svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Floating List Toggle Button */
+.sd-kartensuche-list-toggle {
+    position: absolute;
+    bottom: var(--sd-spacing-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--sd-spacing-sm);
+    padding: var(--sd-spacing-sm) var(--sd-spacing-lg);
+    background: var(--sd-black);
+    color: var(--sd-white);
+    border: none;
+    border-radius: var(--sd-radius-full);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--sd-font-body);
+    cursor: pointer;
+    box-shadow: var(--sd-shadow-xl);
+    transition: all var(--sd-transition-base);
+    z-index: 1000;
+}
+
+.sd-kartensuche-list-toggle:hover {
+    background: var(--sd-grey-800);
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.sd-kartensuche-list-toggle.active {
+    background: var(--sd-yellow);
+    color: var(--sd-black);
+}
+
+.sd-kartensuche-list-toggle.active:hover {
+    background: var(--sd-yellow-dark);
+}
+
+.sd-kartensuche-list-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sd-toggle-count {
+    background: var(--sd-yellow);
+    color: var(--sd-black);
+    padding: 2px 10px;
+    border-radius: var(--sd-radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+}
+
+.sd-kartensuche-list-toggle.active .sd-toggle-count {
+    background: var(--sd-black);
+    color: var(--sd-white);
+}
+
+/* List Panel - Side Slide (Desktop) */
+.sd-kartensuche-list-panel {
+    position: fixed;
+    top: 124px;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    background: var(--sd-white);
+    z-index: 1050;
+    overflow: hidden;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -4px 0 30px rgba(0, 0, 0, 0.12);
+}
+
+.sd-kartensuche-list-panel.active {
+    width: 450px;
+}
+
+/* Drag Handle (hidden on desktop) */
+.sd-list-drag-handle {
+    display: none;
+}
+
+/* List Header */
+.sd-kartensuche-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sd-spacing-md) var(--sd-spacing-lg);
+    border-bottom: 1px solid var(--sd-grey-200);
+    background: var(--sd-white);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.sd-kartensuche-list-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--sd-black);
+}
+
+.sd-kartensuche-list-header h2 span {
+    color: var(--sd-yellow-dark);
+}
+
+.sd-kartensuche-back-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--sd-spacing-xs);
+    padding: var(--sd-spacing-sm) var(--sd-spacing-md);
+    background: var(--sd-yellow);
+    color: var(--sd-black);
+    border: none;
+    border-radius: var(--sd-radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--sd-font-body);
+    cursor: pointer;
+    transition: all var(--sd-transition-base);
+}
+
+.sd-kartensuche-back-btn:hover {
+    background: var(--sd-yellow-dark);
+}
+
+.sd-kartensuche-back-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* List Content */
+.sd-kartensuche-list-content {
+    padding: var(--sd-spacing-md);
+    overflow-y: auto;
+    height: calc(100% - 60px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sd-spacing-md);
+}
+
+/* List loading state */
+.sd-kartensuche-list-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sd-spacing-3xl);
+}
+
+/* Card styling in list */
+.sd-kartensuche-list-content .sd-listing-card {
+    border: 1px solid var(--sd-grey-200);
+    border-radius: var(--sd-radius-lg);
+}
+
+.sd-kartensuche-list-content .sd-listing-card.sd-map-highlight {
+    border-color: var(--sd-yellow);
+    box-shadow: 0 0 0 2px rgba(var(--sd-yellow-rgb), 0.3);
+}
+
+/* No Results */
+.sd-kartensuche-no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--sd-spacing-3xl) var(--sd-spacing-lg);
+    color: var(--sd-grey-500);
+}
+
+.sd-kartensuche-no-results svg {
+    color: var(--sd-grey-300);
+    margin-bottom: var(--sd-spacing-md);
+}
+
+.sd-kartensuche-no-results h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sd-grey-700);
+    margin: 0 0 var(--sd-spacing-sm);
+}
+
+.sd-kartensuche-no-results p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* User Location Marker */
+.sd-user-marker-wrapper {
+    background: transparent !important;
+    border: none !important;
+}
+
+.sd-user-location-marker {
+    width: 20px;
+    height: 20px;
+    background: #4285F4;
+    border: 3px solid var(--sd-white);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.5);
+    position: relative;
+}
+
+.sd-user-location-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(66, 133, 244, 0.2);
+    border-radius: 50%;
+    animation: sd-location-pulse 2s ease-out infinite;
+}
+
+@keyframes sd-location-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Popup Premium Badge */
+.sd-map-popup-premium {
+    display: inline-block;
+    position: absolute;
+    top: var(--sd-spacing-sm);
+    right: var(--sd-spacing-sm);
+    background: var(--sd-yellow);
+    color: var(--sd-black);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: var(--sd-radius-full);
+    letter-spacing: 0.5px;
+}
+
+/* Hero Map Link - Button on Frontpage */
+.sd-hero-map-link-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--sd-spacing-lg);
+    position: relative;
+    z-index: 5;
+}
+
+.sd-hero-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sd-spacing-sm);
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--sd-black);
+    border-radius: var(--sd-radius-full);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--sd-transition-base);
+    box-shadow: var(--sd-shadow-lg);
+    border: 2px solid transparent;
+    backdrop-filter: blur(8px);
+}
+
+.sd-hero-map-link:hover {
+    background: var(--sd-yellow);
+    transform: translateY(-3px);
+    box-shadow: var(--sd-shadow-xl);
+}
+
+.sd-hero-map-link svg {
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   KARTENSUCHE - MOBILE RESPONSIVE
+   ========================================== */
+
+@media (max-width: 1024px) {
+    /* List panel from bottom on tablet */
+    .sd-kartensuche-list-panel {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100% !important;
+        height: 0;
+        border-radius: var(--sd-radius-xl) var(--sd-radius-xl) 0 0;
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sd-kartensuche-list-panel.active {
+        height: 65vh;
+    }
+
+    .sd-kartensuche-map-container.list-open {
+        right: 0;
+        bottom: 65vh;
+    }
+
+    .sd-list-drag-handle {
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: var(--sd-grey-300);
+        border-radius: 2px;
+        margin: var(--sd-spacing-sm) auto var(--sd-spacing-xs);
+    }
+
+    .sd-kartensuche-list-content {
+        height: calc(65vh - 70px);
+    }
+}
+
+@media (max-width: 768px) {
+    /* Adjust for mobile header height if different */
+    .sd-kartensuche-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: var(--sd-spacing-sm);
+        gap: var(--sd-spacing-xs);
+    }
+
+    .sd-kartensuche-logo {
+        order: 1;
+    }
+
+    .sd-kartensuche-search {
+        order: 2;
+        flex-wrap: wrap;
+        width: calc(100% - 50px);
+    }
+
+    .sd-kartensuche-stats {
+        display: none;
+    }
+
+    .sd-kartensuche-input-wrapper {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .sd-kartensuche-select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sd-kartensuche-premium-toggle {
+        display: none; /* Hide on mobile to save space */
+    }
+
+    .sd-kartensuche-submit {
+        padding: 0 var(--sd-spacing-md);
+    }
+
+    .sd-kartensuche-submit span {
+        display: none;
+    }
+
+    .sd-kartensuche-map-container {
+        top: 115px;
+    }
+
+    .sd-kartensuche-list-panel {
+        top: auto;
+    }
+
+    .sd-kartensuche-list-panel.active {
+        height: 70vh;
+    }
+
+    .sd-kartensuche-map-container.list-open {
+        bottom: 70vh;
+    }
+
+    .sd-kartensuche-list-content {
+        height: calc(70vh - 70px);
+    }
+
+    .sd-kartensuche-controls {
+        bottom: 80px;
+        right: var(--sd-spacing-md);
+    }
+
+    .sd-kartensuche-control {
+        width: 38px;
+        height: 38px;
+    }
+
+    .sd-kartensuche-list-toggle {
+        padding: var(--sd-spacing-sm) var(--sd-spacing-md);
+        font-size: 13px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .sd-kartensuche-header {
+        top: 60px; /* Adjust if GP header is shorter on mobile */
+    }
+
+    .sd-kartensuche-map-container {
+        top: 105px;
+    }
+
+    .sd-kartensuche-input-wrapper input,
+    .sd-kartensuche-select,
+    .sd-kartensuche-submit {
+        height: 38px;
+        font-size: 13px;
+    }
+
+    .sd-kartensuche-list-header h2 {
+        font-size: 14px;
+    }
+}

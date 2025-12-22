@@ -4571,6 +4571,526 @@
         }
     };
 
+    /**
+     * SDKartensuche - Full-Screen Map Search Experience
+     * Dedicated map-first search page functionality for /kartensuche/
+     */
+    const SDKartensuche = {
+        map: null,
+        markers: [],
+        markerLayer: null,
+        isListVisible: false,
+        debounceTimer: null,
+        isLoading: false,
+        defaultCenter: [51.1657, 10.4515], // Germany center
+        defaultZoom: 6,
+
+        init: function() {
+            const $mapContainer = $('#sd-kartensuche-map');
+            if (!$mapContainer.length) return;
+
+            // Check if Leaflet is loaded
+            if (typeof L === 'undefined') {
+                console.error('Leaflet not loaded for Kartensuche');
+                return;
+            }
+
+            this.createMap();
+            this.bindEvents();
+            this.loadInitialListings();
+        },
+
+        createMap: function() {
+            const self = this;
+
+            // Create full-screen map
+            this.map = L.map('sd-kartensuche-map', {
+                center: this.defaultCenter,
+                zoom: this.defaultZoom,
+                zoomControl: false, // Use custom controls
+                attributionControl: true
+            });
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(this.map);
+
+            // Create marker layer group
+            this.markerLayer = L.layerGroup().addTo(this.map);
+
+            // Handle window resize
+            $(window).on('resize', function() {
+                if (self.map) {
+                    self.map.invalidateSize();
+                }
+            });
+        },
+
+        bindEvents: function() {
+            const self = this;
+
+            // Search input with debounce
+            $('#sd-kartensuche-search').on('input', function() {
+                clearTimeout(self.debounceTimer);
+                self.debounceTimer = setTimeout(function() {
+                    self.fetchListings();
+                }, 400);
+            });
+
+            // Category dropdown
+            $('#sd-kartensuche-category').on('change', function() {
+                self.fetchListings();
+            });
+
+            // Premium toggle
+            $('.sd-kartensuche-premium-toggle input').on('change', function() {
+                self.fetchListings();
+            });
+
+            // Form submit
+            $('#sd-kartensuche-form').on('submit', function(e) {
+                e.preventDefault();
+                self.fetchListings();
+            });
+
+            // Custom zoom controls
+            $('#sd-karte-zoom-in').on('click', function() {
+                self.map.zoomIn();
+            });
+
+            $('#sd-karte-zoom-out').on('click', function() {
+                self.map.zoomOut();
+            });
+
+            $('#sd-karte-fit-all').on('click', function() {
+                self.fitAllMarkers();
+            });
+
+            // Geolocation button
+            $('#sd-karte-location').on('click', function() {
+                self.goToUserLocation();
+            });
+
+            // List toggle
+            $('#sd-list-toggle').on('click', function() {
+                self.toggleListPanel();
+            });
+
+            // Back to map
+            $('#sd-back-to-map').on('click', function() {
+                self.hideListPanel();
+            });
+
+            // Card hover -> highlight marker
+            $(document).on('mouseenter', '#sd-list-content .sd-listing-card[data-lat]', function() {
+                const postId = $(this).data('post-id');
+                self.highlightMarker(postId);
+            });
+
+            $(document).on('mouseleave', '#sd-list-content .sd-listing-card[data-lat]', function() {
+                const postId = $(this).data('post-id');
+                self.unhighlightMarker(postId);
+            });
+
+            // Keyboard shortcuts
+            $(document).on('keydown', function(e) {
+                if (!$('#sd-kartensuche-map').length) return;
+
+                // Escape to close list panel
+                if (e.key === 'Escape' && self.isListVisible) {
+                    self.hideListPanel();
+                }
+            });
+        },
+
+        getFilters: function() {
+            return {
+                search: $('#sd-kartensuche-search').val() || '',
+                category: $('#sd-kartensuche-category').val() || '',
+                premium: $('.sd-kartensuche-premium-toggle input').is(':checked') ? '1' : '',
+                orderby: 'date_desc',
+                per_page: 200 // Load more for map view
+            };
+        },
+
+        fetchListings: function() {
+            if (this.isLoading) return;
+
+            const self = this;
+            const filters = this.getFilters();
+
+            this.showLoading();
+            this.updateURL(filters);
+
+            $.ajax({
+                url: sdAjax.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'sd_filter_listings',
+                    nonce: sdAjax.filterNonce,
+                    search: filters.search,
+                    category: filters.category,
+                    premium: filters.premium,
+                    orderby: filters.orderby,
+                    per_page: filters.per_page,
+                    paged: 1
+                },
+                success: function(response) {
+                    if (response.success) {
+                        self.updateMarkers(response.data.html);
+                        self.updateListContent(response.data.html);
+                        self.updateCounts(response.data.found_posts);
+                    }
+                    self.hideLoading();
+                },
+                error: function() {
+                    self.hideLoading();
+                    console.error('Kartensuche: AJAX error');
+                }
+            });
+        },
+
+        loadInitialListings: function() {
+            this.fetchListings();
+        },
+
+        updateMarkers: function(html) {
+            const self = this;
+            this.clearMarkers();
+
+            if (!html || html.trim() === '') {
+                return;
+            }
+
+            // Parse HTML to extract lat/lng from cards
+            const $tempContainer = $('<div>').html(html);
+            const bounds = [];
+
+            $tempContainer.find('.sd-listing-card[data-lat][data-lng]').each(function() {
+                const $card = $(this);
+                const lat = parseFloat($card.data('lat'));
+                const lng = parseFloat($card.data('lng'));
+                const postId = $card.data('post-id');
+
+                if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+                    const isPremium = $card.hasClass('sd-listing-premium');
+                    const title = $card.find('.sd-listing-title a').text().trim();
+                    const category = $card.find('.sd-listing-meta-category').text().trim() ||
+                                    $card.find('.sd-category-badge').first().text().trim();
+                    const city = $card.find('.sd-listing-meta-location').text().trim();
+                    const permalink = $card.find('.sd-listing-title a').attr('href');
+                    const image = $card.find('.sd-listing-thumbnail').attr('src');
+
+                    // Create marker with custom icon
+                    const icon = self.createMarkerIcon(isPremium);
+                    const marker = L.marker([lat, lng], { icon: icon })
+                        .bindPopup(self.createPopupContent(title, category, city, permalink, image, isPremium), {
+                            maxWidth: 280,
+                            className: 'sd-kartensuche-popup'
+                        })
+                        .on('mouseover', function() {
+                            self.highlightListCard(postId);
+                            this.openPopup();
+                        })
+                        .on('mouseout', function() {
+                            self.unhighlightListCard(postId);
+                        })
+                        .on('click', function() {
+                            // Keep popup open on click
+                            this.openPopup();
+                        });
+
+                    marker.postId = postId;
+                    self.markers.push(marker);
+                    self.markerLayer.addLayer(marker);
+                    bounds.push([lat, lng]);
+                }
+            });
+
+            // Fit map to markers
+            if (bounds.length > 0) {
+                if (bounds.length === 1) {
+                    this.map.setView(bounds[0], 14);
+                } else {
+                    this.map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+        },
+
+        createMarkerIcon: function(isPremium) {
+            const markerHtml = `
+                <div class="sd-map-marker ${isPremium ? 'premium' : ''}">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="currentColor"/>
+                    </svg>
+                </div>
+            `;
+
+            return L.divIcon({
+                html: markerHtml,
+                className: 'sd-marker-wrapper',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+        },
+
+        createPopupContent: function(title, category, city, permalink, image, isPremium) {
+            let html = '<div class="sd-map-popup">';
+
+            if (image) {
+                html += `<img src="${image}" alt="${this.escapeHtml(title)}" class="sd-map-popup-image" loading="lazy" />`;
+            }
+
+            if (isPremium) {
+                html += '<span class="sd-map-popup-premium">Premium</span>';
+            }
+
+            html += `<h4 class="sd-map-popup-title"><a href="${permalink}">${this.escapeHtml(title)}</a></h4>`;
+
+            if (category || city) {
+                html += '<div class="sd-map-popup-meta">';
+                if (category) html += `<span class="sd-map-popup-category">${this.escapeHtml(category)}</span>`;
+                if (category && city) html += '<span class="sd-map-popup-sep">·</span>';
+                if (city) {
+                    html += `
+                        <span class="sd-map-popup-location">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                            </svg>
+                            ${this.escapeHtml(city)}
+                        </span>
+                    `;
+                }
+                html += '</div>';
+            }
+
+            html += `
+                <a href="${permalink}" class="sd-map-popup-link">
+                    Details ansehen
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" fill="currentColor"/>
+                    </svg>
+                </a>
+            `;
+
+            html += '</div>';
+            return html;
+        },
+
+        escapeHtml: function(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        },
+
+        clearMarkers: function() {
+            if (this.markerLayer) {
+                this.markerLayer.clearLayers();
+            }
+            this.markers = [];
+        },
+
+        fitAllMarkers: function() {
+            if (this.markers.length === 0) return;
+
+            const bounds = this.markers.map(m => m.getLatLng());
+            if (bounds.length === 1) {
+                this.map.setView(bounds[0], 14);
+            } else {
+                this.map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        },
+
+        goToUserLocation: function() {
+            const self = this;
+
+            if (!navigator.geolocation) {
+                console.warn('Geolocation not supported');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    self.map.setView([lat, lng], 12);
+
+                    // Add temporary user location marker
+                    const userIcon = L.divIcon({
+                        html: '<div class="sd-user-location-marker"><div class="sd-user-location-pulse"></div></div>',
+                        className: 'sd-user-marker-wrapper',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    });
+
+                    // Remove previous user marker if exists
+                    if (self.userMarker) {
+                        self.map.removeLayer(self.userMarker);
+                    }
+
+                    self.userMarker = L.marker([lat, lng], { icon: userIcon })
+                        .addTo(self.map)
+                        .bindPopup('Dein Standort')
+                        .openPopup();
+                },
+                function(error) {
+                    console.warn('Geolocation error:', error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 minutes cache
+                }
+            );
+        },
+
+        updateListContent: function(html) {
+            const $content = $('#sd-list-content');
+            if (html && html.trim() !== '') {
+                $content.html(html);
+            } else {
+                $content.html(`
+                    <div class="sd-kartensuche-no-results">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                        </svg>
+                        <h3>Keine Hofläden gefunden</h3>
+                        <p>Versuche es mit anderen Suchbegriffen oder wähle ein anderes Bundesland.</p>
+                    </div>
+                `);
+            }
+        },
+
+        updateCounts: function(count) {
+            const text = count || 0;
+            $('#sd-kartensuche-count').text(text);
+            $('#sd-list-count').text(text);
+            $('#sd-toggle-count').text(text);
+        },
+
+        toggleListPanel: function() {
+            if (this.isListVisible) {
+                this.hideListPanel();
+            } else {
+                this.showListPanel();
+            }
+        },
+
+        showListPanel: function() {
+            const self = this;
+            const $panel = $('#sd-list-panel');
+            const $mapContainer = $('#sd-kartensuche-map-container');
+            const $toggle = $('#sd-list-toggle');
+
+            $panel.addClass('active').attr('aria-hidden', 'false');
+            $mapContainer.addClass('list-open');
+            $toggle.find('.sd-toggle-text').text('Zur Karte');
+            $toggle.addClass('active');
+            this.isListVisible = true;
+
+            // Invalidate map size after animation
+            setTimeout(function() {
+                if (self.map) {
+                    self.map.invalidateSize();
+                }
+            }, 400);
+        },
+
+        hideListPanel: function() {
+            const self = this;
+            const $panel = $('#sd-list-panel');
+            const $mapContainer = $('#sd-kartensuche-map-container');
+            const $toggle = $('#sd-list-toggle');
+
+            $panel.removeClass('active').attr('aria-hidden', 'true');
+            $mapContainer.removeClass('list-open');
+            $toggle.find('.sd-toggle-text').text('Listenansicht');
+            $toggle.removeClass('active');
+            this.isListVisible = false;
+
+            // Invalidate map size after animation
+            setTimeout(function() {
+                if (self.map) {
+                    self.map.invalidateSize();
+                }
+            }, 400);
+
+            // Scroll to top of page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        highlightMarker: function(postId) {
+            const self = this;
+            this.markers.forEach(function(marker) {
+                if (marker.postId === postId) {
+                    $(marker._icon).find('.sd-map-marker').addClass('active');
+                    marker.openPopup();
+
+                    // Pan to marker if not in view
+                    if (!self.map.getBounds().contains(marker.getLatLng())) {
+                        self.map.panTo(marker.getLatLng());
+                    }
+                }
+            });
+        },
+
+        unhighlightMarker: function(postId) {
+            this.markers.forEach(function(marker) {
+                if (marker.postId === postId) {
+                    $(marker._icon).find('.sd-map-marker').removeClass('active');
+                    marker.closePopup();
+                }
+            });
+        },
+
+        highlightListCard: function(postId) {
+            $('#sd-list-content [data-post-id="' + postId + '"]').addClass('sd-map-highlight');
+        },
+
+        unhighlightListCard: function(postId) {
+            $('#sd-list-content [data-post-id="' + postId + '"]').removeClass('sd-map-highlight');
+        },
+
+        updateURL: function(filters) {
+            const url = new URL(window.location);
+
+            // Update URL params
+            if (filters.search) {
+                url.searchParams.set('sd_search', filters.search);
+            } else {
+                url.searchParams.delete('sd_search');
+            }
+
+            if (filters.category) {
+                url.searchParams.set('sd_category', filters.category);
+            } else {
+                url.searchParams.delete('sd_category');
+            }
+
+            if (filters.premium === '1') {
+                url.searchParams.set('sd_premium', '1');
+            } else {
+                url.searchParams.delete('sd_premium');
+            }
+
+            window.history.replaceState({}, '', url);
+        },
+
+        showLoading: function() {
+            $('#sd-kartensuche-loading').addClass('active');
+            this.isLoading = true;
+        },
+
+        hideLoading: function() {
+            $('#sd-kartensuche-loading').removeClass('active');
+            this.isLoading = false;
+        }
+    };
+
     // Initialize on document ready
     $(document).ready(function() {
         initViewToggle();
@@ -4586,6 +5106,7 @@
         SDGalleryPreview.init();
         SDVideoPreview.init();
         SDQuoteModal.init();
+        SDKartensuche.init();
 
         // Render favorites page if on that page
         if ($('.sd-favorites-page').length) {
