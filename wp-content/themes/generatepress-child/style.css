@@ -6755,21 +6755,33 @@ a.wp-block-button__link:not(.has-background) {
     background: var(--sd-grey-100);
 }
 
-/* Compact Search Header */
+/* Floating Search Header - Glass morphism style */
 .sd-kartensuche-header {
     position: fixed;
-    top: 64px; /* Below GP header */
-    left: 0;
-    right: 0;
+    top: 80px; /* Below GP header with spacing */
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1100;
-    background: var(--sd-white);
-    box-shadow: var(--sd-shadow-md);
-    padding: var(--sd-spacing-sm) var(--sd-spacing-lg);
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+    padding: var(--sd-spacing-sm) var(--sd-spacing-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sd-spacing-xs);
+    border-radius: 16px;
+    max-width: 700px;
+    width: calc(100% - 32px);
+}
+
+/* Header row with search elements */
+.sd-kartensuche-header-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--sd-spacing-md);
-    height: 60px;
+    gap: var(--sd-spacing-sm);
+    width: 100%;
 }
 
 /* Logo/Home link */
@@ -6910,23 +6922,21 @@ a.wp-block-button__link:not(.has-background) {
     color: var(--sd-grey-700);
 }
 
-/* Submit Button */
+/* Submit Button - Icon only */
 .sd-kartensuche-submit {
     display: flex;
     align-items: center;
-    gap: var(--sd-spacing-xs);
+    justify-content: center;
+    width: 42px;
     height: 42px;
-    padding: 0 var(--sd-spacing-lg);
+    padding: 0;
     background: var(--sd-yellow);
     color: var(--sd-black);
     border: none;
     border-radius: var(--sd-radius-lg);
-    font-size: 14px;
-    font-weight: 700;
-    font-family: var(--sd-font-body);
     cursor: pointer;
     transition: all var(--sd-transition-base);
-    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .sd-kartensuche-submit:hover {
@@ -6936,28 +6946,34 @@ a.wp-block-button__link:not(.has-background) {
 }
 
 .sd-kartensuche-submit svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
-/* Stats Display */
+/* Hide premium toggle completely */
+.sd-kartensuche-premium-toggle {
+    display: none !important;
+}
+
+/* Stats Display - Centered below search */
 .sd-kartensuche-stats {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--sd-grey-600);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sd-grey-500);
     white-space: nowrap;
-    padding-right: var(--sd-spacing-sm);
+    text-align: center;
+    padding: 4px 0 2px;
 }
 
 .sd-kartensuche-stats span {
-    color: var(--sd-black);
+    color: var(--sd-yellow-dark, #d4a429);
     font-weight: 700;
 }
 
 /* Full-Screen Map Container */
 .sd-kartensuche-map-container {
     position: fixed;
-    top: 124px; /* GP header (64px) + search header (60px) */
+    top: 64px; /* Only GP header, map starts at top */
     left: 0;
     right: 0;
     bottom: 0;
@@ -7593,52 +7609,39 @@ a.wp-block-button__link:not(.has-background) {
 }
 
 @media (max-width: 768px) {
-    /* Adjust for mobile header height if different */
+    /* Floating header adjustments for mobile */
     .sd-kartensuche-header {
-        flex-wrap: wrap;
-        height: auto;
-        padding: var(--sd-spacing-sm);
+        top: 72px;
+        width: calc(100% - 24px);
+        padding: var(--sd-spacing-xs) var(--sd-spacing-sm);
+    }
+
+    .sd-kartensuche-header-row {
         gap: var(--sd-spacing-xs);
     }
 
     .sd-kartensuche-logo {
-        order: 1;
+        width: 36px;
+        height: 36px;
     }
 
-    .sd-kartensuche-search {
-        order: 2;
-        flex-wrap: wrap;
-        width: calc(100% - 50px);
-    }
-
-    .sd-kartensuche-stats {
-        display: none;
-    }
-
-    .sd-kartensuche-input-wrapper {
-        flex: 1 1 100%;
-        min-width: 0;
-    }
-
+    .sd-kartensuche-input-wrapper input,
     .sd-kartensuche-select {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .sd-kartensuche-premium-toggle {
-        display: none; /* Hide on mobile to save space */
+        height: 36px;
+        font-size: 13px;
     }
 
     .sd-kartensuche-submit {
-        padding: 0 var(--sd-spacing-md);
+        width: 36px;
+        height: 36px;
     }
 
-    .sd-kartensuche-submit span {
-        display: none;
+    .sd-kartensuche-stats {
+        font-size: 12px;
     }
 
     .sd-kartensuche-map-container {
-        top: 115px;
+        top: 64px;
     }
 
     .sd-kartensuche-list-panel {
@@ -7676,18 +7679,23 @@ a.wp-block-button__link:not(.has-background) {
 /* Extra small screens */
 @media (max-width: 480px) {
     .sd-kartensuche-header {
-        top: 60px; /* Adjust if GP header is shorter on mobile */
+        top: 68px;
+        border-radius: 12px;
     }
 
     .sd-kartensuche-map-container {
-        top: 105px;
+        top: 60px;
     }
 
     .sd-kartensuche-input-wrapper input,
-    .sd-kartensuche-select,
+    .sd-kartensuche-select {
+        height: 34px;
+        font-size: 12px;
+    }
+
     .sd-kartensuche-submit {
-        height: 38px;
-        font-size: 13px;
+        width: 34px;
+        height: 34px;
     }
 
     .sd-kartensuche-list-header h2 {

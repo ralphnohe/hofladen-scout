@@ -27,60 +27,54 @@ get_header();
 ?>
 
 <div class="sd-kartensuche-wrapper">
-    <!-- Compact Search Header -->
+    <!-- Floating Search Header -->
     <header class="sd-kartensuche-header">
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="sd-kartensuche-logo" title="<?php esc_attr_e( 'Zur Startseite', 'spezialist-directory' ); ?>">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/>
-            </svg>
-        </a>
-
-        <form id="sd-kartensuche-form" class="sd-kartensuche-search" method="get" action="">
-            <!-- Search Input -->
-            <div class="sd-kartensuche-input-wrapper">
-                <svg class="sd-kartensuche-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+        <div class="sd-kartensuche-header-row">
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="sd-kartensuche-logo" title="<?php esc_attr_e( 'Zur Startseite', 'spezialist-directory' ); ?>">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/>
                 </svg>
-                <input
-                    type="text"
-                    id="sd-kartensuche-search"
-                    name="sd_search"
-                    placeholder="<?php esc_attr_e( 'Hofladen, Produkt...', 'spezialist-directory' ); ?>"
-                    value="<?php echo esc_attr( $current_search ); ?>"
-                    autocomplete="off"
-                >
-            </div>
+            </a>
 
-            <!-- Bundesland Dropdown -->
-            <select id="sd-kartensuche-category" name="sd_category" class="sd-kartensuche-select">
-                <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
-                <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
-                    foreach ( $all_categories as $cat ) :
-                        $selected = $current_category === $cat->slug ? 'selected' : '';
-                ?>
-                    <option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo $selected; ?>>
-                        <?php echo esc_html( $cat->name ); ?>
-                    </option>
-                <?php endforeach; endif; ?>
-            </select>
+            <form id="sd-kartensuche-form" class="sd-kartensuche-search" method="get" action="">
+                <!-- Search Input -->
+                <div class="sd-kartensuche-input-wrapper">
+                    <svg class="sd-kartensuche-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                    </svg>
+                    <input
+                        type="text"
+                        id="sd-kartensuche-search"
+                        name="sd_search"
+                        placeholder="<?php esc_attr_e( 'Hofladen, Produkt...', 'spezialist-directory' ); ?>"
+                        value="<?php echo esc_attr( $current_search ); ?>"
+                        autocomplete="off"
+                    >
+                </div>
 
-            <!-- Premium Toggle -->
-            <label class="sd-kartensuche-premium-toggle">
-                <input type="checkbox" name="sd_premium" value="1" <?php checked( $current_premium ); ?>>
-                <span class="sd-kartensuche-toggle-slider"></span>
-                <span class="sd-kartensuche-toggle-label"><?php _e( 'Premium', 'spezialist-directory' ); ?></span>
-            </label>
+                <!-- Bundesland Dropdown -->
+                <select id="sd-kartensuche-category" name="sd_category" class="sd-kartensuche-select">
+                    <option value=""><?php _e( 'Ganz Deutschland', 'spezialist-directory' ); ?></option>
+                    <?php if ( ! is_wp_error( $all_categories ) && ! empty( $all_categories ) ) :
+                        foreach ( $all_categories as $cat ) :
+                            $selected = $current_category === $cat->slug ? 'selected' : '';
+                    ?>
+                        <option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo $selected; ?>>
+                            <?php echo esc_html( $cat->name ); ?>
+                        </option>
+                    <?php endforeach; endif; ?>
+                </select>
 
-            <!-- Submit Button -->
-            <button type="submit" class="sd-kartensuche-submit">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
-                </svg>
-                <span><?php _e( 'Suchen', 'spezialist-directory' ); ?></span>
-            </button>
-        </form>
+                <!-- Submit Button (icon only) -->
+                <button type="submit" class="sd-kartensuche-submit" aria-label="<?php esc_attr_e( 'Suchen', 'spezialist-directory' ); ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
 
-        <!-- Results Count -->
+        <!-- Results Count - Centered -->
         <div class="sd-kartensuche-stats">
             <span id="sd-kartensuche-count">0</span> <?php _e( 'Hofläden', 'spezialist-directory' ); ?>
         </div>
