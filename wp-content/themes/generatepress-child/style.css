@@ -6772,7 +6772,7 @@ a.wp-block-button__link:not(.has-background) {
     align-items: center;
     gap: var(--sd-spacing-xs);
     border-radius: 16px;
-    max-width: 700px;
+    max-width: 500px;
     width: calc(100% - 32px);
 }
 
@@ -6784,38 +6784,20 @@ a.wp-block-button__link:not(.has-background) {
     width: 100%;
 }
 
-/* Logo/Home link */
-.sd-kartensuche-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: var(--sd-grey-100);
-    border-radius: var(--sd-radius-md);
-    color: var(--sd-grey-600);
-    transition: all var(--sd-transition-base);
-    flex-shrink: 0;
-}
-
-.sd-kartensuche-logo:hover {
-    background: var(--sd-yellow);
-    color: var(--sd-black);
-}
-
 /* Search Form */
 .sd-kartensuche-search {
     display: flex;
     align-items: center;
     gap: var(--sd-spacing-sm);
     flex: 1;
-    max-width: 900px;
+    width: 100%;
 }
 
 .sd-kartensuche-input-wrapper {
     position: relative;
     flex: 1;
-    min-width: 180px;
+    min-width: 100px;
+    max-width: 160px;
 }
 
 .sd-kartensuche-input-wrapper input {
@@ -6850,18 +6832,20 @@ a.wp-block-button__link:not(.has-background) {
 /* Bundesland Dropdown */
 .sd-kartensuche-select {
     height: 42px;
-    padding: 0 var(--sd-spacing-xl) 0 var(--sd-spacing-md);
+    padding: 0 var(--sd-spacing-xl) 0 var(--sd-spacing-sm);
     border: 2px solid var(--sd-grey-300);
     border-radius: var(--sd-radius-lg);
-    font-size: 14px;
+    font-size: 13px;
     font-family: var(--sd-font-body);
     background: var(--sd-white);
     cursor: pointer;
-    min-width: 160px;
+    flex: 1;
+    min-width: 100px;
+    max-width: 160px;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%23737373'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 8px center;
+    background-position: right 6px center;
     transition: all var(--sd-transition-base);
 }
 
@@ -7620,15 +7604,15 @@ a.wp-block-button__link:not(.has-background) {
         gap: var(--sd-spacing-xs);
     }
 
-    .sd-kartensuche-logo {
-        width: 36px;
-        height: 36px;
-    }
-
     .sd-kartensuche-input-wrapper input,
     .sd-kartensuche-select {
         height: 36px;
-        font-size: 13px;
+        font-size: 12px;
+    }
+
+    .sd-kartensuche-input-wrapper,
+    .sd-kartensuche-select {
+        max-width: none;
     }
 
     .sd-kartensuche-submit {
