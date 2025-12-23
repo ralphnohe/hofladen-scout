@@ -3663,6 +3663,7 @@ button.sd-action-link svg {
     color: #000000 !important;
     border-radius: 99px !important;
     margin: 2px !important;
+    line-height: 22px !important;
     transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
@@ -3712,7 +3713,9 @@ button.sd-action-link svg {
 .leaflet-container a.sd-map-popup-link {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--sd-spacing-xs);
+    width: 100%;
     font-size: 13px;
     font-weight: 600;
     color: #000000 !important;
