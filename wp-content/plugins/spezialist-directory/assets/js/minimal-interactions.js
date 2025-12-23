@@ -5305,29 +5305,33 @@
             let isDragging = false;
             const threshold = 80; // Minimum drag distance to trigger close
 
-            // Touch events for mobile
+            // Touch events for mobile - passive: false to allow preventDefault/stopPropagation
             $dragHandle[0].addEventListener('touchstart', function(e) {
                 if (window.innerWidth > 1024) return; // Only on tablet/mobile
+                e.stopPropagation(); // Prevent event from reaching map
                 isDragging = true;
                 startY = e.touches[0].clientY;
                 $panel.css('transition', 'none');
-            }, { passive: true });
+                // Visual feedback - highlight both lines
+                $dragHandle.addClass('dragging');
+            }, { passive: false });
 
             $dragHandle[0].addEventListener('touchmove', function(e) {
                 if (!isDragging || window.innerWidth > 1024) return;
+                e.preventDefault(); // Prevent map panning
+                e.stopPropagation();
                 currentY = e.touches[0].clientY;
                 const deltaY = currentY - startY;
 
                 // Only allow dragging down (positive deltaY)
                 if (deltaY > 0) {
                     $panel.css('transform', 'translateY(' + deltaY + 'px)');
-                    // Visual feedback on drag handle
-                    $dragHandle.css('background', 'var(--sd-yellow)');
                 }
-            }, { passive: true });
+            }, { passive: false });
 
             $dragHandle[0].addEventListener('touchend', function(e) {
                 if (!isDragging || window.innerWidth > 1024) return;
+                e.stopPropagation();
                 isDragging = false;
                 const deltaY = currentY - startY;
 
@@ -5336,7 +5340,7 @@
                     'transition': '',
                     'transform': ''
                 });
-                $dragHandle.css('background', '');
+                $dragHandle.removeClass('dragging');
 
                 // Close panel if dragged past threshold
                 if (deltaY > threshold) {
@@ -5345,7 +5349,7 @@
 
                 startY = 0;
                 currentY = 0;
-            }, { passive: true });
+            }, { passive: false });
 
             // Mouse events for desktop testing
             $dragHandle.on('mousedown', function(e) {
@@ -5353,6 +5357,7 @@
                 isDragging = true;
                 startY = e.clientY;
                 $panel.css('transition', 'none');
+                $dragHandle.addClass('dragging');
                 e.preventDefault();
             });
 
@@ -5363,7 +5368,6 @@
 
                 if (deltaY > 0) {
                     $panel.css('transform', 'translateY(' + deltaY + 'px)');
-                    $dragHandle.css('background', 'var(--sd-yellow)');
                 }
             });
 
@@ -5376,7 +5380,7 @@
                     'transition': '',
                     'transform': ''
                 });
-                $dragHandle.css('background', '');
+                $dragHandle.removeClass('dragging');
 
                 if (deltaY > threshold) {
                     self.hideListPanel();

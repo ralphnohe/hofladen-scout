@@ -7757,19 +7757,49 @@ a.wp-block-button__link:not(.has-background) {
 
     .sd-list-drag-handle {
         display: block;
-        width: 40px;
-        height: 4px;
-        background: var(--sd-grey-300);
-        border-radius: 2px;
-        margin: var(--sd-spacing-sm) auto var(--sd-spacing-xs);
+        width: 50px;
+        height: 20px;
+        background: transparent;
+        border-radius: 4px;
+        margin: 12px auto 8px;
         cursor: grab;
         touch-action: pan-y;
+        position: relative;
+        /* Größere Touch-Zone durch padding */
+        padding: 8px 20px;
+        box-sizing: content-box;
+    }
+
+    .sd-list-drag-handle::before,
+    .sd-list-drag-handle::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: var(--sd-grey-400);
+        border-radius: 2px;
         transition: background 0.2s ease, width 0.2s ease;
+    }
+
+    .sd-list-drag-handle::before {
+        top: 10px;
+    }
+
+    .sd-list-drag-handle::after {
+        bottom: 10px;
     }
 
     .sd-list-drag-handle:active {
         cursor: grabbing;
-        width: 60px;
+    }
+
+    .sd-list-drag-handle:active::before,
+    .sd-list-drag-handle:active::after,
+    .sd-list-drag-handle.dragging::before,
+    .sd-list-drag-handle.dragging::after {
+        width: 46px;
         background: var(--sd-yellow);
     }
 
