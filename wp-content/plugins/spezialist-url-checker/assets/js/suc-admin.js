@@ -130,8 +130,17 @@
                         var data = response.data;
                         var status = data.status;
 
-                        // Check for errors (0 = connection error, 4xx, 5xx)
-                        if (status === 0 || status >= 400) {
+                        // 403 komplett ignorieren (viele Seiten blockieren HEAD-Requests)
+                        if (status === 403) {
+                            self.addLog('OK (403 ignoriert): ' + post.title, 'success');
+                        }
+                        // 404: automatisch pausieren, aber NICHT in Fehlerliste anzeigen
+                        else if (status === 404) {
+                            self.autoPausePost(post.id);
+                            self.addLog('Auto-Pausiert (404): ' + post.title, 'skipped');
+                        }
+                        // Check for errors (0 = connection error, andere 4xx, 5xx)
+                        else if (status === 0 || status >= 400) {
                             self.errors++;
                             self.errorList.push({
                                 id: post.id,
@@ -237,8 +246,12 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        $row.addClass('suc-row-paused');
-                        $btn.text('Pausiert').addClass('button-disabled');
+                        // Zeile ausblenden (wie bei Ignorieren)
+                        $row.fadeOut(300, function() {
+                            $(this).remove();
+                            self.errors--;
+                            self.updateStats();
+                        });
                         self.addLog('Pausiert: Post ID ' + postId, 'success');
                     } else {
                         $btn.prop('disabled', false).text('Pausieren');
@@ -305,6 +318,19 @@
             });
 
             this.addLog('Ignoriert: Post ID ' + postId, 'skipped');
+        },
+
+        autoPausePost: function(postId) {
+            var self = this;
+            $.ajax({
+                url: sucAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'suc_pause_post',
+                    nonce: sucAdmin.nonce,
+                    post_id: postId
+                }
+            });
         },
 
         complete: function() {
