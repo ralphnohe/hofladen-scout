@@ -7180,12 +7180,12 @@ a.wp-block-button__link:not(.has-background) {
     fill: #222 !important;
 }
 
-/* Floating List Toggle Button */
+/* Floating List Toggle Button - fixed position, always 20px from bottom, centered */
 .sd-kartensuche-list-toggle {
-    position: absolute;
-    bottom: 30px !important;
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     display: flex;
     align-items: center;
     gap: var(--sd-spacing-sm);
@@ -7199,29 +7199,17 @@ a.wp-block-button__link:not(.has-background) {
     font-family: var(--sd-font-body);
     cursor: pointer;
     box-shadow: var(--sd-shadow-xl);
-    transition: all var(--sd-transition-base);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
     z-index: 1000;
 }
 
 .sd-kartensuche-list-toggle:hover {
     background: var(--sd-grey-800);
-    transform: translateX(-50%) translateY(-3px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 .sd-kartensuche-list-toggle.active {
     display: none !important; /* Hide when list panel is open */
-}
-
-/* Adjust for WordPress Admin Bar */
-.admin-bar .sd-kartensuche-list-toggle {
-    bottom: 62px !important; /* 30px + 32px admin bar */
-}
-
-@media screen and (max-width: 782px) {
-    .admin-bar .sd-kartensuche-list-toggle {
-        bottom: 76px !important; /* 30px + 46px mobile admin bar */
-    }
 }
 
 .sd-kartensuche-list-toggle svg {
@@ -7909,12 +7897,6 @@ a.wp-block-button__link:not(.has-background) {
         height: 38px;
     }
 
-    .sd-kartensuche-list-toggle {
-        bottom: 20px !important;
-        padding: var(--sd-spacing-sm) var(--sd-spacing-md);
-        font-size: 13px;
-    }
-
     /* When list panel is open on mobile: hide stats, position header at bottom of map */
     .sd-kartensuche-map-container.list-open ~ .sd-kartensuche-header .sd-kartensuche-stats,
     .sd-kartensuche-wrapper.list-open .sd-kartensuche-stats {
@@ -7957,19 +7939,11 @@ a.wp-block-button__link:not(.has-background) {
     .sd-kartensuche-controls {
         bottom: 100px !important;
     }
-
-    .sd-kartensuche-list-toggle {
-        bottom: 15px !important;
-    }
 }
 
-/* iPad Landscape - more bottom spacing for list toggle */
+/* iPad Landscape - controls positioning */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-    .sd-kartensuche-list-toggle {
-        bottom: 80px !important;
-    }
-
     .sd-kartensuche-controls {
-        bottom: 150px !important;
+        bottom: 100px !important;
     }
 }
