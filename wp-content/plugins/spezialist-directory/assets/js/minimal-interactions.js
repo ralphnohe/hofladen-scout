@@ -5001,8 +5001,14 @@
                 per_page: 200 // Load more for map view
             };
 
-            // Add map bounds if map exists
-            if (this.map) {
+            // Use frozen bounds if list is visible (prevents count change when map resizes)
+            // Otherwise use current map bounds
+            if (this.frozenBounds && this.isListVisible) {
+                filters.bounds_north = this.frozenBounds.getNorth();
+                filters.bounds_south = this.frozenBounds.getSouth();
+                filters.bounds_east = this.frozenBounds.getEast();
+                filters.bounds_west = this.frozenBounds.getWest();
+            } else if (this.map) {
                 const bounds = this.map.getBounds();
                 filters.bounds_north = bounds.getNorth();
                 filters.bounds_south = bounds.getSouth();
@@ -5398,6 +5404,12 @@
             const $wrapper = $('.sd-kartensuche-wrapper');
             const $toggle = $('#sd-list-toggle');
 
+            // Freeze current bounds BEFORE opening the list panel
+            // This prevents the marker count from changing when the map resizes
+            if (this.map) {
+                this.frozenBounds = this.map.getBounds();
+            }
+
             $panel.addClass('active').attr('aria-hidden', 'false');
             $mapContainer.addClass('list-open');
             $wrapper.addClass('list-open');
@@ -5419,6 +5431,9 @@
             const $mapContainer = $('#sd-kartensuche-map-container');
             const $wrapper = $('.sd-kartensuche-wrapper');
             const $toggle = $('#sd-list-toggle');
+
+            // Clear frozen bounds when closing the list
+            this.frozenBounds = null;
 
             $panel.removeClass('active').attr('aria-hidden', 'true');
             $mapContainer.removeClass('list-open');
