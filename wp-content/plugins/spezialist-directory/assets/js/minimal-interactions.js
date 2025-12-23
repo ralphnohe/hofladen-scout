@@ -4587,6 +4587,8 @@
         isInitialLoad: true, // Flag to prevent fitBounds on initial load
         userLocationMarker: null, // Blue dot for user's location
         mapMoveTimer: null, // Timer for debouncing map movement
+        isLocationSearch: false, // Track if current search is location-based
+        locationSearchTerm: null, // Store the location term for display
 
         init: function() {
             const $mapContainer = $('#sd-kartensuche-map');
@@ -4734,11 +4736,32 @@
         bindEvents: function() {
             const self = this;
 
-            // Search input with debounce
+            // Search input with debounce - detect location vs product search
             $('#sd-kartensuche-search').on('input', function() {
                 clearTimeout(self.debounceTimer);
+
+                const searchTerm = $(this).val().trim();
+
                 self.debounceTimer = setTimeout(function() {
-                    self.fetchListings();
+                    if (searchTerm.length >= 2) {
+                        // First, try to geocode the term
+                        self.geocodeLocation(searchTerm).then(function(location) {
+                            if (location) {
+                                // It's a location - center map on it
+                                self.centerOnLocation(location);
+                            } else {
+                                // Not a location - do normal product search
+                                self.isLocationSearch = false;
+                                self.locationSearchTerm = null;
+                                self.fetchListings();
+                            }
+                        });
+                    } else if (searchTerm.length === 0) {
+                        // Empty search - reset and fetch all
+                        self.isLocationSearch = false;
+                        self.locationSearchTerm = null;
+                        self.fetchListings();
+                    }
                 }, 400);
             });
 
@@ -4828,9 +4851,150 @@
             });
         },
 
+        /**
+         * Geocode a search term using Nominatim API
+         * @param {string} term - The search term to geocode
+         * @returns {Promise<object|null>} - Location data or null
+         */
+        geocodeLocation: function(term) {
+            return new Promise(function(resolve, reject) {
+                if (!term || term.length < 2) {
+                    resolve(null);
+                    return;
+                }
+
+                const encodedTerm = encodeURIComponent(term);
+                const url = 'https://nominatim.openstreetmap.org/search?' +
+                    'q=' + encodedTerm + ',Deutschland' +
+                    '&format=json' +
+                    '&countrycodes=de' +
+                    '&limit=1' +
+                    '&addressdetails=1';
+
+                fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data && data.length > 0) {
+                        const result = data[0];
+
+                        // Check if this is a valid location type
+                        const validClasses = ['place', 'boundary'];
+                        const validTypes = [
+                            'city', 'town', 'village', 'hamlet',
+                            'municipality', 'administrative',
+                            'suburb', 'neighbourhood', 'quarter',
+                            'county', 'state', 'region', 'district'
+                        ];
+
+                        const isValidLocation = validClasses.includes(result.class) &&
+                            (validTypes.includes(result.type) || result.type === 'administrative');
+
+                        if (isValidLocation) {
+                            resolve({
+                                lat: parseFloat(result.lat),
+                                lng: parseFloat(result.lon),
+                                displayName: result.display_name,
+                                shortName: result.address?.city ||
+                                           result.address?.town ||
+                                           result.address?.village ||
+                                           result.address?.municipality ||
+                                           result.address?.county ||
+                                           result.address?.state ||
+                                           term,
+                                type: result.type,
+                                boundingbox: result.boundingbox
+                            });
+                        } else {
+                            resolve(null); // Not a location, treat as product search
+                        }
+                    } else {
+                        resolve(null);
+                    }
+                })
+                .catch(function(error) {
+                    console.warn('Geocoding error:', error);
+                    resolve(null); // Fail gracefully
+                });
+            });
+        },
+
+        /**
+         * Center map on a location with appropriate zoom
+         * @param {object} location - Location data from geocodeLocation
+         */
+        centerOnLocation: function(location) {
+            const self = this;
+
+            // Determine zoom level based on location type
+            let zoom = 10; // Default ~50km radius
+
+            if (location.type === 'state') {
+                zoom = 7; // Bundesland level
+            } else if (location.type === 'county' || location.type === 'district') {
+                zoom = 9; // Landkreis level
+            } else if (location.type === 'suburb' || location.type === 'neighbourhood' || location.type === 'quarter') {
+                zoom = 13; // Neighborhood level
+            }
+
+            // Use flyTo for smooth animation
+            this.map.flyTo([location.lat, location.lng], zoom, {
+                duration: 0.8
+            });
+
+            // Track that this is a location search
+            this.isLocationSearch = true;
+            this.locationSearchTerm = location.shortName;
+
+            // Show visual feedback
+            this.showLocationFeedback(location.shortName);
+
+            // After map animation completes, fetch listings will happen via moveend event
+        },
+
+        /**
+         * Show brief notification that map centered on location
+         * @param {string} locationName - The location name to display
+         */
+        showLocationFeedback: function(locationName) {
+            // Remove any existing feedback
+            $('.sd-location-feedback').remove();
+
+            const self = this;
+            const escapedName = $('<div>').text(locationName).html(); // Escape HTML
+
+            const $feedback = $('<div class="sd-location-feedback">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none">' +
+                '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="currentColor"/>' +
+                '</svg>' +
+                '<span>Kartenansicht: <strong>' + escapedName + '</strong></span>' +
+                '</div>');
+
+            $('.sd-kartensuche-wrapper').append($feedback);
+
+            // Animate in
+            setTimeout(function() {
+                $feedback.addClass('active');
+            }, 10);
+
+            // Remove after 3 seconds
+            setTimeout(function() {
+                $feedback.removeClass('active');
+                setTimeout(function() {
+                    $feedback.remove();
+                }, 300);
+            }, 3000);
+        },
+
         getFilters: function() {
             const filters = {
-                search: $('#sd-kartensuche-search').val() || '',
+                // If this is a location search, don't pass the location name as search term
+                search: this.isLocationSearch ? '' : ($('#sd-kartensuche-search').val() || ''),
                 category: $('#sd-kartensuche-category').val() || '',
                 premium: $('.sd-kartensuche-premium-toggle input').is(':checked') ? '1' : '',
                 orderby: 'date_desc',

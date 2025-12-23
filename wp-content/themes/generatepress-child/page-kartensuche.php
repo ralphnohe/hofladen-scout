@@ -40,7 +40,7 @@ get_header();
                         type="text"
                         id="sd-kartensuche-search"
                         name="sd_search"
-                        placeholder="<?php esc_attr_e( 'Hofladen, Produkt...', 'spezialist-directory' ); ?>"
+                        placeholder="<?php esc_attr_e( 'Ort, Hofladen, Produkt...', 'spezialist-directory' ); ?>"
                         value="<?php echo esc_attr( $current_search ); ?>"
                         autocomplete="off"
                     >

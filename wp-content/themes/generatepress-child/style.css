@@ -7085,6 +7085,51 @@ a.wp-block-button__link:not(.has-background) {
     }
 }
 
+/* Location Search Feedback Toast */
+.sd-location-feedback {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--sd-grey-900);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.sd-location-feedback.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.sd-location-feedback svg {
+    color: var(--sd-yellow);
+    flex-shrink: 0;
+}
+
+.sd-location-feedback strong {
+    color: var(--sd-yellow);
+}
+
+/* Mobile adjustments for location feedback */
+@media (max-width: 768px) {
+    .sd-location-feedback {
+        bottom: 80px;
+        width: calc(100% - 32px);
+        max-width: 400px;
+    }
+}
+
 /* Custom Zoom Controls */
 .sd-kartensuche-controls {
     position: absolute;
