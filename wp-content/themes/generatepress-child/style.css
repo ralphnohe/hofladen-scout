@@ -1447,6 +1447,23 @@ body.page-template-default .entry-content {
         flex: 1;
         min-width: 0;
     }
+
+    /* Center search input placeholder on mobile */
+    #sd_search {
+        text-align: center;
+    }
+
+    #sd_search::placeholder {
+        text-align: center;
+    }
+
+    /* Center category dropdown text on mobile */
+    #sd_category_dropdown {
+        text-align: center;
+        text-align-last: center;
+        padding-left: 10px !important;
+        padding-right: 30px !important;
+    }
 }
 
 /* ==========================================
@@ -3778,37 +3795,44 @@ button.sd-action-link svg {
    MOBILE FILTER DRAWER
    ========================================== */
 
-/* Mobile Filter Button - Only visible on mobile */
+/* Mobile Filter Button - Visible on mobile, hidden on desktop */
 .sd-mobile-filter-btn {
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--sd-spacing-sm);
-    position: fixed;
-    bottom: var(--sd-spacing-lg);
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 14px 24px;
-    background: var(--sd-black);
-    color: var(--sd-white);
+    position: static;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--sd-black);
     font-family: var(--sd-font-body);
     font-size: 15px;
     font-weight: 600;
-    border: none;
+    border: 2px solid transparent;
     border-radius: var(--sd-radius-full);
-    box-shadow: var(--sd-shadow-xl);
+    box-shadow: var(--sd-shadow-lg);
     cursor: pointer;
-    z-index: 990;
+    z-index: 5;
     transition: all var(--sd-transition-fast);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    text-decoration: none;
 }
 
 .sd-mobile-filter-btn:hover {
-    background: var(--sd-grey-800);
-    transform: translateX(-50%) scale(1.02);
+    background: var(--sd-yellow);
+    transform: translateY(-3px);
 }
 
 .sd-mobile-filter-btn:active {
-    transform: translateX(-50%) scale(0.98);
+    transform: scale(0.98);
+}
+
+/* Hide filter button on desktop (>768px) */
+@media (min-width: 769px) {
+    .sd-mobile-filter-btn {
+        display: none !important;
+    }
 }
 
 .sd-mobile-filter-btn svg {
@@ -4035,9 +4059,14 @@ button.sd-action-link svg {
 
 /* Mobile-specific show/hide */
 @media (max-width: 768px) {
-    /* Show mobile filter button */
-    .sd-mobile-filter-btn {
-        display: flex;
+    /* Hero map link wrapper - flex row for buttons side by side */
+    .sd-hero-map-link-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        gap: var(--sd-spacing-sm);
+        justify-content: center;
+        align-items: center;
     }
 
     /* Hide desktop filter bar on mobile */
@@ -4078,9 +4107,9 @@ button.sd-action-link svg {
         margin: 0 auto;
     }
 
-    /* Add bottom padding for fixed button */
+    /* No bottom padding needed - button is no longer fixed */
     .sd-listings-container {
-        padding-bottom: 80px;
+        padding-bottom: 0;
     }
 }
 
@@ -7612,7 +7641,11 @@ a.wp-block-button__link:not(.has-background) {
 /* Hero Map Link - Button on Frontpage */
 .sd-hero-map-link-wrapper {
     display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--sd-spacing-sm);
     justify-content: center;
+    align-items: center;
     margin-top: var(--sd-spacing-lg);
     position: relative;
     z-index: 5;

@@ -146,7 +146,7 @@ if ( $current_category && $current_location ) {
             </div>
         </form>
 
-        <!-- Map Search Link -->
+        <!-- Map Search Link & Mobile Filter Button -->
         <div class="sd-hero-map-link-wrapper">
             <a href="<?php echo esc_url( home_url( '/karte/' ) ); ?>" class="sd-hero-map-link">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -154,6 +154,25 @@ if ( $current_category && $current_location ) {
                 </svg>
                 <span><?php _e( 'Kartensuche', 'spezialist-directory' ); ?></span>
             </a>
+            <?php
+            // Mobile Filter Button - calculate active filter count
+            $active_filter_count_hero = 0;
+            if ( ! empty( $_GET['sd_search'] ) ) $active_filter_count_hero++;
+            if ( ! empty( $current_category ) ) $active_filter_count_hero++;
+            if ( ! empty( $current_location ) ) $active_filter_count_hero++;
+            if ( ! empty( $current_tag ) ) $active_filter_count_hero++;
+            if ( isset( $_GET['sd_premium'] ) && '1' === $_GET['sd_premium'] ) $active_filter_count_hero++;
+            if ( isset( $_GET['sd_orderby'] ) && $_GET['sd_orderby'] !== 'date_desc' ) $active_filter_count_hero++;
+            ?>
+            <button type="button" class="sd-mobile-filter-btn" id="sd-mobile-filter-btn" aria-label="<?php esc_attr_e( 'Filter öffnen', 'spezialist-directory' ); ?>">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/>
+                </svg>
+                <span><?php _e( 'Filter', 'spezialist-directory' ); ?></span>
+                <?php if ( $active_filter_count_hero > 0 ) : ?>
+                    <span class="sd-filter-count"><?php echo $active_filter_count_hero; ?></span>
+                <?php endif; ?>
+            </button>
         </div>
 
         <!-- Tag Quick Chips -->
@@ -653,26 +672,6 @@ if ( $current_category && $current_location ) {
     <?php endif; ?>
 
     <?php wp_reset_postdata(); ?>
-
-    <!-- Mobile Filter Button (Fixed at bottom) -->
-    <?php
-    $active_filter_count = 0;
-    if ( ! empty( $_GET['sd_search'] ) ) $active_filter_count++;
-    if ( ! empty( $current_category ) ) $active_filter_count++;
-    if ( ! empty( $current_location ) ) $active_filter_count++;
-    if ( ! empty( $current_tag ) ) $active_filter_count++;
-    if ( isset( $_GET['sd_premium'] ) && '1' === $_GET['sd_premium'] ) $active_filter_count++;
-    if ( isset( $_GET['sd_orderby'] ) && $_GET['sd_orderby'] !== 'date_desc' ) $active_filter_count++;
-    ?>
-    <button type="button" class="sd-mobile-filter-btn" id="sd-mobile-filter-btn" aria-label="<?php esc_attr_e( 'Filter öffnen', 'spezialist-directory' ); ?>">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/>
-        </svg>
-        <span><?php _e( 'Filter', 'spezialist-directory' ); ?></span>
-        <?php if ( $active_filter_count > 0 ) : ?>
-            <span class="sd-filter-count"><?php echo $active_filter_count; ?></span>
-        <?php endif; ?>
-    </button>
 
     <!-- Mobile Filter Drawer Backdrop -->
     <div class="sd-filter-drawer-backdrop" id="sd-filter-drawer-backdrop"></div>
