@@ -4741,6 +4741,9 @@
                 self.hideListPanel();
             });
 
+            // Drag handle - swipe down to close list panel (mobile/tablet only)
+            this.initDragHandle();
+
             // Card hover -> highlight marker
             $(document).on('mouseenter', '#sd-list-content .sd-listing-card[data-lat]', function() {
                 const postId = $(this).data('post-id');
@@ -5078,6 +5081,101 @@
             } else {
                 this.showListPanel();
             }
+        },
+
+        // Initialize drag handle for swipe-to-close on mobile/tablet
+        initDragHandle: function() {
+            const self = this;
+            const $dragHandle = $('.sd-list-drag-handle');
+            const $panel = $('#sd-list-panel');
+
+            if (!$dragHandle.length) return;
+
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+            const threshold = 80; // Minimum drag distance to trigger close
+
+            // Touch events for mobile
+            $dragHandle[0].addEventListener('touchstart', function(e) {
+                if (window.innerWidth > 1024) return; // Only on tablet/mobile
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                $panel.css('transition', 'none');
+            }, { passive: true });
+
+            $dragHandle[0].addEventListener('touchmove', function(e) {
+                if (!isDragging || window.innerWidth > 1024) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+
+                // Only allow dragging down (positive deltaY)
+                if (deltaY > 0) {
+                    $panel.css('transform', 'translateY(' + deltaY + 'px)');
+                    // Visual feedback on drag handle
+                    $dragHandle.css('background', 'var(--sd-yellow)');
+                }
+            }, { passive: true });
+
+            $dragHandle[0].addEventListener('touchend', function(e) {
+                if (!isDragging || window.innerWidth > 1024) return;
+                isDragging = false;
+                const deltaY = currentY - startY;
+
+                // Reset styles
+                $panel.css({
+                    'transition': '',
+                    'transform': ''
+                });
+                $dragHandle.css('background', '');
+
+                // Close panel if dragged past threshold
+                if (deltaY > threshold) {
+                    self.hideListPanel();
+                }
+
+                startY = 0;
+                currentY = 0;
+            }, { passive: true });
+
+            // Mouse events for desktop testing
+            $dragHandle.on('mousedown', function(e) {
+                if (window.innerWidth > 1024) return;
+                isDragging = true;
+                startY = e.clientY;
+                $panel.css('transition', 'none');
+                e.preventDefault();
+            });
+
+            $(document).on('mousemove.draghandle', function(e) {
+                if (!isDragging || window.innerWidth > 1024) return;
+                currentY = e.clientY;
+                const deltaY = currentY - startY;
+
+                if (deltaY > 0) {
+                    $panel.css('transform', 'translateY(' + deltaY + 'px)');
+                    $dragHandle.css('background', 'var(--sd-yellow)');
+                }
+            });
+
+            $(document).on('mouseup.draghandle', function(e) {
+                if (!isDragging || window.innerWidth > 1024) return;
+                isDragging = false;
+                const deltaY = currentY - startY;
+
+                $panel.css({
+                    'transition': '',
+                    'transform': ''
+                });
+                $dragHandle.css('background', '');
+
+                if (deltaY > threshold) {
+                    self.hideListPanel();
+                }
+
+                startY = 0;
+                currentY = 0;
+            });
         },
 
         showListPanel: function() {

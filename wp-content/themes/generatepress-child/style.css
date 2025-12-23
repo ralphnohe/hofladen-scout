@@ -7678,6 +7678,15 @@ a.wp-block-button__link:not(.has-background) {
         background: var(--sd-grey-300);
         border-radius: 2px;
         margin: var(--sd-spacing-sm) auto var(--sd-spacing-xs);
+        cursor: grab;
+        touch-action: pan-y;
+        transition: background 0.2s ease, width 0.2s ease;
+    }
+
+    .sd-list-drag-handle:active {
+        cursor: grabbing;
+        width: 60px;
+        background: var(--sd-yellow);
     }
 
     .sd-kartensuche-list-content {
@@ -7742,7 +7751,14 @@ a.wp-block-button__link:not(.has-background) {
     }
 
     .sd-kartensuche-map-container {
-        height: calc(100vh - 64px);
+        height: calc(100dvh - 64px);
+        height: calc(100vh - 64px); /* Fallback for older browsers */
+    }
+
+    @supports (height: 100dvh) {
+        .sd-kartensuche-map-container {
+            height: calc(100dvh - 64px) !important;
+        }
     }
 
     .sd-kartensuche-list-panel {
@@ -7750,19 +7766,27 @@ a.wp-block-button__link:not(.has-background) {
     }
 
     .sd-kartensuche-list-panel.active {
-        height: 70vh;
+        height: 70dvh;
+        height: 70vh; /* Fallback */
+    }
+
+    @supports (height: 100dvh) {
+        .sd-kartensuche-list-panel.active {
+            height: 70dvh !important;
+        }
     }
 
     .sd-kartensuche-map-container.list-open {
-        height: calc(100vh - 64px - 70vh) !important;
+        height: calc(100dvh - 64px - 70dvh) !important;
     }
 
     .sd-kartensuche-list-content {
-        height: calc(70vh - 70px);
+        height: calc(70dvh - 70px);
+        height: calc(70vh - 70px); /* Fallback */
     }
 
     .sd-kartensuche-controls {
-        bottom: 80px;
+        bottom: 120px !important;
         right: var(--sd-spacing-md);
     }
 
@@ -7772,6 +7796,7 @@ a.wp-block-button__link:not(.has-background) {
     }
 
     .sd-kartensuche-list-toggle {
+        bottom: 20px !important;
         padding: var(--sd-spacing-sm) var(--sd-spacing-md);
         font-size: 13px;
     }
@@ -7792,12 +7817,12 @@ a.wp-block-button__link:not(.has-background) {
 /* Extra small screens */
 @media (max-width: 480px) {
     .sd-kartensuche-header {
-        top: 68px;
+        top: 10px;
         border-radius: 12px;
     }
 
     .sd-kartensuche-map-container {
-        height: calc(100vh - 60px);
+        height: calc(100dvh - 60px) !important;
     }
 
     .sd-kartensuche-input-wrapper input,
@@ -7813,5 +7838,24 @@ a.wp-block-button__link:not(.has-background) {
 
     .sd-kartensuche-list-header h2 {
         font-size: 14px;
+    }
+
+    .sd-kartensuche-controls {
+        bottom: 100px !important;
+    }
+
+    .sd-kartensuche-list-toggle {
+        bottom: 15px !important;
+    }
+}
+
+/* iPad Landscape - more bottom spacing for list toggle */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .sd-kartensuche-list-toggle {
+        bottom: 80px !important;
+    }
+
+    .sd-kartensuche-controls {
+        bottom: 150px !important;
     }
 }
