@@ -185,7 +185,7 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
 
     <!-- Quick Actions -->
     <div class="sd-dashboard-actions">
-        <a href="<?php echo esc_url( home_url( '/spezialist-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
+        <a href="<?php echo esc_url( home_url( '/hofladen-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
             </svg>
@@ -432,7 +432,7 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
                 </div>
                 <h3><?php _e( 'Noch keine Einträge', 'spezialist-directory' ); ?></h3>
                 <p><?php _e( 'Du hast noch keine Hofladen-Einträge erstellt.', 'spezialist-directory' ); ?></p>
-                <a href="<?php echo esc_url( home_url( '/spezialist-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
+                <a href="<?php echo esc_url( home_url( '/hofladen-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
                     <?php _e( 'Ersten Eintrag erstellen', 'spezialist-directory' ); ?>
                 </a>
             </div>
@@ -750,7 +750,7 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
             <?php else : ?>
                 <div class="sd-notice sd-notice-info">
                     <?php _e( 'Du hast noch keine Einträge erstellt.', 'spezialist-directory' ); ?>
-                    <a href="<?php echo esc_url( home_url( '/spezialist-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
+                    <a href="<?php echo esc_url( home_url( '/hofladen-hinzufuegen/' ) ); ?>" class="sd-button sd-button-primary">
                         <?php _e( 'Eintrag hinzufügen', 'spezialist-directory' ); ?>
                     </a>
                 </div>
