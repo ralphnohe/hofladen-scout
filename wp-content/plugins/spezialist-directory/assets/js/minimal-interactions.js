@@ -4600,36 +4600,81 @@
 
             const self = this;
 
-            // Try to get user's location first
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // Success: Use user's location
-                        self.defaultCenter = [position.coords.latitude, position.coords.longitude];
-                        self.createMap();
-                        self.addUserLocationMarker(position.coords.latitude, position.coords.longitude);
-                        self.bindEvents();
-                        self.loadInitialListings();
-                    },
-                    function(error) {
-                        // Error or denied: Use Frankfurt am Main
-                        console.log('Geolocation not available, using Frankfurt as default');
-                        self.createMap();
-                        self.bindEvents();
-                        self.loadInitialListings();
-                    },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 5000,
-                        maximumAge: 300000 // 5 minutes cache
-                    }
-                );
+            // Check if geolocation is available and we're in a secure context
+            const canUseGeolocation = navigator.geolocation &&
+                (window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost');
+
+            if (canUseGeolocation) {
+                // Use Permissions API to check status first (if available)
+                if (navigator.permissions && navigator.permissions.query) {
+                    navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
+                        console.log('Geolocation permission status:', result.state);
+
+                        if (result.state === 'granted') {
+                            // Permission already granted, get location immediately
+                            self.requestGeolocation();
+                        } else if (result.state === 'prompt') {
+                            // Permission not yet requested, request it
+                            // Small delay to ensure page is fully loaded (helps on iOS)
+                            setTimeout(function() {
+                                self.requestGeolocation();
+                            }, 100);
+                        } else {
+                            // Permission denied, use default
+                            console.log('Geolocation permission denied, using Frankfurt as default');
+                            self.createMap();
+                            self.bindEvents();
+                            self.loadInitialListings();
+                        }
+                    }).catch(function(err) {
+                        // Permissions API failed (e.g., Safari), try geolocation directly
+                        console.log('Permissions API not available, trying geolocation directly');
+                        setTimeout(function() {
+                            self.requestGeolocation();
+                        }, 100);
+                    });
+                } else {
+                    // No Permissions API (Safari/iOS), try geolocation directly with delay
+                    console.log('No Permissions API, trying geolocation directly');
+                    setTimeout(function() {
+                        self.requestGeolocation();
+                    }, 100);
+                }
             } else {
-                // Geolocation not supported: Use Frankfurt
+                // Geolocation not available or not secure context
+                console.log('Geolocation not available (secure context:', window.isSecureContext, ')');
                 this.createMap();
                 this.bindEvents();
                 this.loadInitialListings();
             }
+        },
+
+        requestGeolocation: function() {
+            const self = this;
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Success: Use user's location
+                    console.log('Geolocation success:', position.coords.latitude, position.coords.longitude);
+                    self.defaultCenter = [position.coords.latitude, position.coords.longitude];
+                    self.createMap();
+                    self.addUserLocationMarker(position.coords.latitude, position.coords.longitude);
+                    self.bindEvents();
+                    self.loadInitialListings();
+                },
+                function(error) {
+                    // Error or denied: Use Frankfurt am Main
+                    console.log('Geolocation error:', error.code, error.message);
+                    self.createMap();
+                    self.bindEvents();
+                    self.loadInitialListings();
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 10000, // Increased timeout for mobile
+                    maximumAge: 300000 // 5 minutes cache
+                }
+            );
         },
 
         addUserLocationMarker: function(lat, lng) {
