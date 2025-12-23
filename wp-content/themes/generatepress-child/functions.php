@@ -88,10 +88,10 @@ function sd_excerpt_more( $more ) {
 	return $more;
 }
 
-// Remove entry-header (page title) on front page / Spezialisten finden page
+// Remove entry-header (page title) on front page / Hofläden finden page
 add_action( 'wp', 'sd_remove_entry_header_on_front_page' );
 function sd_remove_entry_header_on_front_page() {
-	if ( is_front_page() || is_page( 'spezialisten-finden' ) ) {
+	if ( is_front_page() || is_page( 'hoflaeden-finden' ) ) {
 		// Remove the entry header from GeneratePress
 		remove_action( 'generate_after_entry_header', 'generate_post_image' );
 		add_filter( 'generate_show_title', '__return_false' );
