@@ -3242,10 +3242,16 @@ button.sd-action-link svg {
     }
 
     /* Tab Navigation Mobile */
+    .sd-detail-tabs {
+        overflow: visible !important;
+    }
+
     .sd-tabs-container {
         padding: 0 var(--sd-spacing-md);
+        padding-bottom: 20px; /* Space for ::after yellow underline */
         gap: var(--sd-spacing-xs);
         overflow-x: auto;
+        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
     }
 
