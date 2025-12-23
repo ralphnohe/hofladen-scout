@@ -4741,6 +4741,14 @@
                 clearTimeout(self.debounceTimer);
 
                 const searchTerm = $(this).val().trim();
+                const $clearBtn = $('.sd-kartensuche-clear');
+
+                // Show/hide clear button based on input content
+                if (searchTerm.length > 0) {
+                    $clearBtn.addClass('visible');
+                } else {
+                    $clearBtn.removeClass('visible');
+                }
 
                 self.debounceTimer = setTimeout(function() {
                     if (searchTerm.length >= 2) {
@@ -4764,6 +4772,16 @@
                     }
                 }, 400);
             });
+
+            // Clear button click handler
+            $('.sd-kartensuche-clear').on('click', function() {
+                $('#sd-kartensuche-search').val('').trigger('input').focus();
+            });
+
+            // Initial visibility of clear button on page load
+            if ($('#sd-kartensuche-search').val().trim().length > 0) {
+                $('.sd-kartensuche-clear').addClass('visible');
+            }
 
             // Category dropdown
             $('#sd-kartensuche-category').on('change', function() {

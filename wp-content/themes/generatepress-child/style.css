@@ -6899,6 +6899,35 @@ a.wp-block-button__link:not(.has-background) {
     pointer-events: none;
 }
 
+/* Clear Button for Search Input */
+.sd-kartensuche-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--sd-grey-400);
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.sd-kartensuche-clear:hover {
+    background: var(--sd-grey-200);
+    color: var(--sd-grey-600);
+}
+
+.sd-kartensuche-clear.visible {
+    display: flex;
+}
+
 /* Bundesland Dropdown */
 .sd-kartensuche-select {
     height: 42px;
