@@ -215,3 +215,141 @@ function sd_remove_dashboard_page_title( $title, $id = null ) {
 	return $title;
 }
 
+/**
+ * hCaptcha Integration for Contact Form 7
+ * Keys defined in wp-config.php: SD_HCAPTCHA_SITE_KEY, SD_HCAPTCHA_SECRET_KEY
+ */
+
+/**
+ * 1. Enqueue hCaptcha script on contact page
+ */
+add_action( 'wp_enqueue_scripts', 'sd_enqueue_hcaptcha_script' );
+function sd_enqueue_hcaptcha_script() {
+	if ( is_page( 'kontakt' ) ) {
+		wp_enqueue_script(
+			'hcaptcha',
+			'https://js.hcaptcha.com/1/api.js',
+			array(),
+			null,
+			true
+		);
+	}
+}
+
+/**
+ * 2. Add hCaptcha widget to CF7 form before submit button
+ */
+add_filter( 'wpcf7_form_elements', 'sd_add_hcaptcha_to_cf7' );
+function sd_add_hcaptcha_to_cf7( $content ) {
+	if ( ! is_page( 'kontakt' ) ) {
+		return $content;
+	}
+
+	$hcaptcha_html = '
+	<div class="sd-hcaptcha-wrapper">
+		<div class="h-captcha" data-sitekey="' . SD_HCAPTCHA_SITE_KEY . '" data-callback="sdHcaptchaCallback"></div>
+		<div class="sd-hcaptcha-error" style="display:none;">Bitte bestätige, dass Du kein Roboter bist.</div>
+	</div>';
+
+	// Insert before submit button
+	$content = preg_replace(
+		'/(<input[^>]*type=["\']submit["\'][^>]*>)/i',
+		$hcaptcha_html . '$1',
+		$content
+	);
+
+	return $content;
+}
+
+/**
+ * 3. Server-side hCaptcha validation
+ * Uses wp_get_referer() instead of is_page() - works during AJAX requests!
+ */
+add_filter( 'wpcf7_validate', 'sd_validate_hcaptcha', 10, 2 );
+function sd_validate_hcaptcha( $result, $tags ) {
+	// Check referer instead of is_page() - works during AJAX!
+	$referer = wp_get_referer();
+	if ( strpos( $referer, '/kontakt' ) === false ) {
+		return $result;
+	}
+
+	$hcaptcha_response = isset( $_POST['h-captcha-response'] ) ? sanitize_text_field( $_POST['h-captcha-response'] ) : '';
+
+	if ( empty( $hcaptcha_response ) ) {
+		$result->invalidate( '', 'Bitte bestätige, dass Du kein Roboter bist.' );
+		return $result;
+	}
+
+	// Verify with hCaptcha API
+	$verify_url = 'https://api.hcaptcha.com/siteverify';
+	$response = wp_remote_post( $verify_url, [
+		'body' => [
+			'secret'   => SD_HCAPTCHA_SECRET_KEY,
+			'response' => $hcaptcha_response,
+			'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
+		],
+		'timeout' => 10
+	] );
+
+	if ( is_wp_error( $response ) ) {
+		// Network error: allow form submission as fallback
+		return $result;
+	}
+
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+	if ( empty( $body['success'] ) || $body['success'] !== true ) {
+		$result->invalidate( '', 'Die Captcha-Überprüfung ist fehlgeschlagen. Bitte versuche es erneut.' );
+	}
+
+	return $result;
+}
+
+/**
+ * 4. Client-side validation script
+ */
+add_action( 'wp_footer', 'sd_hcaptcha_validation_script' );
+function sd_hcaptcha_validation_script() {
+	if ( ! is_page( 'kontakt' ) ) {
+		return;
+	}
+	?>
+	<script>
+	// hCaptcha callback when solved
+	function sdHcaptchaCallback() {
+		var errorDiv = document.querySelector('.sd-hcaptcha-error');
+		if (errorDiv) {
+			errorDiv.style.display = 'none';
+		}
+	}
+
+	document.addEventListener('DOMContentLoaded', function() {
+		var form = document.querySelector('.sd-cf7-form .wpcf7-form');
+		if (!form) return;
+
+		form.addEventListener('submit', function(e) {
+			var hcaptchaResponse = form.querySelector('[name="h-captcha-response"]');
+			var errorDiv = form.querySelector('.sd-hcaptcha-error');
+
+			if (!hcaptchaResponse || !hcaptchaResponse.value) {
+				e.preventDefault();
+				e.stopPropagation();
+				if (errorDiv) {
+					errorDiv.style.display = 'block';
+				}
+				// Scroll to captcha
+				var captchaWrapper = form.querySelector('.sd-hcaptcha-wrapper');
+				if (captchaWrapper) {
+					captchaWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				}
+				return false;
+			}
+			if (errorDiv) {
+				errorDiv.style.display = 'none';
+			}
+		});
+	});
+	</script>
+	<?php
+}
+

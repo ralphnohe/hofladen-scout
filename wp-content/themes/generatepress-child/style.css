@@ -6526,6 +6526,39 @@ body:has(.sd-taxonomy-archive-wrapper) #page {
     display: none;
 }
 
+/* =============================================
+   hCaptcha Styling für Kontaktformular
+   ============================================= */
+
+.sd-cf7-form .sd-hcaptcha-wrapper {
+    margin-bottom: var(--sd-spacing-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sd-cf7-form .h-captcha {
+    transform-origin: center;
+}
+
+.sd-cf7-form .sd-hcaptcha-error {
+    color: var(--sd-danger);
+    font-size: 13px;
+    margin-top: var(--sd-spacing-sm);
+    text-align: center;
+    padding: 8px 16px;
+    background-color: var(--sd-danger-light);
+    border-radius: var(--sd-radius-sm);
+}
+
+/* Responsive: hCaptcha auf kleinen Bildschirmen */
+@media (max-width: 380px) {
+    .sd-cf7-form .sd-hcaptcha-wrapper {
+        transform: scale(0.9);
+        transform-origin: center;
+    }
+}
+
 /* ==========================================
    CONTACT PAGE - RESPONSIVE
    ========================================== */
