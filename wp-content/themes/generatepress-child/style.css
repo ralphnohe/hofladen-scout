@@ -369,6 +369,14 @@
 
 /* Mobile Navigation */
 @media (max-width: 768px) {
+    /* Sticky header on mobile - prevent zoom during pinch-to-zoom */
+    .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        touch-action: pan-x pan-y;
+    }
+
     .menu-toggle {
         display: block;
     }

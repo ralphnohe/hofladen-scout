@@ -133,7 +133,13 @@ final class Spezialist_Ratings {
     public function enqueue_frontend_assets() {
         // Only load on pages with spezialist content
         $is_taxonomy_archive = is_tax( 'spezialist_category' ) || is_tax( 'spezialist_location' ) || is_tax( 'spezialist_tag' );
-        if ( is_singular( 'spezialist' ) || is_front_page() || is_home() || is_post_type_archive( 'spezialist' ) || $is_taxonomy_archive ) {
+
+        // Check for pages using the spezialist_listings shortcode
+        global $post;
+        $has_listings_shortcode = is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'spezialist_listings' );
+        $is_listings_page = is_page( array( 'hoflaeden-finden', 'spezialisten-finden' ) );
+
+        if ( is_singular( 'spezialist' ) || is_front_page() || is_home() || is_post_type_archive( 'spezialist' ) || $is_taxonomy_archive || $has_listings_shortcode || $is_listings_page ) {
             wp_enqueue_style(
                 'sr-styles',
                 SR_PLUGIN_URL . 'assets/css/sr-styles.css',

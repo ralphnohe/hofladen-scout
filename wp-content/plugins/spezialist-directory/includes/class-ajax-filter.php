@@ -204,10 +204,10 @@ class SD_Ajax_Filter {
         }
 
         // For map bounds queries, load more results to show all markers in view
-        // Limit to 500 for performance
+        // Limit to 200 for performance
         $is_bounds_query = ( $bounds_north !== null && $bounds_south !== null && $bounds_east !== null && $bounds_west !== null );
         if ( $is_bounds_query ) {
-            $per_page = 500; // Load up to 500 results within bounds
+            $per_page = 200; // Load up to 200 results within bounds
         }
 
         // Build query args

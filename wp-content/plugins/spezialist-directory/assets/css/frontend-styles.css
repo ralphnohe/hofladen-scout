@@ -4032,13 +4032,6 @@ li.sd-service-item {
 }
 
 /* ====================
-   Rating Badge
-   ==================== */
-.sr-rating-badge {
-    border: 2px solid #d8d8d8;
-}
-
-/* ====================
    Mobile Styles (768px) - Plugin Elements
    ==================== */
 @media (max-width: 768px) {
