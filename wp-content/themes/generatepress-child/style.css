@@ -7253,9 +7253,9 @@ a.wp-block-button__link:not(.has-background) {
     fill: #222 !important;
 }
 
-/* Floating List Toggle Button - fixed position, always 20px from bottom, centered */
+/* Floating List Toggle Button - positioned 20px above bottom of .sd-kartensuche-wrapper */
 .sd-kartensuche-list-toggle {
-    position: fixed !important;
+    position: absolute !important;
     bottom: 20px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;

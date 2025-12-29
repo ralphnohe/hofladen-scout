@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+add_filter( 'litespeed_crawler_disable_blocklist', '__return_true' );
+
 /**
  * Enqueue parent and child theme styles
  */
@@ -353,3 +355,20 @@ function sd_hcaptcha_validation_script() {
 	<?php
 }
 
+/**
+ * Custom OG Image for Homepage (Kartensuche)
+ * Priority 99 to override OG Screenshots plugin
+ */
+add_filter( 'spezialist_seo_og_image', function( $image, $post ) {
+    if ( is_front_page() || is_page_template( 'page-kartensuche.php' ) ) {
+        return home_url( '/wp-content/uploads/og-image-v1.webp' );
+    }
+    return $image;
+}, 99, 2 );
+
+add_filter( 'spezialist_seo_twitter_image', function( $image, $post ) {
+    if ( is_front_page() || is_page_template( 'page-kartensuche.php' ) ) {
+        return home_url( '/wp-content/uploads/og-image-v1.webp' );
+    }
+    return $image;
+}, 99, 2 );
