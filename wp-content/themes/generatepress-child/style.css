@@ -7743,6 +7743,12 @@ a.wp-block-button__link:not(.has-background) {
     }
 }
 
+/* User Location Popup Position Fix */
+.sd-user-location-popup.leaflet-popup {
+    bottom: 0px !important;
+    left: -140px !important;
+}
+
 /* Popup Premium Badge */
 .sd-map-popup-premium {
     display: inline-block;
