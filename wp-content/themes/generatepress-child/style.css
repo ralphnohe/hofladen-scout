@@ -7253,6 +7253,21 @@ a.wp-block-button__link:not(.has-background) {
     fill: #222 !important;
 }
 
+/* Location button loading state */
+.sd-kartensuche-control.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.sd-kartensuche-control.loading svg {
+    animation: sd-spin 1s linear infinite;
+}
+
+@keyframes sd-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Floating List Toggle Button - positioned 20px above bottom of .sd-kartensuche-wrapper */
 .sd-kartensuche-list-toggle {
     position: absolute !important;

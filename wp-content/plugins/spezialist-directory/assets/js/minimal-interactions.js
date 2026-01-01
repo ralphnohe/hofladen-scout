@@ -5237,17 +5237,29 @@
 
         goToUserLocation: function() {
             const self = this;
+            const $btn = $('#sd-karte-location');
 
+            // Check if geolocation is supported
             if (!navigator.geolocation) {
-                console.warn('Geolocation not supported');
+                alert('Standortbestimmung wird von Ihrem Browser nicht unterstützt.');
                 return;
             }
 
+            // Visual feedback - show loading state
+            $btn.addClass('loading');
+            $btn.prop('disabled', true);
+
             navigator.geolocation.getCurrentPosition(
                 function(position) {
+                    // Success
+                    $btn.removeClass('loading');
+                    $btn.prop('disabled', false);
+
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    self.map.setView([lat, lng], 12);
+
+                    // Smooth fly to location
+                    self.map.flyTo([lat, lng], 12, { duration: 0.8 });
 
                     // Remove any existing user location markers first
                     if (self.userLocationMarker) {
@@ -5274,12 +5286,28 @@
                         .openPopup();
                 },
                 function(error) {
-                    console.warn('Geolocation error:', error.message);
+                    // Error handling with user feedback
+                    $btn.removeClass('loading');
+                    $btn.prop('disabled', false);
+
+                    let errorMsg = 'Standort konnte nicht ermittelt werden.';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = 'Bitte erlauben Sie den Zugriff auf Ihren Standort in den Browser-Einstellungen.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = 'Standortinformationen sind nicht verfügbar.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = 'Die Standortabfrage hat zu lange gedauert. Bitte versuchen Sie es erneut.';
+                            break;
+                    }
+                    alert(errorMsg);
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 300000 // 5 minutes cache
+                    timeout: 15000,
+                    maximumAge: 0  // Always request fresh position
                 }
             );
         },
