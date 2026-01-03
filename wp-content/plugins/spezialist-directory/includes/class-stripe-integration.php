@@ -745,8 +745,44 @@ class SD_Stripe_Integration {
 
         error_log( 'SD Stripe Webhook: Checkout completed for post ' . $post_id );
 
-        // The subscription.created webhook will handle the actual premium activation
-        // This is just for logging/confirmation purposes
+        // Aktiviere Premium direkt wenn Subscription in Session vorhanden
+        if ( ! empty( $session->subscription ) ) {
+            try {
+                \Stripe\Stripe::setApiKey( $this->get_secret_key() );
+                $subscription = \Stripe\Subscription::retrieve( $session->subscription );
+
+                if ( in_array( $subscription->status, array( 'active', 'trialing' ), true ) ) {
+                    // Premium aktivieren
+                    update_post_meta( $post_id, '_sd_is_premium', '1' );
+                    update_post_meta( $post_id, '_sd_stripe_subscription_id', $subscription->id );
+                    update_post_meta( $post_id, '_sd_stripe_customer_id', $session->customer );
+
+                    // Plan-Typ bestimmen
+                    $plan_type = $this->get_plan_type_from_subscription( $subscription );
+                    if ( $plan_type ) {
+                        update_post_meta( $post_id, '_sd_subscription_plan', $plan_type );
+                    }
+
+                    // Premium-Enddatum setzen
+                    if ( isset( $subscription->current_period_end ) ) {
+                        $premium_until = date( 'Y-m-d H:i:s', $subscription->current_period_end );
+                        update_post_meta( $post_id, '_sd_premium_until', $premium_until );
+                    }
+
+                    // User-ID aus Session-Metadata holen und Customer-ID speichern
+                    if ( isset( $session->metadata->user_id ) ) {
+                        update_user_meta( intval( $session->metadata->user_id ), '_sd_stripe_customer_id', $session->customer );
+                    }
+
+                    // Pending-Flag entfernen
+                    delete_post_meta( $post_id, '_sd_pending_premium' );
+
+                    error_log( 'SD Stripe Webhook: Premium activated via checkout.session.completed for post ' . $post_id );
+                }
+            } catch ( \Exception $e ) {
+                error_log( 'SD Stripe Webhook: Error retrieving subscription in checkout.session.completed: ' . $e->getMessage() );
+            }
+        }
     }
 
     /**
