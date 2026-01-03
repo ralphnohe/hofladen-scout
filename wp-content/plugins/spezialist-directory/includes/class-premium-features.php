@@ -154,7 +154,7 @@ class SD_Premium_Features {
      * @return array
      */
     public function add_premium_body_class( $classes ) {
-        if ( is_singular( 'spezialist' ) && self::is_premium() ) {
+        if ( is_singular( 'hofladen' ) && self::is_premium() ) {
             $classes[] = 'sd-premium-listing';
         }
 
@@ -170,7 +170,7 @@ class SD_Premium_Features {
      * @return array
      */
     public function add_premium_post_class( $classes, $class, $post_id ) {
-        if ( 'spezialist' === get_post_type( $post_id ) && self::is_premium( $post_id ) ) {
+        if ( 'hofladen' === get_post_type( $post_id ) && self::is_premium( $post_id ) ) {
             $classes[] = 'sd-listing-premium';
         }
 
@@ -181,7 +181,7 @@ class SD_Premium_Features {
      * Add premium structured data
      */
     public function add_premium_structured_data() {
-        if ( ! is_singular( 'spezialist' ) || ! self::is_premium() ) {
+        if ( ! is_singular( 'hofladen' ) || ! self::is_premium() ) {
             return;
         }
 

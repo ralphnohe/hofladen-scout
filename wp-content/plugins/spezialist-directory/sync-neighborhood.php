@@ -30,7 +30,7 @@ function sd_success( $message, $is_cli ) {
 }
 
 $args = array(
-    'post_type'      => 'spezialist',
+    'post_type'      => 'hofladen',
     'post_status'    => 'any',
     'posts_per_page' => -1,
     'fields'         => 'ids',

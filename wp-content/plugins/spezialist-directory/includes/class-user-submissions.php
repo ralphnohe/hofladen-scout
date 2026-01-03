@@ -144,7 +144,7 @@ class SD_User_Submissions {
         $post_data = array(
             'post_title'   => sanitize_text_field( $_POST['title'] ),
             'post_content' => wp_kses_post( $_POST['description'] ),
-            'post_type'    => 'spezialist',
+            'post_type'    => 'hofladen',
             'post_status'  => Spezialist_Directory::get_option( 'require_approval', true ) ? 'pending' : 'publish',
             'post_author'  => is_user_logged_in() ? get_current_user_id() : 0,
         );

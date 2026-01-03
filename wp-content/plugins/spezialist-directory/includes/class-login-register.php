@@ -524,7 +524,7 @@ class SD_Login_Register {
      */
     public function add_admin_menu() {
         add_submenu_page(
-            'edit.php?post_type=spezialist',
+            'edit.php?post_type=hofladen',
             __( 'Google OAuth Einstellungen', 'spezialist-directory' ),
             __( 'Google OAuth', 'spezialist-directory' ),
             'manage_options',

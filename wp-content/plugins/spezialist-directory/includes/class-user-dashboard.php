@@ -85,7 +85,7 @@ class SD_User_Dashboard {
         }
 
         $args = array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'author'         => $user_id,
             'posts_per_page' => $per_page,
             'paged'          => $paged,
@@ -111,7 +111,7 @@ class SD_User_Dashboard {
         }
 
         $args = array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'posts_per_page' => $per_page,
             'paged'          => $paged,
             'post_status'    => array( 'publish', 'pending', 'draft' ),
@@ -142,7 +142,7 @@ class SD_User_Dashboard {
         }
 
         $args = array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'author'         => $user_id,
             'posts_per_page' => 1,
             'post_status'    => array( 'publish', 'pending', 'draft' ),
@@ -165,7 +165,7 @@ class SD_User_Dashboard {
         }
 
         $args = array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'posts_per_page' => 1,
             'post_status'    => array( 'publish', 'pending', 'draft' ),
             'fields'         => 'ids',
@@ -201,7 +201,7 @@ class SD_User_Dashboard {
         }
 
         $post = get_post( $post_id );
-        if ( ! $post || 'spezialist' !== $post->post_type ) {
+        if ( ! $post || 'hofladen' !== $post->post_type ) {
             return false;
         }
 
@@ -601,7 +601,7 @@ class SD_User_Dashboard {
     public static function get_listing_data( $post_id ) {
         $post = get_post( $post_id );
 
-        if ( ! $post || 'spezialist' !== $post->post_type ) {
+        if ( ! $post || 'hofladen' !== $post->post_type ) {
             return false;
         }
 
@@ -923,7 +923,7 @@ class SD_User_Dashboard {
         // Get original post
         $original_post = get_post( $post_id );
 
-        if ( ! $original_post || 'spezialist' !== $original_post->post_type ) {
+        if ( ! $original_post || 'hofladen' !== $original_post->post_type ) {
             wp_send_json_error( array(
                 'message' => __( 'Eintrag nicht gefunden.', 'spezialist-directory' )
             ) );
@@ -934,7 +934,7 @@ class SD_User_Dashboard {
             'post_title'   => $original_post->post_title . ' ' . __( '(Kopie)', 'spezialist-directory' ),
             'post_content' => $original_post->post_content,
             'post_status'  => 'draft', // Always create as draft
-            'post_type'    => 'spezialist',
+            'post_type'    => 'hofladen',
             'post_author'  => get_current_user_id(),
         );
 

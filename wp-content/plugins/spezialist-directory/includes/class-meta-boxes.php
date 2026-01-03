@@ -486,7 +486,7 @@ class SD_Meta_Boxes {
         }
 
         // Check post type
-        if ( 'spezialist' !== $post->post_type ) {
+        if ( 'hofladen' !== $post->post_type ) {
             return;
         }
 

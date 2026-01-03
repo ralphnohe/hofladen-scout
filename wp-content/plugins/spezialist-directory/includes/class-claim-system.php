@@ -44,8 +44,8 @@ class SD_Claim_System {
         add_action( 'wp_ajax_sd_claim_listing', array( $this, 'handle_claim_request' ) );
         add_action( 'wp_ajax_nopriv_sd_claim_listing', array( $this, 'handle_claim_request' ) );
         add_action( 'admin_menu', array( $this, 'add_claims_menu' ) );
-        add_filter( 'manage_spezialist_posts_columns', array( $this, 'add_claim_column' ) );
-        add_action( 'manage_spezialist_posts_custom_column', array( $this, 'render_claim_column' ), 10, 2 );
+        add_filter( 'manage_hofladen_posts_columns', array( $this, 'add_claim_column' ) );
+        add_action( 'manage_hofladen_posts_custom_column', array( $this, 'render_claim_column' ), 10, 2 );
     }
 
     /**
@@ -237,7 +237,7 @@ class SD_Claim_System {
         );
 
         $site_name     = get_bloginfo( 'name' );
-        $dashboard_url = admin_url( 'edit.php?post_type=spezialist&page=sd-claims' );
+        $dashboard_url = admin_url( 'edit.php?post_type=hofladen&page=sd-claims' );
         $listing_url   = get_permalink( $post_id );
         $edit_url      = get_edit_post_link( $post_id, 'raw' );
 
@@ -351,7 +351,7 @@ class SD_Claim_System {
      */
     public function add_claims_menu() {
         add_submenu_page(
-            'edit.php?post_type=spezialist',
+            'edit.php?post_type=hofladen',
             __( 'Dashboard', 'spezialist-directory' ),
             __( 'Dashboard', 'spezialist-directory' ),
             'manage_options',
@@ -415,7 +415,7 @@ class SD_Claim_System {
         $reverted_count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name WHERE status = 'reverted'" );
 
         // Get pending listings count
-        $pending_listings_count = wp_count_posts( 'spezialist' )->pending;
+        $pending_listings_count = wp_count_posts( 'hofladen' )->pending;
         $total_users = count_users();
         $subscriber_count = isset( $total_users['avail_roles']['subscriber'] ) ? $total_users['avail_roles']['subscriber'] : 0;
 
@@ -489,18 +489,18 @@ class SD_Claim_System {
 
             <!-- Tab Navigation -->
             <nav class="nav-tab-wrapper sd-admin-tabs">
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=claims' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=claims' ) ); ?>"
                    class="nav-tab <?php echo $current_tab === 'claims' ? 'nav-tab-active' : ''; ?>">
                     <?php _e( 'Claim-Anfragen', 'spezialist-directory' ); ?>
                     <?php if ( $pending_count > 0 ) : ?>
                         <span class="sd-badge sd-badge-warning"><?php echo esc_html( $pending_count ); ?></span>
                     <?php endif; ?>
                 </a>
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=users' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=users' ) ); ?>"
                    class="nav-tab <?php echo $current_tab === 'users' ? 'nav-tab-active' : ''; ?>">
                     <?php _e( 'Benutzer', 'spezialist-directory' ); ?>
                 </a>
-                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=pending_listings' ) ); ?>"
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=pending_listings' ) ); ?>"
                    class="nav-tab <?php echo $current_tab === 'pending_listings' ? 'nav-tab-active' : ''; ?>">
                     <?php _e( 'Ausstehende Einträge', 'spezialist-directory' ); ?>
                     <?php if ( $pending_listings_count > 0 ) : ?>
@@ -514,23 +514,23 @@ class SD_Claim_System {
                 <?php if ( $current_tab === 'claims' ) : ?>
                     <!-- Claims Tab -->
                     <div class="sd-admin-filters">
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=claims' ) ); ?>"
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=claims' ) ); ?>"
                            class="button <?php echo ! $status_filter ? 'button-primary' : ''; ?>">
                             <?php _e( 'Alle', 'spezialist-directory' ); ?>
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=claims&status=pending' ) ); ?>"
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=claims&status=pending' ) ); ?>"
                            class="button <?php echo $status_filter === 'pending' ? 'button-primary' : ''; ?>">
                             <?php _e( 'Ausstehend', 'spezialist-directory' ); ?> (<?php echo esc_html( $pending_count ); ?>)
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=claims&status=approved' ) ); ?>"
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=claims&status=approved' ) ); ?>"
                            class="button <?php echo $status_filter === 'approved' ? 'button-primary' : ''; ?>">
                             <?php _e( 'Genehmigt', 'spezialist-directory' ); ?>
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=claims&status=rejected' ) ); ?>"
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=claims&status=rejected' ) ); ?>"
                            class="button <?php echo $status_filter === 'rejected' ? 'button-primary' : ''; ?>">
                             <?php _e( 'Abgelehnt', 'spezialist-directory' ); ?>
                         </a>
-                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=spezialist&page=sd-claims&tab=claims&status=reverted' ) ); ?>"
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=claims&status=reverted' ) ); ?>"
                            class="button <?php echo $status_filter === 'reverted' ? 'button-primary' : ''; ?>">
                             <?php _e( 'Widerrufen', 'spezialist-directory' ); ?> (<?php echo esc_html( $reverted_count ); ?>)
                         </a>
@@ -725,7 +725,7 @@ class SD_Claim_System {
                     <!-- Pending Listings Tab -->
                     <?php
                     $pending_listings = get_posts( array(
-                        'post_type'      => 'spezialist',
+                        'post_type'      => 'hofladen',
                         'post_status'    => 'pending',
                         'posts_per_page' => 50,
                         'orderby'        => 'date',

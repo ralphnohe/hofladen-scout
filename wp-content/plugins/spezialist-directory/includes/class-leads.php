@@ -139,7 +139,7 @@ class SD_Leads {
 
         // Get listing info
         $listing = get_post( $listing_id );
-        if ( ! $listing || 'spezialist' !== $listing->post_type ) {
+        if ( ! $listing || 'hofladen' !== $listing->post_type ) {
             wp_send_json_error( array(
                 'message' => __( 'Hofladen nicht gefunden.', 'spezialist-directory' )
             ) );
@@ -283,7 +283,7 @@ class SD_Leads {
     public static function get_user_leads( $user_id ) {
         // Get user's listings
         $listings = get_posts( array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'post_status'    => array( 'publish', 'pending', 'draft' ),
             'author'         => $user_id,
             'posts_per_page' => -1,
@@ -292,7 +292,7 @@ class SD_Leads {
 
         // Also include claimed listings
         $claimed = get_posts( array(
-            'post_type'      => 'spezialist',
+            'post_type'      => 'hofladen',
             'post_status'    => array( 'publish', 'pending', 'draft' ),
             'posts_per_page' => -1,
             'fields'         => 'ids',

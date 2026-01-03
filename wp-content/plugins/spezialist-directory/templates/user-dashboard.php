@@ -28,7 +28,7 @@ $total_own_listings = $user_listings->found_posts;
 
 // Get claimed listings IDs separately for flagging (only IDs, no full load)
 $claimed_ids_query = new WP_Query( array(
-    'post_type'      => 'spezialist',
+    'post_type'      => 'hofladen',
     'posts_per_page' => -1,
     'post_status'    => array( 'publish', 'pending', 'draft' ),
     'fields'         => 'ids',

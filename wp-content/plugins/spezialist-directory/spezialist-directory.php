@@ -176,9 +176,9 @@ final class Spezialist_Directory {
         $cpt->register_post_type();
 
         // Explicitly associate taxonomies with post type for extra safety
-        register_taxonomy_for_object_type( 'spezialist_category', 'spezialist' );
-        register_taxonomy_for_object_type( 'spezialist_location', 'spezialist' );
-        register_taxonomy_for_object_type( 'spezialist_tag', 'spezialist' );
+        register_taxonomy_for_object_type( 'spezialist_category', 'hofladen' );
+        register_taxonomy_for_object_type( 'spezialist_location', 'hofladen' );
+        register_taxonomy_for_object_type( 'spezialist_tag', 'hofladen' );
 
         // Initialize other components
         SD_Meta_Boxes::instance();
@@ -364,9 +364,9 @@ final class Spezialist_Directory {
         $cpt->register_post_type();
 
         // Explicitly associate taxonomies with post type
-        register_taxonomy_for_object_type( 'spezialist_category', 'spezialist' );
-        register_taxonomy_for_object_type( 'spezialist_location', 'spezialist' );
-        register_taxonomy_for_object_type( 'spezialist_tag', 'spezialist' );
+        register_taxonomy_for_object_type( 'spezialist_category', 'hofladen' );
+        register_taxonomy_for_object_type( 'spezialist_location', 'hofladen' );
+        register_taxonomy_for_object_type( 'spezialist_tag', 'hofladen' );
 
         // Flush rewrite rules
         flush_rewrite_rules();
