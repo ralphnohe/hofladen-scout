@@ -552,13 +552,28 @@ class SD_User_Submissions {
      * @return array
      */
     public static function get_bundeslaender() {
-        $parent = get_term_by( 'slug', 'bundesland', 'spezialist_category' );
-        if ( ! $parent ) {
-            return array();
-        }
+        $bundesland_slugs = array(
+            'baden-wuerttemberg',
+            'bayern',
+            'berlin',
+            'brandenburg',
+            'bremen',
+            'hamburg',
+            'hessen',
+            'mecklenburg-vorpommern',
+            'niedersachsen',
+            'nordrhein-westfalen',
+            'rheinland-pfalz',
+            'saarland',
+            'sachsen',
+            'sachsen-anhalt',
+            'schleswig-holstein',
+            'thueringen',
+        );
+
         return get_terms( array(
             'taxonomy'   => 'spezialist_category',
-            'parent'     => $parent->term_id,
+            'slug'       => $bundesland_slugs,
             'hide_empty' => false,
             'orderby'    => 'name',
             'order'      => 'ASC',
