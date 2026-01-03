@@ -344,9 +344,16 @@ class SR_Ratings {
      * @param int    $media_id Optional attachment ID
      */
     private static function send_admin_notification( $post_id, $user_id, $rating, $comment, $media_id = 0 ) {
+        // Check if notification is enabled
+        if ( class_exists( 'SD_Email_Templates' ) && ! SD_Email_Templates::is_enabled( 'sd_notify_admin_new_rating' ) ) {
+            return;
+        }
+
         $post = get_post( $post_id );
         $user = get_user_by( 'id', $user_id );
-        $admin_email = get_option( 'admin_email' );
+        $admin_email = class_exists( 'SD_Email_Templates' )
+            ? SD_Email_Templates::get_admin_email()
+            : get_option( 'admin_email' );
 
         if ( ! $post || ! $user ) {
             return;
@@ -357,25 +364,41 @@ class SR_Ratings {
             get_bloginfo( 'name' )
         );
 
-        $media_info = '';
-        if ( $media_id ) {
-            $media_url = wp_get_attachment_url( $media_id );
-            $media_type = wp_attachment_is( 'video', $media_id ) ? 'Video' : 'Foto';
-            $media_info = sprintf( "\n%s: %s", $media_type, $media_url );
+        $moderation_url = admin_url( 'edit.php?post_type=hofladen&page=sr-ratings&status=pending' );
+
+        // Use HTML template if available
+        if ( class_exists( 'SD_Email_Templates' ) ) {
+            $html_message = SD_Email_Templates::template_admin_new_rating(
+                $post->post_title,
+                $user->display_name,
+                $rating,
+                $comment ?: '',
+                $moderation_url
+            );
+            $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+            wp_mail( $admin_email, $subject, $html_message, $headers );
+        } else {
+            // Fallback to plain text
+            $media_info = '';
+            if ( $media_id ) {
+                $media_url = wp_get_attachment_url( $media_id );
+                $media_type = wp_attachment_is( 'video', $media_id ) ? 'Video' : 'Foto';
+                $media_info = sprintf( "\n%s: %s", $media_type, $media_url );
+            }
+
+            $message = sprintf(
+                __( "Neue Bewertung für: %s\n\nVon: %s (%s)\nBewertung: %d Sterne\n\nKommentar:\n%s%s\n\nZur Moderation:\n%s", 'spezialist-ratings' ),
+                $post->post_title,
+                $user->display_name,
+                $user->user_email,
+                $rating,
+                $comment ?: '(kein Kommentar)',
+                $media_info,
+                $moderation_url
+            );
+
+            wp_mail( $admin_email, $subject, $message );
         }
-
-        $message = sprintf(
-            __( "Neue Bewertung für: %s\n\nVon: %s (%s)\nBewertung: %d Sterne\n\nKommentar:\n%s%s\n\nZur Moderation:\n%s", 'spezialist-ratings' ),
-            $post->post_title,
-            $user->display_name,
-            $user->user_email,
-            $rating,
-            $comment ?: '(kein Kommentar)',
-            $media_info,
-            admin_url( 'edit.php?post_type=spezialist&page=sr-ratings&status=pending' )
-        );
-
-        wp_mail( $admin_email, $subject, $message );
     }
 
     /**
@@ -394,6 +417,9 @@ class SR_Ratings {
             return false;
         }
 
+        // Get rating data before update for notification
+        $rating = self::get_by_id( $rating_id );
+
         $result = $wpdb->update(
             $table,
             array(
@@ -406,7 +432,85 @@ class SR_Ratings {
             array( '%d' )
         );
 
+        // Send user notification
+        if ( $result !== false && $rating ) {
+            if ( $status === 'approved' ) {
+                self::send_rating_approved_email( $rating );
+            } elseif ( $status === 'rejected' ) {
+                self::send_rating_rejected_email( $rating );
+            }
+        }
+
         return $result !== false;
+    }
+
+    /**
+     * Send rating approved email to user
+     *
+     * @param object $rating Rating object
+     */
+    private static function send_rating_approved_email( $rating ) {
+        // Check if notification is enabled and class exists
+        if ( ! class_exists( 'SD_Email_Templates' ) || ! SD_Email_Templates::is_enabled( 'sd_notify_user_rating_approved' ) ) {
+            return;
+        }
+
+        $user = get_user_by( 'id', $rating->user_id );
+        $post = get_post( $rating->post_id );
+
+        if ( ! $user || ! $post ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( '[%s] Deine Bewertung wurde veröffentlicht!', 'spezialist-ratings' ),
+            get_bloginfo( 'name' )
+        );
+
+        $listing_url = get_permalink( $post->ID );
+        $html_message = SD_Email_Templates::template_rating_approved(
+            $user->display_name,
+            $post->post_title,
+            $rating->rating,
+            $listing_url
+        );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $user->user_email, $subject, $html_message, $headers );
+    }
+
+    /**
+     * Send rating rejected email to user
+     *
+     * @param object $rating Rating object
+     */
+    private static function send_rating_rejected_email( $rating ) {
+        // Check if notification is enabled and class exists
+        if ( ! class_exists( 'SD_Email_Templates' ) || ! SD_Email_Templates::is_enabled( 'sd_notify_user_rating_rejected' ) ) {
+            return;
+        }
+
+        $user = get_user_by( 'id', $rating->user_id );
+        $post = get_post( $rating->post_id );
+
+        if ( ! $user || ! $post ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( '[%s] Deine Bewertung konnte nicht veröffentlicht werden', 'spezialist-ratings' ),
+            get_bloginfo( 'name' )
+        );
+
+        $contact_url = home_url( '/kontakt/' );
+        $html_message = SD_Email_Templates::template_rating_rejected(
+            $user->display_name,
+            $post->post_title,
+            $contact_url
+        );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $user->user_email, $subject, $html_message, $headers );
     }
 
     /**

@@ -197,6 +197,11 @@ class SD_Leads {
      * @param int $listing_id
      */
     private function send_lead_notification( $lead_id, $listing_id ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_lead_to_specialist' ) ) {
+            return;
+        }
+
         $listing = get_post( $listing_id );
         $specialist_email = get_post_meta( $listing_id, '_sd_email', true );
 
@@ -250,6 +255,11 @@ class SD_Leads {
      * @param int $listing_id
      */
     private function send_customer_confirmation( $lead_id, $listing_id ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_lead_confirmation' ) ) {
+            return;
+        }
+
         $listing = get_post( $listing_id );
         $lead_email = get_post_meta( $lead_id, '_sd_lead_email', true );
         $lead_name = get_post_meta( $lead_id, '_sd_lead_name', true );
@@ -263,15 +273,14 @@ class SD_Leads {
             $listing->post_title
         );
 
-        $body = sprintf(
-            __( "Hallo %s,\n\nvielen Dank für Deine Anfrage an %s über %s.\n\nDer Hofladen wurde über Deine Anfrage informiert und wird sich in Kürze bei Dir melden.\n\nMit freundlichen Grüßen,\nDein %s Team", 'spezialist-directory' ),
+        // Use HTML template
+        $html_message = SD_Email_Templates::template_lead_confirmation(
             $lead_name,
-            $listing->post_title,
-            get_bloginfo( 'name' ),
-            get_bloginfo( 'name' )
+            $listing->post_title
         );
 
-        wp_mail( $lead_email, $subject, $body );
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $lead_email, $subject, $html_message, $headers );
     }
 
     /**

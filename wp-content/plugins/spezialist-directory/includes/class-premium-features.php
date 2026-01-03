@@ -264,6 +264,83 @@ class SD_Premium_Features {
             // Notify user
             $this->send_premium_expired_notification( $post->post_id );
         }
+
+        // Check for 7-day reminders
+        $this->check_premium_reminders();
+    }
+
+    /**
+     * Check and send premium reminder emails (7 days before expiry)
+     */
+    private function check_premium_reminders() {
+        global $wpdb;
+
+        // Calculate date 7 days from now
+        $reminder_date_start = date( 'Y-m-d 00:00:00', strtotime( '+7 days' ) );
+        $reminder_date_end = date( 'Y-m-d 23:59:59', strtotime( '+7 days' ) );
+
+        // Find all premium posts expiring in 7 days that haven't received a reminder
+        $expiring_posts = $wpdb->get_results( $wpdb->prepare(
+            "SELECT pm.post_id FROM {$wpdb->postmeta} pm
+            WHERE pm.meta_key = '_sd_premium_until'
+            AND pm.meta_value BETWEEN %s AND %s
+            AND pm.post_id IN (
+                SELECT post_id FROM {$wpdb->postmeta}
+                WHERE meta_key = '_sd_is_premium'
+                AND meta_value = '1'
+            )
+            AND pm.post_id NOT IN (
+                SELECT post_id FROM {$wpdb->postmeta}
+                WHERE meta_key = '_sd_premium_reminder_sent'
+                AND meta_value = '1'
+            )",
+            $reminder_date_start,
+            $reminder_date_end
+        ) );
+
+        foreach ( $expiring_posts as $post ) {
+            $this->send_premium_reminder( $post->post_id, 7 );
+            // Mark as reminded to avoid duplicate emails
+            update_post_meta( $post->post_id, '_sd_premium_reminder_sent', '1' );
+        }
+    }
+
+    /**
+     * Send premium reminder email
+     *
+     * @param int $post_id   Post ID
+     * @param int $days_left Days until expiry
+     */
+    private function send_premium_reminder( $post_id, $days_left ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_premium_reminder' ) ) {
+            return;
+        }
+
+        $post = get_post( $post_id );
+        $author = get_user_by( 'id', $post->post_author );
+
+        if ( ! $author ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( '[%s] Dein Premium-Listing läuft in %d Tagen ab', 'spezialist-directory' ),
+            get_bloginfo( 'name' ),
+            $days_left
+        );
+
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+
+        $html_message = SD_Email_Templates::template_premium_reminder(
+            $author->display_name,
+            $post->post_title,
+            $days_left,
+            $dashboard_url
+        );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $author->user_email, $subject, $html_message, $headers );
     }
 
     /**
@@ -272,6 +349,11 @@ class SD_Premium_Features {
      * @param int $post_id
      */
     private function send_premium_expired_notification( $post_id ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_premium_expired' ) ) {
+            return;
+        }
+
         $post = get_post( $post_id );
         $author = get_user_by( 'id', $post->post_author );
 
@@ -284,15 +366,15 @@ class SD_Premium_Features {
             get_bloginfo( 'name' )
         );
 
-        $message = sprintf(
-            __( "Hallo %s,\n\nDein Premium-Listing für '%s' ist abgelaufen.\n\nUm weiterhin von den Vorteilen eines Premium-Listings zu profitieren, kannst du dein Abo im Dashboard erneuern:\n%s\n\nViele Grüße,\n%s", 'spezialist-directory' ),
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+        $html_message = SD_Email_Templates::template_premium_expired(
             $author->display_name,
             $post->post_title,
-            home_url( '/dashboard/' ),
-            get_bloginfo( 'name' )
+            $dashboard_url
         );
 
-        wp_mail( $author->user_email, $subject, $message );
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $author->user_email, $subject, $html_message, $headers );
     }
 
     /**

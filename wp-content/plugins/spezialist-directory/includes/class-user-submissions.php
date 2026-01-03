@@ -44,6 +44,9 @@ class SD_User_Submissions {
         add_shortcode( 'spezialist_submit', array( $this, 'render_submission_form' ) );
         add_action( 'wp_ajax_sd_submit_spezialist', array( $this, 'handle_submission' ) );
         add_action( 'wp_ajax_nopriv_sd_submit_spezialist', array( $this, 'handle_submission' ) );
+
+        // Hook for listing status changes (for approval/rejection notifications)
+        add_action( 'transition_post_status', array( $this, 'handle_listing_status_change' ), 10, 3 );
     }
 
     /**
@@ -210,6 +213,11 @@ class SD_User_Submissions {
 
         // Send notification to admin
         $this->send_admin_notification( $post_id );
+
+        // Send confirmation to user
+        if ( is_user_logged_in() ) {
+            $this->send_user_submission_confirmation( $post_id, get_current_user_id() );
+        }
 
         // Mark as claimed if user is logged in
         if ( is_user_logged_in() ) {
@@ -491,21 +499,28 @@ class SD_User_Submissions {
      * @param int $post_id
      */
     private function send_admin_notification( $post_id ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_admin_new_listing' ) ) {
+            return;
+        }
+
         $post = get_post( $post_id );
-        $admin_email = get_option( 'admin_email' );
+        $admin_email = SD_Email_Templates::get_admin_email();
 
         $subject = sprintf(
             __( '[%s] Neuer Hofladen-Eintrag eingereicht', 'spezialist-directory' ),
             get_bloginfo( 'name' )
         );
 
-        $message = sprintf(
-            __( "Ein neuer Hofladen-Eintrag wurde eingereicht:\n\nTitel: %s\n\nEintrag überprüfen: %s", 'spezialist-directory' ),
-            $post->post_title,
-            admin_url( 'post.php?post=' . $post_id . '&action=edit' )
-        );
+        // Use HTML template
+        $edit_url = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
+        $author = get_user_by( 'id', $post->post_author );
+        $author_name = $author ? $author->display_name : __( 'Unbekannt', 'spezialist-directory' );
+        $author_email = $author ? $author->user_email : '';
+        $html_message = SD_Email_Templates::template_admin_new_listing( $post->post_title, $author_name, $author_email, $edit_url );
 
-        wp_mail( $admin_email, $subject, $message );
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $admin_email, $subject, $html_message, $headers );
     }
 
     /**
@@ -578,5 +593,135 @@ class SD_User_Submissions {
             'orderby'    => 'name',
             'order'      => 'ASC',
         ) );
+    }
+
+    /**
+     * Send confirmation email to user after submission
+     *
+     * @param int $post_id
+     * @param int $user_id
+     */
+    private function send_user_submission_confirmation( $post_id, $user_id ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_listing_submitted' ) ) {
+            return;
+        }
+
+        $post = get_post( $post_id );
+        $user = get_user_by( 'id', $user_id );
+
+        if ( ! $post || ! $user ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( '[%s] Dein Hofladen-Eintrag wurde eingereicht', 'spezialist-directory' ),
+            get_bloginfo( 'name' )
+        );
+
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+        $html_message = SD_Email_Templates::template_listing_submitted(
+            $user->display_name,
+            $post->post_title,
+            $dashboard_url
+        );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $user->user_email, $subject, $html_message, $headers );
+    }
+
+    /**
+     * Handle listing status changes for approval/rejection notifications
+     *
+     * @param string  $new_status New post status
+     * @param string  $old_status Old post status
+     * @param WP_Post $post       Post object
+     */
+    public function handle_listing_status_change( $new_status, $old_status, $post ) {
+        // Only for hofladen post type
+        if ( $post->post_type !== 'hofladen' ) {
+            return;
+        }
+
+        // Skip if status didn't change
+        if ( $new_status === $old_status ) {
+            return;
+        }
+
+        // Listing approved: pending → publish
+        if ( $old_status === 'pending' && $new_status === 'publish' ) {
+            $this->send_listing_approved_email( $post );
+        }
+
+        // Listing rejected: pending → trash
+        if ( $old_status === 'pending' && $new_status === 'trash' ) {
+            $this->send_listing_rejected_email( $post );
+        }
+    }
+
+    /**
+     * Send listing approved email to user
+     *
+     * @param WP_Post $post
+     */
+    private function send_listing_approved_email( $post ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_listing_approved' ) ) {
+            return;
+        }
+
+        $author = get_user_by( 'id', $post->post_author );
+        if ( ! $author ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( '[%s] Dein Hofladen-Eintrag wurde veröffentlicht!', 'spezialist-directory' ),
+            get_bloginfo( 'name' )
+        );
+
+        $listing_url = get_permalink( $post->ID );
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+        $html_message = SD_Email_Templates::template_listing_approved(
+            $author->display_name,
+            $post->post_title,
+            $listing_url,
+            $dashboard_url
+        );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $author->user_email, $subject, $html_message, $headers );
+    }
+
+    /**
+     * Send listing rejected email to user
+     *
+     * @param WP_Post $post
+     */
+    private function send_listing_rejected_email( $post ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_listing_rejected' ) ) {
+            return;
+        }
+
+        $author = get_user_by( 'id', $post->post_author );
+        if ( ! $author ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( '[%s] Dein Hofladen-Eintrag wurde abgelehnt', 'spezialist-directory' ),
+            get_bloginfo( 'name' )
+        );
+
+        $contact_url = home_url( '/kontakt/' );
+        $html_message = SD_Email_Templates::template_listing_rejected(
+            $author->display_name,
+            $post->post_title,
+            $contact_url
+        );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $author->user_email, $subject, $html_message, $headers );
     }
 }

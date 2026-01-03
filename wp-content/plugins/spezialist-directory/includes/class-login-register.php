@@ -243,6 +243,9 @@ class SD_Login_Register {
             'display_name' => $firstname . ' ' . $lastname,
         ) );
 
+        // Send welcome email
+        $this->send_welcome_email( $user_id, $firstname . ' ' . $lastname );
+
         // Determine redirect URL
         $redirect_to = isset( $_POST['redirect_to'] ) ? esc_url_raw( $_POST['redirect_to'] ) : '';
 
@@ -300,21 +303,24 @@ class SD_Login_Register {
 
         // Always return success message for security (don't reveal if email exists)
         if ( $user ) {
-            // Generate password reset link
-            $reset_key = get_password_reset_key( $user );
+            // Check if notification is enabled
+            if ( SD_Email_Templates::is_enabled( 'sd_notify_user_password_reset' ) ) {
+                // Generate password reset link
+                $reset_key = get_password_reset_key( $user );
 
-            if ( ! is_wp_error( $reset_key ) ) {
-                $reset_link = network_site_url( "wp-login.php?action=rp&key=$reset_key&login=" . rawurlencode( $user->user_login ), 'login' );
+                if ( ! is_wp_error( $reset_key ) ) {
+                    $reset_link = network_site_url( "wp-login.php?action=rp&key=$reset_key&login=" . rawurlencode( $user->user_login ), 'login' );
 
-                // Send email
-                $subject = sprintf( __( '[%s] Passwort zurücksetzen', 'spezialist-directory' ), get_bloginfo( 'name' ) );
-                $message = sprintf(
-                    __( "Hallo %s,\n\nJemand hat das Zurücksetzen des Passworts für dein Konto angefordert.\n\nWenn du diese Anfrage gestellt hast, klicke auf den folgenden Link:\n%s\n\nWenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.\n\nDiesen Link kannst du nur einmal verwenden und er ist 24 Stunden lang gültig.", 'spezialist-directory' ),
-                    $user->display_name,
-                    $reset_link
-                );
+                    // Send HTML email
+                    $subject = sprintf( __( '[%s] Passwort zurücksetzen', 'spezialist-directory' ), get_bloginfo( 'name' ) );
+                    $html_message = SD_Email_Templates::template_password_reset(
+                        $user->display_name,
+                        $reset_link
+                    );
 
-                wp_mail( $email, $subject, $message );
+                    $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+                    wp_mail( $email, $subject, $html_message, $headers );
+                }
             }
         }
 
@@ -651,5 +657,34 @@ class SD_Login_Register {
             $register_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), home_url( '/anmelden/' ) ) . '#register';
         }
         return $register_url;
+    }
+
+    /**
+     * Send welcome email to new user
+     *
+     * @param int    $user_id   User ID
+     * @param string $user_name User display name
+     */
+    private function send_welcome_email( $user_id, $user_name ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_welcome' ) ) {
+            return;
+        }
+
+        $user = get_user_by( 'id', $user_id );
+        if ( ! $user ) {
+            return;
+        }
+
+        $subject = sprintf(
+            __( 'Willkommen bei %s!', 'spezialist-directory' ),
+            get_bloginfo( 'name' )
+        );
+
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+        $html_message = SD_Email_Templates::template_welcome( $user_name, $dashboard_url );
+
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $user->user_email, $subject, $html_message, $headers );
     }
 }

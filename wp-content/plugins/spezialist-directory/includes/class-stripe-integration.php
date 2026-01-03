@@ -936,14 +936,21 @@ class SD_Stripe_Integration {
      * @param WP_Post $post
      */
     private function send_subscription_ended_email( $user, $post ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_subscription_ended' ) ) {
+            return;
+        }
+
         $subject = __( 'Dein Premium-Abonnement ist beendet', 'spezialist-directory' );
-        $message = sprintf(
-            __( "Hallo %s,\n\nDein Premium-Abonnement für den Eintrag \"%s\" ist nun beendet.\n\nDu kannst jederzeit ein neues Premium-Abonnement abschließen, um wieder von allen Vorteilen zu profitieren.\n\nMit freundlichen Grüßen,\nDein Spezialist-Für.de Team", 'spezialist-directory' ),
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+        $html_message = SD_Email_Templates::template_subscription_ended(
             $user->display_name,
-            $post->post_title
+            $post->post_title,
+            $dashboard_url
         );
 
-        wp_mail( $user->user_email, $subject, $message );
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $user->user_email, $subject, $html_message, $headers );
     }
 
     /**
@@ -954,13 +961,20 @@ class SD_Stripe_Integration {
      * @param object $invoice
      */
     private function send_payment_failed_email( $user, $post, $invoice ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_payment_failed' ) ) {
+            return;
+        }
+
         $subject = __( 'Zahlung fehlgeschlagen - Aktion erforderlich', 'spezialist-directory' );
-        $message = sprintf(
-            __( "Hallo %s,\n\nLeider konnte die Zahlung für dein Premium-Abonnement (\"%s\") nicht verarbeitet werden.\n\nBitte aktualisiere deine Zahlungsinformationen, um dein Premium-Abonnement aufrechtzuerhalten.\n\nDu kannst deine Zahlungsmethode in deinem Dashboard unter 'Premium' → 'Abrechnung verwalten' aktualisieren.\n\nMit freundlichen Grüßen,\nDein Spezialist-Für.de Team", 'spezialist-directory' ),
+        $dashboard_url = sd_get_page_url( 'mein-dashboard/' );
+        $html_message = SD_Email_Templates::template_payment_failed(
             $user->display_name,
-            $post->post_title
+            $post->post_title,
+            $dashboard_url
         );
 
-        wp_mail( $user->user_email, $subject, $message );
+        $headers = array( 'Content-Type: text/html; charset=UTF-8' );
+        wp_mail( $user->user_email, $subject, $html_message, $headers );
     }
 }

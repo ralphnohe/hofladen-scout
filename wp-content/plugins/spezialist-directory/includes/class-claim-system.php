@@ -223,9 +223,14 @@ class SD_Claim_System {
      * @param string $message
      */
     private function send_claim_notification( $post_id, $user_id, $message ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_admin_new_claim' ) ) {
+            return;
+        }
+
         $post = get_post( $post_id );
         $user = get_user_by( 'id', $user_id );
-        $admin_email = get_option( 'admin_email' );
+        $admin_email = SD_Email_Templates::get_admin_email();
 
         if ( ! $post || ! $user ) {
             return;
@@ -402,6 +407,14 @@ class SD_Claim_System {
             }
         }
 
+        // Handle notification settings save
+        if ( isset( $_POST['sd_save_notifications'] ) && isset( $_POST['_wpnonce'] ) ) {
+            if ( wp_verify_nonce( $_POST['_wpnonce'], 'sd_save_notifications' ) ) {
+                $this->save_notification_settings();
+                add_settings_error( 'sd_claims', 'notifications_saved', __( 'Benachrichtigungs-Einstellungen gespeichert.', 'spezialist-directory' ), 'success' );
+            }
+        }
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'sd_claims';
 
@@ -506,6 +519,10 @@ class SD_Claim_System {
                     <?php if ( $pending_listings_count > 0 ) : ?>
                         <span class="sd-badge sd-badge-warning"><?php echo esc_html( $pending_listings_count ); ?></span>
                     <?php endif; ?>
+                </a>
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=notifications' ) ); ?>"
+                   class="nav-tab <?php echo $current_tab === 'notifications' ? 'nav-tab-active' : ''; ?>">
+                    <?php _e( 'E-Mail Benachrichtigungen', 'spezialist-directory' ); ?>
                 </a>
             </nav>
 
@@ -808,6 +825,301 @@ class SD_Claim_System {
                             <?php endif; ?>
                         </tbody>
                     </table>
+
+                <?php elseif ( $current_tab === 'notifications' ) : ?>
+                    <!-- Notifications Tab -->
+                    <?php settings_errors( 'sd_claims' ); ?>
+                    <form method="post" action="">
+                        <?php wp_nonce_field( 'sd_save_notifications' ); ?>
+                        <input type="hidden" name="sd_save_notifications" value="1">
+
+                        <div class="sd-notifications-grid">
+                            <!-- Admin Notifications -->
+                            <div class="sd-notification-section">
+                                <h3 class="sd-section-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" fill="#2563EB"/></svg>
+                                    <?php _e( 'Admin-Benachrichtigungen', 'spezialist-directory' ); ?>
+                                </h3>
+                                <p class="sd-section-description"><?php _e( 'E-Mails an den Administrator bei wichtigen Ereignissen.', 'spezialist-directory' ); ?></p>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_admin_new_claim" value="1" <?php checked( get_option( 'sd_notify_admin_new_claim', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Neue Claim-Anfrage', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn ein Nutzer einen Eintrag beansprucht', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_admin_new_listing" value="1" <?php checked( get_option( 'sd_notify_admin_new_listing', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Neuer Hofladen-Eintrag', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn ein neuer Eintrag eingereicht wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_admin_new_rating" value="1" <?php checked( get_option( 'sd_notify_admin_new_rating', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Neue Bewertung zur Moderation', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn eine neue Bewertung eingereicht wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item sd-admin-email-setting">
+                                    <label for="sd_notification_admin_email"><?php _e( 'Alternative Admin-Email:', 'spezialist-directory' ); ?></label>
+                                    <input type="email" name="sd_notification_admin_email" id="sd_notification_admin_email"
+                                           value="<?php echo esc_attr( get_option( 'sd_notification_admin_email', '' ) ); ?>"
+                                           placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>"
+                                           class="regular-text">
+                                    <span class="description"><?php _e( 'Leer lassen, um die Standard-Admin-Email zu verwenden', 'spezialist-directory' ); ?></span>
+                                </div>
+                            </div>
+
+                            <!-- Claim Notifications -->
+                            <div class="sd-notification-section">
+                                <h3 class="sd-section-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#059669"/></svg>
+                                    <?php _e( 'Benutzer-Benachrichtigungen (Claim)', 'spezialist-directory' ); ?>
+                                </h3>
+                                <p class="sd-section-description"><?php _e( 'E-Mails an Benutzer bezüglich Claim-Anfragen.', 'spezialist-directory' ); ?></p>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_claim_approved" value="1" <?php checked( get_option( 'sd_notify_user_claim_approved', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Claim genehmigt', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn ein Claim genehmigt wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_claim_rejected" value="1" <?php checked( get_option( 'sd_notify_user_claim_rejected', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Claim abgelehnt', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn ein Claim abgelehnt wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_claim_reverted" value="1" <?php checked( get_option( 'sd_notify_user_claim_reverted', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Claim widerrufen', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn ein genehmigter Claim widerrufen wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Listing Notifications -->
+                            <div class="sd-notification-section">
+                                <h3 class="sd-section-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="#6366f1"/></svg>
+                                    <?php _e( 'Benutzer-Benachrichtigungen (Einträge)', 'spezialist-directory' ); ?>
+                                </h3>
+                                <p class="sd-section-description"><?php _e( 'E-Mails an Benutzer bezüglich ihrer Einträge.', 'spezialist-directory' ); ?></p>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_welcome" value="1" <?php checked( get_option( 'sd_notify_user_welcome', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Welcome-Email', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Willkommens-Email bei Registrierung', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_listing_submitted" value="1" <?php checked( get_option( 'sd_notify_user_listing_submitted', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Eintrag eingereicht', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Bestätigung wenn ein Eintrag eingereicht wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_listing_approved" value="1" <?php checked( get_option( 'sd_notify_user_listing_approved', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Eintrag genehmigt', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Benachrichtigung wenn ein Eintrag freigeschaltet wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_listing_rejected" value="1" <?php checked( get_option( 'sd_notify_user_listing_rejected', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Eintrag abgelehnt', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Benachrichtigung wenn ein Eintrag nicht freigeschaltet wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_password_reset" value="1" <?php checked( get_option( 'sd_notify_user_password_reset', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Passwort zurücksetzen', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Email zum Zurücksetzen des Passworts', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rating Notifications -->
+                            <div class="sd-notification-section">
+                                <h3 class="sd-section-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#f59e0b"/></svg>
+                                    <?php _e( 'Benutzer-Benachrichtigungen (Bewertungen)', 'spezialist-directory' ); ?>
+                                </h3>
+                                <p class="sd-section-description"><?php _e( 'E-Mails an Benutzer bezüglich ihrer Bewertungen.', 'spezialist-directory' ); ?></p>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_rating_approved" value="1" <?php checked( get_option( 'sd_notify_user_rating_approved', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Bewertung veröffentlicht', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Benachrichtigung wenn eine Bewertung veröffentlicht wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_rating_rejected" value="1" <?php checked( get_option( 'sd_notify_user_rating_rejected', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Bewertung abgelehnt', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Benachrichtigung wenn eine Bewertung nicht veröffentlicht wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Premium Notifications -->
+                            <div class="sd-notification-section">
+                                <h3 class="sd-section-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#8b5cf6"/></svg>
+                                    <?php _e( 'Benutzer-Benachrichtigungen (Premium)', 'spezialist-directory' ); ?>
+                                </h3>
+                                <p class="sd-section-description"><?php _e( 'E-Mails bezüglich Premium-Abonnements und Zahlungen.', 'spezialist-directory' ); ?></p>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_premium_reminder" value="1" <?php checked( get_option( 'sd_notify_user_premium_reminder', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Premium-Ablauf-Erinnerung', 'spezialist-directory' ); ?></strong>
+                                        <span class="sd-badge-new"><?php _e( 'NEU', 'spezialist-directory' ); ?></span>
+                                        <span><?php _e( 'Erinnerung 7 Tage vor Premium-Ablauf', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_premium_expired" value="1" <?php checked( get_option( 'sd_notify_user_premium_expired', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Premium abgelaufen', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn Premium-Status abläuft', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_payment_failed" value="1" <?php checked( get_option( 'sd_notify_user_payment_failed', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Zahlung fehlgeschlagen', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung bei fehlgeschlagener Zahlung', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_user_subscription_ended" value="1" <?php checked( get_option( 'sd_notify_user_subscription_ended', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Abonnement beendet', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung wenn Abo gekündigt wird', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lead Notifications -->
+                            <div class="sd-notification-section">
+                                <h3 class="sd-section-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#10b981"/></svg>
+                                    <?php _e( 'Lead-Benachrichtigungen', 'spezialist-directory' ); ?>
+                                </h3>
+                                <p class="sd-section-description"><?php _e( 'E-Mails bezüglich Kundenanfragen an Hofläden.', 'spezialist-directory' ); ?></p>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_lead_to_specialist" value="1" <?php checked( get_option( 'sd_notify_lead_to_specialist', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Lead an Hofladen-Betreiber', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Benachrichtigung an Hofladen bei neuer Kundenanfrage', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="sd-notification-item">
+                                    <label class="sd-toggle">
+                                        <input type="checkbox" name="sd_notify_lead_confirmation" value="1" <?php checked( get_option( 'sd_notify_lead_confirmation', true ) ); ?>>
+                                        <span class="sd-toggle-slider"></span>
+                                    </label>
+                                    <div class="sd-notification-info">
+                                        <strong><?php _e( 'Lead-Bestätigung an Kunde', 'spezialist-directory' ); ?></strong>
+                                        <span><?php _e( 'Bestätigung an Kunde dass Anfrage gesendet wurde', 'spezialist-directory' ); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sd-notification-actions">
+                            <button type="submit" class="button button-primary button-large">
+                                <?php _e( 'Einstellungen speichern', 'spezialist-directory' ); ?>
+                            </button>
+                        </div>
+                    </form>
                 <?php endif; ?>
             </div>
         </div>
@@ -959,6 +1271,37 @@ class SD_Claim_System {
             .sd-form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
             .sd-form-group textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; }
             .sd-modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 20px; border-top: 1px solid #e5e7eb; background: #f9fafb; border-radius: 0 0 8px 8px; }
+
+            /* Notification Settings Styles */
+            .sd-notifications-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; }
+            .sd-notification-section { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+            .sd-section-title { display: flex; align-items: center; gap: 10px; margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; }
+            .sd-section-title svg { flex-shrink: 0; }
+            .sd-section-description { margin: 0 0 16px 0; font-size: 13px; color: #6b7280; }
+            .sd-notification-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+            .sd-notification-item:last-child { border-bottom: none; padding-bottom: 0; }
+            .sd-notification-info { flex: 1; }
+            .sd-notification-info strong { display: block; margin-bottom: 2px; color: #1f2937; font-size: 14px; }
+            .sd-notification-info > span { display: block; font-size: 12px; color: #6b7280; }
+            .sd-badge-new { display: inline-block; padding: 2px 6px; background: #dbeafe; color: #1d4ed8; font-size: 10px; font-weight: 600; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+
+            /* Toggle Switch */
+            .sd-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; margin-top: 2px; }
+            .sd-toggle input { opacity: 0; width: 0; height: 0; }
+            .sd-toggle-slider { position: absolute; cursor: pointer; inset: 0; background-color: #d1d5db; transition: .3s; border-radius: 24px; }
+            .sd-toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+            .sd-toggle input:checked + .sd-toggle-slider { background-color: #2563EB; }
+            .sd-toggle input:checked + .sd-toggle-slider:before { transform: translateX(20px); }
+            .sd-toggle input:focus + .sd-toggle-slider { box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+
+            /* Admin Email Setting */
+            .sd-admin-email-setting { display: block; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+            .sd-admin-email-setting label { display: block; margin-bottom: 8px; font-weight: 500; color: #1f2937; }
+            .sd-admin-email-setting input { margin-bottom: 4px; }
+            .sd-admin-email-setting .description { font-size: 12px; color: #6b7280; }
+
+            /* Save Button */
+            .sd-notification-actions { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
         </style>
 
         <script>
@@ -1130,6 +1473,11 @@ class SD_Claim_System {
      * @param string $revert_reason
      */
     private function send_claim_reverted_notification( $claim, $revert_reason = '' ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_claim_reverted' ) ) {
+            return;
+        }
+
         $post = get_post( $claim->post_id );
         $user = get_user_by( 'id', $claim->user_id );
 
@@ -1167,6 +1515,11 @@ class SD_Claim_System {
      * @param object $claim
      */
     private function send_claim_approved_notification( $claim ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_claim_approved' ) ) {
+            return;
+        }
+
         $post = get_post( $claim->post_id );
         $user = get_user_by( 'id', $claim->user_id );
 
@@ -1206,6 +1559,11 @@ class SD_Claim_System {
      * @param string $rejection_reason
      */
     private function send_claim_rejected_notification( $claim, $rejection_reason = '' ) {
+        // Check if notification is enabled
+        if ( ! SD_Email_Templates::is_enabled( 'sd_notify_user_claim_rejected' ) ) {
+            return;
+        }
+
         $post = get_post( $claim->post_id );
         $user = get_user_by( 'id', $claim->user_id );
 
@@ -1438,5 +1796,48 @@ class SD_Claim_System {
                 echo '<span style="color: #6b7280;">—</span>';
             }
         }
+    }
+
+    /**
+     * Save notification settings
+     */
+    private function save_notification_settings() {
+        // Notification toggle options - all default to true
+        $notification_options = array(
+            // Admin notifications
+            'sd_notify_admin_new_claim',
+            'sd_notify_admin_new_listing',
+            'sd_notify_admin_new_rating',
+            // User claim notifications
+            'sd_notify_user_claim_approved',
+            'sd_notify_user_claim_rejected',
+            'sd_notify_user_claim_reverted',
+            // User listing notifications
+            'sd_notify_user_welcome',
+            'sd_notify_user_listing_submitted',
+            'sd_notify_user_listing_approved',
+            'sd_notify_user_listing_rejected',
+            'sd_notify_user_password_reset',
+            // User rating notifications
+            'sd_notify_user_rating_approved',
+            'sd_notify_user_rating_rejected',
+            // Premium notifications
+            'sd_notify_user_premium_reminder',
+            'sd_notify_user_premium_expired',
+            'sd_notify_user_payment_failed',
+            'sd_notify_user_subscription_ended',
+            // Lead notifications
+            'sd_notify_lead_to_specialist',
+            'sd_notify_lead_confirmation',
+        );
+
+        foreach ( $notification_options as $option ) {
+            $value = isset( $_POST[ $option ] ) ? true : false;
+            update_option( $option, $value );
+        }
+
+        // Alternative admin email
+        $admin_email = isset( $_POST['sd_notification_admin_email'] ) ? sanitize_email( $_POST['sd_notification_admin_email'] ) : '';
+        update_option( 'sd_notification_admin_email', $admin_email );
     }
 }

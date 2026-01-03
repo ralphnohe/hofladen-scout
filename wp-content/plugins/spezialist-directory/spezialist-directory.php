@@ -96,6 +96,7 @@ final class Spezialist_Directory {
         }
 
         // Core classes
+        require_once SD_PLUGIN_DIR . 'includes/class-email-templates.php';
         require_once SD_PLUGIN_DIR . 'includes/class-cpt-spezialist.php';
         require_once SD_PLUGIN_DIR . 'includes/class-taxonomies.php';
         require_once SD_PLUGIN_DIR . 'includes/class-meta-boxes.php';
