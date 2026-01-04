@@ -1013,4 +1013,386 @@ class SD_Stripe_Integration {
         $headers = array( 'Content-Type: text/html; charset=UTF-8' );
         wp_mail( $user->user_email, $subject, $html_message, $headers );
     }
+
+    /**
+     * ========================================================================
+     * ADMIN METHODS - For Subscriptions Tab in Admin Dashboard
+     * ========================================================================
+     */
+
+    /**
+     * Get all subscriptions from Stripe for admin display
+     *
+     * @param int $limit Maximum number of subscriptions to fetch
+     * @return array Array with 'subscriptions' and 'error' keys
+     */
+    public function get_admin_subscriptions( $limit = 50 ) {
+        $result = array(
+            'subscriptions' => array(),
+            'error'         => null,
+        );
+
+        try {
+            \Stripe\Stripe::setApiKey( $this->get_secret_key() );
+
+            // Fetch all subscriptions with expanded data
+            $subscriptions = \Stripe\Subscription::all( array(
+                'limit'  => $limit,
+                'expand' => array( 'data.customer', 'data.latest_invoice' ),
+            ) );
+
+            foreach ( $subscriptions->data as $subscription ) {
+                // Get WordPress post and user for this subscription
+                $post_id = isset( $subscription->metadata->post_id ) ? intval( $subscription->metadata->post_id ) : 0;
+                $user_id = isset( $subscription->metadata->user_id ) ? intval( $subscription->metadata->user_id ) : 0;
+
+                // If no post_id in metadata, try to find by subscription ID in post meta
+                if ( ! $post_id ) {
+                    $posts = get_posts( array(
+                        'post_type'      => 'hofladen',
+                        'meta_key'       => '_sd_stripe_subscription_id',
+                        'meta_value'     => $subscription->id,
+                        'posts_per_page' => 1,
+                    ) );
+                    if ( ! empty( $posts ) ) {
+                        $post_id = $posts[0]->ID;
+                        $user_id = $posts[0]->post_author;
+                    }
+                }
+
+                $post = $post_id ? get_post( $post_id ) : null;
+                $user = $user_id ? get_user_by( 'id', $user_id ) : null;
+
+                // Get customer info from Stripe
+                $customer_email = '';
+                $customer_name = '';
+                if ( isset( $subscription->customer ) && is_object( $subscription->customer ) ) {
+                    $customer_email = $subscription->customer->email ?? '';
+                    $customer_name = $subscription->customer->name ?? '';
+                }
+
+                // Determine plan type and amount
+                $plan_type = $this->get_plan_type_from_subscription( $subscription );
+                $amount = 0;
+                $currency = 'eur';
+                if ( isset( $subscription->items->data[0]->price ) ) {
+                    $amount = $subscription->items->data[0]->price->unit_amount / 100;
+                    $currency = $subscription->items->data[0]->price->currency;
+                }
+
+                $result['subscriptions'][] = array(
+                    'id'                     => $subscription->id,
+                    'status'                 => $subscription->status,
+                    'plan_type'              => $plan_type,
+                    'amount'                 => $amount,
+                    'currency'               => strtoupper( $currency ),
+                    'current_period_end'     => $subscription->current_period_end,
+                    'cancel_at_period_end'   => $subscription->cancel_at_period_end,
+                    'created'                => $subscription->created,
+                    'post_id'                => $post_id,
+                    'post_title'             => $post ? $post->post_title : __( 'Unbekannt', 'spezialist-directory' ),
+                    'user_id'                => $user_id,
+                    'user_name'              => $user ? $user->display_name : $customer_name,
+                    'user_email'             => $user ? $user->user_email : $customer_email,
+                    'customer_id'            => is_string( $subscription->customer ) ? $subscription->customer : $subscription->customer->id,
+                );
+            }
+
+        } catch ( \Stripe\Exception\ApiErrorException $e ) {
+            error_log( 'SD Stripe Admin: API Error - ' . $e->getMessage() );
+            $result['error'] = $e->getMessage();
+        } catch ( \Exception $e ) {
+            error_log( 'SD Stripe Admin: Error - ' . $e->getMessage() );
+            $result['error'] = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get all invoices from Stripe for admin display
+     *
+     * @param int $limit Maximum number of invoices to fetch
+     * @return array Array with 'invoices' and 'error' keys
+     */
+    public function get_admin_invoices( $limit = 50 ) {
+        $result = array(
+            'invoices' => array(),
+            'error'    => null,
+        );
+
+        try {
+            \Stripe\Stripe::setApiKey( $this->get_secret_key() );
+
+            // Fetch all invoices with expanded data
+            $invoices = \Stripe\Invoice::all( array(
+                'limit'  => $limit,
+                'expand' => array( 'data.customer', 'data.subscription' ),
+            ) );
+
+            foreach ( $invoices->data as $invoice ) {
+                // Get WordPress post and user for this invoice
+                $post_id = 0;
+                $user_id = 0;
+
+                // Try to get from subscription metadata
+                if ( isset( $invoice->subscription ) && is_object( $invoice->subscription ) ) {
+                    $post_id = isset( $invoice->subscription->metadata->post_id ) ? intval( $invoice->subscription->metadata->post_id ) : 0;
+                    $user_id = isset( $invoice->subscription->metadata->user_id ) ? intval( $invoice->subscription->metadata->user_id ) : 0;
+                }
+
+                // If still no post_id, try to find by subscription ID in post meta
+                if ( ! $post_id && ! empty( $invoice->subscription ) ) {
+                    $sub_id = is_object( $invoice->subscription ) ? $invoice->subscription->id : $invoice->subscription;
+                    $posts = get_posts( array(
+                        'post_type'      => 'hofladen',
+                        'meta_key'       => '_sd_stripe_subscription_id',
+                        'meta_value'     => $sub_id,
+                        'posts_per_page' => 1,
+                    ) );
+                    if ( ! empty( $posts ) ) {
+                        $post_id = $posts[0]->ID;
+                        $user_id = $posts[0]->post_author;
+                    }
+                }
+
+                $post = $post_id ? get_post( $post_id ) : null;
+                $user = $user_id ? get_user_by( 'id', $user_id ) : null;
+
+                // Get customer info from Stripe
+                $customer_email = '';
+                $customer_name = '';
+                if ( isset( $invoice->customer ) && is_object( $invoice->customer ) ) {
+                    $customer_email = $invoice->customer->email ?? '';
+                    $customer_name = $invoice->customer->name ?? '';
+                }
+
+                $result['invoices'][] = array(
+                    'id'              => $invoice->id,
+                    'number'          => $invoice->number,
+                    'status'          => $invoice->status,
+                    'amount_total'    => $invoice->amount_paid / 100,
+                    'amount_due'      => $invoice->amount_due / 100,
+                    'currency'        => strtoupper( $invoice->currency ),
+                    'created'         => $invoice->created,
+                    'period_start'    => $invoice->period_start,
+                    'period_end'      => $invoice->period_end,
+                    'invoice_pdf'     => $invoice->invoice_pdf,
+                    'hosted_invoice'  => $invoice->hosted_invoice_url,
+                    'post_id'         => $post_id,
+                    'post_title'      => $post ? $post->post_title : __( 'Unbekannt', 'spezialist-directory' ),
+                    'user_id'         => $user_id,
+                    'user_name'       => $user ? $user->display_name : $customer_name,
+                    'user_email'      => $user ? $user->user_email : $customer_email,
+                    'subscription_id' => is_object( $invoice->subscription ) ? $invoice->subscription->id : $invoice->subscription,
+                );
+            }
+
+        } catch ( \Stripe\Exception\ApiErrorException $e ) {
+            error_log( 'SD Stripe Admin: Invoices API Error - ' . $e->getMessage() );
+            $result['error'] = $e->getMessage();
+        } catch ( \Exception $e ) {
+            error_log( 'SD Stripe Admin: Invoices Error - ' . $e->getMessage() );
+            $result['error'] = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get failed/open invoices from Stripe for admin display
+     *
+     * @param int $limit Maximum number of invoices to fetch
+     * @return array Array with 'failed_payments' and 'error' keys
+     */
+    public function get_failed_payments( $limit = 20 ) {
+        $result = array(
+            'failed_payments' => array(),
+            'error'           => null,
+        );
+
+        try {
+            \Stripe\Stripe::setApiKey( $this->get_secret_key() );
+
+            // Fetch open (unpaid) invoices
+            $open_invoices = \Stripe\Invoice::all( array(
+                'status' => 'open',
+                'limit'  => $limit,
+                'expand' => array( 'data.customer', 'data.subscription', 'data.charge' ),
+            ) );
+
+            // Also fetch uncollectible invoices
+            $uncollectible_invoices = \Stripe\Invoice::all( array(
+                'status' => 'uncollectible',
+                'limit'  => $limit,
+                'expand' => array( 'data.customer', 'data.subscription', 'data.charge' ),
+            ) );
+
+            // Combine both
+            $all_failed = array_merge( $open_invoices->data, $uncollectible_invoices->data );
+
+            foreach ( $all_failed as $invoice ) {
+                // Get WordPress post and user
+                $post_id = 0;
+                $user_id = 0;
+
+                if ( isset( $invoice->subscription ) && is_object( $invoice->subscription ) ) {
+                    $post_id = isset( $invoice->subscription->metadata->post_id ) ? intval( $invoice->subscription->metadata->post_id ) : 0;
+                    $user_id = isset( $invoice->subscription->metadata->user_id ) ? intval( $invoice->subscription->metadata->user_id ) : 0;
+                }
+
+                if ( ! $post_id && ! empty( $invoice->subscription ) ) {
+                    $sub_id = is_object( $invoice->subscription ) ? $invoice->subscription->id : $invoice->subscription;
+                    $posts = get_posts( array(
+                        'post_type'      => 'hofladen',
+                        'meta_key'       => '_sd_stripe_subscription_id',
+                        'meta_value'     => $sub_id,
+                        'posts_per_page' => 1,
+                    ) );
+                    if ( ! empty( $posts ) ) {
+                        $post_id = $posts[0]->ID;
+                        $user_id = $posts[0]->post_author;
+                    }
+                }
+
+                $post = $post_id ? get_post( $post_id ) : null;
+                $user = $user_id ? get_user_by( 'id', $user_id ) : null;
+
+                // Get customer info
+                $customer_email = '';
+                $customer_name = '';
+                if ( isset( $invoice->customer ) && is_object( $invoice->customer ) ) {
+                    $customer_email = $invoice->customer->email ?? '';
+                    $customer_name = $invoice->customer->name ?? '';
+                }
+
+                // Get failure reason from charge if available
+                $failure_message = '';
+                $attempt_count = $invoice->attempt_count ?? 0;
+                if ( isset( $invoice->charge ) && is_object( $invoice->charge ) ) {
+                    $failure_message = $invoice->charge->failure_message ?? '';
+                }
+
+                $result['failed_payments'][] = array(
+                    'id'              => $invoice->id,
+                    'number'          => $invoice->number,
+                    'status'          => $invoice->status,
+                    'amount_due'      => $invoice->amount_due / 100,
+                    'currency'        => strtoupper( $invoice->currency ),
+                    'created'         => $invoice->created,
+                    'attempt_count'   => $attempt_count,
+                    'failure_message' => $failure_message,
+                    'next_attempt'    => $invoice->next_payment_attempt,
+                    'post_id'         => $post_id,
+                    'post_title'      => $post ? $post->post_title : __( 'Unbekannt', 'spezialist-directory' ),
+                    'user_id'         => $user_id,
+                    'user_name'       => $user ? $user->display_name : $customer_name,
+                    'user_email'      => $user ? $user->user_email : $customer_email,
+                    'subscription_id' => is_object( $invoice->subscription ) ? $invoice->subscription->id : $invoice->subscription,
+                    'hosted_invoice'  => $invoice->hosted_invoice_url,
+                );
+            }
+
+        } catch ( \Stripe\Exception\ApiErrorException $e ) {
+            error_log( 'SD Stripe Admin: Failed Payments API Error - ' . $e->getMessage() );
+            $result['error'] = $e->getMessage();
+        } catch ( \Exception $e ) {
+            error_log( 'SD Stripe Admin: Failed Payments Error - ' . $e->getMessage() );
+            $result['error'] = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get Stripe dashboard URL for a subscription
+     *
+     * @param string $subscription_id
+     * @return string
+     */
+    public function get_stripe_dashboard_url( $subscription_id ) {
+        $test_mode = Spezialist_Directory::get_option( 'stripe_test_mode', true );
+        $base_url = $test_mode
+            ? 'https://dashboard.stripe.com/test/subscriptions/'
+            : 'https://dashboard.stripe.com/subscriptions/';
+        return $base_url . $subscription_id;
+    }
+
+    /**
+     * Get Stripe dashboard URL for an invoice
+     *
+     * @param string $invoice_id
+     * @return string
+     */
+    public function get_stripe_invoice_url( $invoice_id ) {
+        $test_mode = Spezialist_Directory::get_option( 'stripe_test_mode', true );
+        $base_url = $test_mode
+            ? 'https://dashboard.stripe.com/test/invoices/'
+            : 'https://dashboard.stripe.com/invoices/';
+        return $base_url . $invoice_id;
+    }
+
+    /**
+     * Get Stripe dashboard URL for a customer
+     *
+     * @param string $customer_id
+     * @return string
+     */
+    public function get_stripe_customer_url( $customer_id ) {
+        $test_mode = Spezialist_Directory::get_option( 'stripe_test_mode', true );
+        $base_url = $test_mode
+            ? 'https://dashboard.stripe.com/test/customers/'
+            : 'https://dashboard.stripe.com/customers/';
+        return $base_url . $customer_id;
+    }
+
+    /**
+     * Translate Stripe status to German
+     *
+     * @param string $status
+     * @return string
+     */
+    public static function translate_status( $status ) {
+        $translations = array(
+            'active'        => __( 'Aktiv', 'spezialist-directory' ),
+            'canceled'      => __( 'Gekündigt', 'spezialist-directory' ),
+            'past_due'      => __( 'Zahlungsverzug', 'spezialist-directory' ),
+            'unpaid'        => __( 'Unbezahlt', 'spezialist-directory' ),
+            'trialing'      => __( 'Testphase', 'spezialist-directory' ),
+            'incomplete'    => __( 'Unvollständig', 'spezialist-directory' ),
+            'paused'        => __( 'Pausiert', 'spezialist-directory' ),
+            'paid'          => __( 'Bezahlt', 'spezialist-directory' ),
+            'open'          => __( 'Offen', 'spezialist-directory' ),
+            'void'          => __( 'Storniert', 'spezialist-directory' ),
+            'uncollectible' => __( 'Uneinbringlich', 'spezialist-directory' ),
+            'draft'         => __( 'Entwurf', 'spezialist-directory' ),
+        );
+
+        return isset( $translations[ $status ] ) ? $translations[ $status ] : $status;
+    }
+
+    /**
+     * Get status color class
+     *
+     * @param string $status
+     * @return string CSS color value
+     */
+    public static function get_status_color( $status ) {
+        $colors = array(
+            'active'        => '#059669', // green
+            'trialing'      => '#3b82f6', // blue
+            'paid'          => '#059669', // green
+            'past_due'      => '#f59e0b', // orange
+            'unpaid'        => '#ef4444', // red
+            'canceled'      => '#6b7280', // gray
+            'incomplete'    => '#f59e0b', // orange
+            'paused'        => '#6b7280', // gray
+            'open'          => '#f59e0b', // orange
+            'void'          => '#6b7280', // gray
+            'uncollectible' => '#ef4444', // red
+            'draft'         => '#9ca3af', // light gray
+        );
+
+        return isset( $colors[ $status ] ) ? $colors[ $status ] : '#6b7280';
+    }
 }

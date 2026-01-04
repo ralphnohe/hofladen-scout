@@ -46,6 +46,9 @@ class SD_Claim_System {
         add_action( 'admin_menu', array( $this, 'add_claims_menu' ) );
         add_filter( 'manage_hofladen_posts_columns', array( $this, 'add_claim_column' ) );
         add_action( 'manage_hofladen_posts_custom_column', array( $this, 'render_claim_column' ), 10, 2 );
+        // Premium column sortable
+        add_filter( 'manage_edit-hofladen_sortable_columns', array( $this, 'make_premium_column_sortable' ) );
+        add_action( 'pre_get_posts', array( $this, 'sort_by_premium_column' ) );
     }
 
     /**
@@ -523,6 +526,10 @@ class SD_Claim_System {
                 <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=notifications' ) ); ?>"
                    class="nav-tab <?php echo $current_tab === 'notifications' ? 'nav-tab-active' : ''; ?>">
                     <?php _e( 'E-Mail Benachrichtigungen', 'spezialist-directory' ); ?>
+                </a>
+                <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=subscriptions' ) ); ?>"
+                   class="nav-tab <?php echo $current_tab === 'subscriptions' ? 'nav-tab-active' : ''; ?>">
+                    <?php _e( 'Abos', 'spezialist-directory' ); ?>
                 </a>
             </nav>
 
@@ -1120,6 +1127,271 @@ class SD_Claim_System {
                             </button>
                         </div>
                     </form>
+
+                <?php elseif ( $current_tab === 'subscriptions' ) : ?>
+                    <!-- Subscriptions Tab -->
+                    <?php
+                    $stripe = SD_Stripe_Integration::instance();
+                    $sub_tab = isset( $_GET['sub'] ) ? sanitize_text_field( $_GET['sub'] ) : 'subscriptions';
+                    ?>
+
+                    <!-- Sub-Tab Navigation -->
+                    <div class="sd-admin-filters" style="margin-bottom: 20px;">
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=subscriptions&sub=subscriptions' ) ); ?>"
+                           class="button <?php echo $sub_tab === 'subscriptions' ? 'button-primary' : ''; ?>">
+                            <?php _e( 'Alle Abos', 'spezialist-directory' ); ?>
+                        </a>
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=subscriptions&sub=invoices' ) ); ?>"
+                           class="button <?php echo $sub_tab === 'invoices' ? 'button-primary' : ''; ?>">
+                            <?php _e( 'Rechnungen', 'spezialist-directory' ); ?>
+                        </a>
+                        <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hofladen&page=sd-claims&tab=subscriptions&sub=failed' ) ); ?>"
+                           class="button <?php echo $sub_tab === 'failed' ? 'button-primary' : ''; ?>">
+                            <?php _e( 'Fehlgeschlagen', 'spezialist-directory' ); ?>
+                        </a>
+                    </div>
+
+                    <?php if ( $sub_tab === 'subscriptions' ) : ?>
+                        <!-- All Subscriptions -->
+                        <?php
+                        $subs_data = $stripe->get_admin_subscriptions( 50 );
+                        if ( $subs_data['error'] ) :
+                        ?>
+                            <div class="notice notice-error">
+                                <p><?php echo esc_html( __( 'Stripe-Fehler: ', 'spezialist-directory' ) . $subs_data['error'] ); ?></p>
+                            </div>
+                        <?php else : ?>
+                            <table class="wp-list-table widefat fixed striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%;"><?php _e( 'Hofladen', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 18%;"><?php _e( 'Kunde', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 10%;"><?php _e( 'Status', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 12%;"><?php _e( 'Plan', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 12%;"><?php _e( 'Nächste Zahlung', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 12%;"><?php _e( 'Erstellt', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 16%;"><?php _e( 'Aktionen', 'spezialist-directory' ); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if ( empty( $subs_data['subscriptions'] ) ) : ?>
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                                <?php _e( 'Keine Abos vorhanden.', 'spezialist-directory' ); ?>
+                                            </td>
+                                        </tr>
+                                    <?php else : ?>
+                                        <?php foreach ( $subs_data['subscriptions'] as $sub ) : ?>
+                                            <tr>
+                                                <td>
+                                                    <?php if ( $sub['post_id'] ) : ?>
+                                                        <strong>
+                                                            <a href="<?php echo esc_url( get_edit_post_link( $sub['post_id'] ) ); ?>">
+                                                                <?php echo esc_html( $sub['post_title'] ); ?>
+                                                            </a>
+                                                        </strong>
+                                                    <?php else : ?>
+                                                        <span style="color: #6b7280;"><?php echo esc_html( $sub['post_title'] ); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <strong><?php echo esc_html( $sub['user_name'] ); ?></strong><br>
+                                                    <small style="color: #6b7280;"><?php echo esc_html( $sub['user_email'] ); ?></small>
+                                                </td>
+                                                <td>
+                                                    <span style="color: <?php echo esc_attr( SD_Stripe_Integration::get_status_color( $sub['status'] ) ); ?>; font-weight: 500;">
+                                                        <?php echo esc_html( SD_Stripe_Integration::translate_status( $sub['status'] ) ); ?>
+                                                    </span>
+                                                    <?php if ( $sub['cancel_at_period_end'] ) : ?>
+                                                        <br><small style="color: #f59e0b;"><?php _e( '(endet)', 'spezialist-directory' ); ?></small>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $plan_label = $sub['plan_type'] === 'yearly' ? __( 'Jährlich', 'spezialist-directory' ) : __( 'Monatlich', 'spezialist-directory' );
+                                                    echo esc_html( $plan_label );
+                                                    ?>
+                                                    <br><small style="color: #6b7280;"><?php echo esc_html( number_format( $sub['amount'], 2, ',', '.' ) . ' ' . $sub['currency'] ); ?></small>
+                                                </td>
+                                                <td>
+                                                    <?php echo esc_html( date_i18n( 'd.m.Y', $sub['current_period_end'] ) ); ?>
+                                                </td>
+                                                <td>
+                                                    <?php echo esc_html( date_i18n( 'd.m.Y', $sub['created'] ) ); ?>
+                                                </td>
+                                                <td>
+                                                    <a href="<?php echo esc_url( $stripe->get_stripe_dashboard_url( $sub['id'] ) ); ?>" target="_blank" class="button button-small">
+                                                        <?php _e( 'Stripe', 'spezialist-directory' ); ?>
+                                                    </a>
+                                                    <a href="<?php echo esc_url( $stripe->get_stripe_customer_url( $sub['customer_id'] ) ); ?>" target="_blank" class="button button-small">
+                                                        <?php _e( 'Kunde', 'spezialist-directory' ); ?>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+
+                    <?php elseif ( $sub_tab === 'invoices' ) : ?>
+                        <!-- All Invoices -->
+                        <?php
+                        $invoices_data = $stripe->get_admin_invoices( 50 );
+                        if ( $invoices_data['error'] ) :
+                        ?>
+                            <div class="notice notice-error">
+                                <p><?php echo esc_html( __( 'Stripe-Fehler: ', 'spezialist-directory' ) . $invoices_data['error'] ); ?></p>
+                            </div>
+                        <?php else : ?>
+                            <table class="wp-list-table widefat fixed striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 12%;"><?php _e( 'Rechnung', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 18%;"><?php _e( 'Hofladen', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 18%;"><?php _e( 'Kunde', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 10%;"><?php _e( 'Betrag', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 10%;"><?php _e( 'Status', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 12%;"><?php _e( 'Datum', 'spezialist-directory' ); ?></th>
+                                        <th style="width: 20%;"><?php _e( 'Aktionen', 'spezialist-directory' ); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if ( empty( $invoices_data['invoices'] ) ) : ?>
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 20px;">
+                                                <?php _e( 'Keine Rechnungen vorhanden.', 'spezialist-directory' ); ?>
+                                            </td>
+                                        </tr>
+                                    <?php else : ?>
+                                        <?php foreach ( $invoices_data['invoices'] as $inv ) : ?>
+                                            <tr>
+                                                <td>
+                                                    <strong><?php echo esc_html( $inv['number'] ? $inv['number'] : '-' ); ?></strong>
+                                                </td>
+                                                <td>
+                                                    <?php if ( $inv['post_id'] ) : ?>
+                                                        <a href="<?php echo esc_url( get_edit_post_link( $inv['post_id'] ) ); ?>">
+                                                            <?php echo esc_html( $inv['post_title'] ); ?>
+                                                        </a>
+                                                    <?php else : ?>
+                                                        <span style="color: #6b7280;"><?php echo esc_html( $inv['post_title'] ); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <strong><?php echo esc_html( $inv['user_name'] ); ?></strong><br>
+                                                    <small style="color: #6b7280;"><?php echo esc_html( $inv['user_email'] ); ?></small>
+                                                </td>
+                                                <td>
+                                                    <?php echo esc_html( number_format( $inv['amount_total'], 2, ',', '.' ) . ' ' . $inv['currency'] ); ?>
+                                                </td>
+                                                <td>
+                                                    <span style="color: <?php echo esc_attr( SD_Stripe_Integration::get_status_color( $inv['status'] ) ); ?>; font-weight: 500;">
+                                                        <?php echo esc_html( SD_Stripe_Integration::translate_status( $inv['status'] ) ); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <?php echo esc_html( date_i18n( 'd.m.Y', $inv['created'] ) ); ?>
+                                                </td>
+                                                <td>
+                                                    <?php if ( $inv['invoice_pdf'] ) : ?>
+                                                        <a href="<?php echo esc_url( $inv['invoice_pdf'] ); ?>" target="_blank" class="button button-small">
+                                                            <?php _e( 'PDF', 'spezialist-directory' ); ?>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                    <?php if ( $inv['hosted_invoice'] ) : ?>
+                                                        <a href="<?php echo esc_url( $inv['hosted_invoice'] ); ?>" target="_blank" class="button button-small">
+                                                            <?php _e( 'Online', 'spezialist-directory' ); ?>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                    <a href="<?php echo esc_url( $stripe->get_stripe_invoice_url( $inv['id'] ) ); ?>" target="_blank" class="button button-small">
+                                                        <?php _e( 'Stripe', 'spezialist-directory' ); ?>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+
+                    <?php elseif ( $sub_tab === 'failed' ) : ?>
+                        <!-- Failed Payments -->
+                        <?php
+                        $failed_data = $stripe->get_failed_payments( 20 );
+                        if ( $failed_data['error'] ) :
+                        ?>
+                            <div class="notice notice-error">
+                                <p><?php echo esc_html( __( 'Stripe-Fehler: ', 'spezialist-directory' ) . $failed_data['error'] ); ?></p>
+                            </div>
+                        <?php else : ?>
+                            <?php if ( empty( $failed_data['failed_payments'] ) ) : ?>
+                                <div class="notice notice-success" style="margin: 0;">
+                                    <p><?php _e( 'Keine fehlgeschlagenen Zahlungen vorhanden.', 'spezialist-directory' ); ?></p>
+                                </div>
+                            <?php else : ?>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 18%;"><?php _e( 'Hofladen', 'spezialist-directory' ); ?></th>
+                                            <th style="width: 18%;"><?php _e( 'Kunde', 'spezialist-directory' ); ?></th>
+                                            <th style="width: 10%;"><?php _e( 'Betrag', 'spezialist-directory' ); ?></th>
+                                            <th style="width: 10%;"><?php _e( 'Status', 'spezialist-directory' ); ?></th>
+                                            <th style="width: 18%;"><?php _e( 'Fehlergrund', 'spezialist-directory' ); ?></th>
+                                            <th style="width: 8%;"><?php _e( 'Versuche', 'spezialist-directory' ); ?></th>
+                                            <th style="width: 18%;"><?php _e( 'Aktionen', 'spezialist-directory' ); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ( $failed_data['failed_payments'] as $fail ) : ?>
+                                            <tr>
+                                                <td>
+                                                    <?php if ( $fail['post_id'] ) : ?>
+                                                        <a href="<?php echo esc_url( get_edit_post_link( $fail['post_id'] ) ); ?>">
+                                                            <?php echo esc_html( $fail['post_title'] ); ?>
+                                                        </a>
+                                                    <?php else : ?>
+                                                        <span style="color: #6b7280;"><?php echo esc_html( $fail['post_title'] ); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <strong><?php echo esc_html( $fail['user_name'] ); ?></strong><br>
+                                                    <small style="color: #6b7280;"><?php echo esc_html( $fail['user_email'] ); ?></small>
+                                                </td>
+                                                <td>
+                                                    <strong style="color: #ef4444;"><?php echo esc_html( number_format( $fail['amount_due'], 2, ',', '.' ) . ' ' . $fail['currency'] ); ?></strong>
+                                                </td>
+                                                <td>
+                                                    <span style="color: <?php echo esc_attr( SD_Stripe_Integration::get_status_color( $fail['status'] ) ); ?>; font-weight: 500;">
+                                                        <?php echo esc_html( SD_Stripe_Integration::translate_status( $fail['status'] ) ); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small style="color: #6b7280;">
+                                                        <?php echo esc_html( $fail['failure_message'] ? $fail['failure_message'] : '-' ); ?>
+                                                    </small>
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    <?php echo esc_html( $fail['attempt_count'] ); ?>
+                                                </td>
+                                                <td>
+                                                    <?php if ( $fail['hosted_invoice'] ) : ?>
+                                                        <a href="<?php echo esc_url( $fail['hosted_invoice'] ); ?>" target="_blank" class="button button-small">
+                                                            <?php _e( 'Zahlen', 'spezialist-directory' ); ?>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                    <a href="<?php echo esc_url( $stripe->get_stripe_invoice_url( $fail['id'] ) ); ?>" target="_blank" class="button button-small">
+                                                        <?php _e( 'Stripe', 'spezialist-directory' ); ?>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
                 <?php endif; ?>
             </div>
         </div>
@@ -1772,8 +2044,17 @@ class SD_Claim_System {
      * @return array
      */
     public function add_claim_column( $columns ) {
-        $columns['sd_claimed'] = __( 'Beansprucht', 'spezialist-directory' );
-        return $columns;
+        // Insert premium column before 'date'
+        $new_columns = array();
+        foreach ( $columns as $key => $value ) {
+            if ( $key === 'date' ) {
+                $new_columns['sd_premium'] = __( 'Premium', 'spezialist-directory' );
+            }
+            $new_columns[ $key ] = $value;
+        }
+        // Add claimed column
+        $new_columns['sd_claimed'] = __( 'Beansprucht', 'spezialist-directory' );
+        return $new_columns;
     }
 
     /**
@@ -1795,6 +2076,68 @@ class SD_Claim_System {
             } else {
                 echo '<span style="color: #6b7280;">—</span>';
             }
+        } elseif ( 'sd_premium' === $column ) {
+            $is_premium = get_post_meta( $post_id, '_sd_is_premium', true ) === '1';
+            $premium_until = get_post_meta( $post_id, '_sd_premium_until', true );
+            $plan = get_post_meta( $post_id, '_sd_subscription_plan', true );
+            $cancel_pending = get_post_meta( $post_id, '_sd_subscription_cancel_at_period_end', true );
+
+            if ( $is_premium ) {
+                $plan_label = $plan === 'yearly' ? __( 'Jährlich', 'spezialist-directory' ) : __( 'Monatlich', 'spezialist-directory' );
+                echo '<span style="color: #059669; font-weight: 500;">★ ' . esc_html( $plan_label ) . '</span>';
+                if ( $cancel_pending ) {
+                    echo ' <span style="color: #f59e0b; font-size: 11px;">(' . __( 'endet', 'spezialist-directory' ) . ')</span>';
+                }
+                if ( $premium_until ) {
+                    echo '<br><small style="color: #6b7280;">bis ' . esc_html( date_i18n( 'd.m.Y', strtotime( $premium_until ) ) ) . '</small>';
+                }
+            } else {
+                echo '<span style="color: #9ca3af;">—</span>';
+            }
+        }
+    }
+
+    /**
+     * Make premium column sortable
+     *
+     * @param array $columns
+     * @return array
+     */
+    public function make_premium_column_sortable( $columns ) {
+        $columns['sd_premium'] = 'sd_premium';
+        return $columns;
+    }
+
+    /**
+     * Handle sorting by premium column
+     *
+     * @param WP_Query $query
+     */
+    public function sort_by_premium_column( $query ) {
+        if ( ! is_admin() || ! $query->is_main_query() ) {
+            return;
+        }
+
+        if ( $query->get( 'post_type' ) !== 'hofladen' ) {
+            return;
+        }
+
+        $orderby = $query->get( 'orderby' );
+
+        if ( 'sd_premium' === $orderby ) {
+            // Use meta_query with EXISTS to include posts without meta
+            $query->set( 'meta_query', array(
+                'relation' => 'OR',
+                array(
+                    'key'     => '_sd_is_premium',
+                    'compare' => 'EXISTS',
+                ),
+                array(
+                    'key'     => '_sd_is_premium',
+                    'compare' => 'NOT EXISTS',
+                ),
+            ) );
+            $query->set( 'orderby', 'meta_value' );
         }
     }
 
