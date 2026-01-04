@@ -8113,3 +8113,97 @@ a.wp-block-button__link:not(.has-background) {
         bottom: 100px !important;
     }
 }
+
+/* ====================
+   RATING STARS OVERRIDE
+   Override GeneratePress button styles for rating stars
+   ==================== */
+.sr-star-input button.sr-star-btn,
+button.sr-star-btn,
+.sr-star-btn[type="button"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 4px !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    line-height: 1 !important;
+}
+
+.sr-star-input button.sr-star-btn:hover,
+button.sr-star-btn:hover,
+.sr-star-btn[type="button"]:hover,
+.sr-star-input button.sr-star-btn:focus,
+button.sr-star-btn:focus,
+.sr-star-btn[type="button"]:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    transform: scale(1.1);
+}
+
+.sr-star-btn svg {
+    fill: #D1D5DB !important;
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.sr-star-btn:hover svg,
+.sr-star-btn.hover svg {
+    fill: #FCD34D !important;
+}
+
+.sr-star-btn.active svg {
+    fill: #F59E0B !important;
+}
+
+/* ====================
+   RATING TAB DESIGN OVERRIDE
+   Match imker-scout.de design
+   ==================== */
+
+/* CTA Banner - Yellow call-to-action box */
+.sr-cta-banner {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 24px 32px !important;
+    background: #FEF9E7 !important;
+    border-radius: 16px !important;
+    margin-bottom: 24px !important;
+}
+
+.sr-cta-text {
+    font-size: 15px !important;
+    color: #78350F !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+}
+
+/* Form Container - White box with border */
+.sr-rating-form-container {
+    padding: 32px !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 16px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.sr-rating-form-container h3 {
+    margin: 0 0 24px 0 !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: #1F2937 !important;
+}
+
+/* Media Upload - Dashed border */
+.sr-media-upload input[type="file"] {
+    width: 100% !important;
+    padding: 20px 16px !important;
+    border: 2px dashed #E5E7EB !important;
+    border-radius: 12px !important;
+    background: #FAFAFA !important;
+    cursor: pointer !important;
+}

@@ -30,27 +30,30 @@ $user_rating = isset( $can_rate_check['rating'] ) ? $can_rate_check['rating'] : 
     <div class="sd-detail-section sr-reviews-section">
         <h2><?php _e( 'Bewertungen', 'spezialist-ratings' ); ?></h2>
 
-        <!-- Rating Summary -->
-        <div class="sr-reviews-summary">
+        <!-- Rating Summary (only show if there are ratings) -->
+        <?php if ( $count > 0 ) : ?>
+        <div class="sr-reviews-summary sr-has-ratings">
             <div class="sr-rating-large">
-                <?php if ( $count > 0 ) : ?>
-                    <span class="sr-rating-number"><?php echo esc_html( $average ); ?></span>
-                    <div class="sr-rating-stars-large">
-                        <?php echo SR_Ratings::render_stars( $average, 24 ); ?>
-                    </div>
-                    <span class="sr-rating-count-text">
-                        <?php
-                        printf(
-                            _n( '%d Bewertung', '%d Bewertungen', $count, 'spezialist-ratings' ),
-                            $count
-                        );
-                        ?>
-                    </span>
-                <?php else : ?>
-                    <span class="sr-no-ratings-text"><?php _e( 'Mach mit und füge die erste Bewertung für diesen Eintrag hinzu!', 'spezialist-ratings' ); ?></span>
-                <?php endif; ?>
+                <span class="sr-rating-number"><?php echo esc_html( $average ); ?></span>
+                <div class="sr-rating-stars-large">
+                    <?php echo SR_Ratings::render_stars( $average, 24 ); ?>
+                </div>
+                <span class="sr-rating-count-text">
+                    <?php
+                    printf(
+                        _n( '%d Bewertung', '%d Bewertungen', $count, 'spezialist-ratings' ),
+                        $count
+                    );
+                    ?>
+                </span>
             </div>
         </div>
+        <?php else : ?>
+        <!-- Call to action banner when no ratings exist -->
+        <div class="sr-cta-banner">
+            <span class="sr-cta-text"><?php _e( 'Mach mit und füge die erste Bewertung für diesen Eintrag hinzu!', 'spezialist-ratings' ); ?></span>
+        </div>
+        <?php endif; ?>
 
         <!-- Rating Form / Messages -->
         <div class="sr-form-section">
@@ -128,7 +131,7 @@ $user_rating = isset( $can_rate_check['rating'] ) ? $can_rate_check['rating'] : 
 
                         <div class="sr-form-group">
                             <label for="sr-comment"><?php _e( 'Kommentar (optional)', 'spezialist-ratings' ); ?></label>
-                            <textarea id="sr-comment" name="comment" rows="4" placeholder="<?php esc_attr_e( 'Teile Deine Erfahrungen mit diesem Spezialisten...', 'spezialist-ratings' ); ?>"></textarea>
+                            <textarea id="sr-comment" name="comment" rows="4" placeholder="<?php esc_attr_e( 'Teile Deine Erfahrungen mit diesem Hofladen...', 'spezialist-ratings' ); ?>"></textarea>
                             <p class="sr-field-hint">
                                 <?php _e( 'Hinweis: Kommentare werden vor der Veröffentlichung geprüft.', 'spezialist-ratings' ); ?>
                             </p>
@@ -168,11 +171,11 @@ $user_rating = isset( $can_rate_check['rating'] ) ? $can_rate_check['rating'] : 
             <?php endif; ?>
         </div>
 
-        <!-- All Ratings List -->
+        <!-- All Ratings List (only shown if ratings exist) -->
+        <?php if ( ! empty( $ratings ) ) : ?>
         <div class="sr-ratings-list">
             <h3><?php _e( 'Alle Bewertungen', 'spezialist-ratings' ); ?></h3>
 
-            <?php if ( ! empty( $ratings ) ) : ?>
                 <?php foreach ( $ratings as $rating ) :
                     $reviewer = get_user_by( 'id', $rating->user_id );
                     if ( ! $reviewer ) continue;
@@ -236,7 +239,7 @@ $user_rating = isset( $can_rate_check['rating'] ) ? $can_rate_check['rating'] : 
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
         </div>
+        <?php endif; ?>
     </div>
 </div>

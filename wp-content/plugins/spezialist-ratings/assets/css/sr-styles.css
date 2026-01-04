@@ -107,18 +107,43 @@
     padding: 0;
 }
 
-/* Rating Summary */
+/* CTA Banner - Call to action when no ratings */
+.sr-cta-banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 32px;
+    background: #FEF9E7;
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.sr-cta-text {
+    font-size: 15px;
+    color: #78350F;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Rating Summary - With Ratings */
 .sr-reviews-summary {
     display: flex;
     justify-content: center;
-    padding: 32px;
+    align-items: center;
+    padding: 28px 32px;
     background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
-    border-radius: 12px;
-    margin-bottom: 32px;
+    border-radius: 16px;
+    margin-bottom: 28px;
 }
 
 .sr-rating-large {
     text-align: center;
+}
+
+.sr-no-ratings-text {
+    font-size: 15px;
+    color: #78350F;
+    font-weight: 500;
 }
 
 .sr-rating-number {
@@ -247,71 +272,114 @@
    Rating Form
    ==================== */
 .sr-rating-form-container {
-    padding: 24px;
+    padding: 32px;
     background: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 12px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .sr-rating-form-container h3 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 600;
     color: #1F2937;
+    letter-spacing: -0.01em;
 }
 
 .sr-form-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .sr-form-group label {
     display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 14px;
     color: #374151;
+    letter-spacing: 0.01em;
 }
 
 .sr-form-group label .required {
     color: #DC2626;
 }
 
-/* Star Input */
+/* Star Input - Professional Rating Stars */
 .sr-star-input-group {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 .sr-star-input {
     display: flex;
-    gap: 8px;
+    gap: 4px;
+    align-items: center;
 }
 
+/* Ultra-specific selector to override GeneratePress */
+.sr-rating-form .sr-star-input button.sr-star-btn,
+.sr-star-input button.sr-star-btn,
+button.sr-star-btn[type="button"],
 .sr-star-btn {
-    background: none;
-    border: none;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: transform 0.15s ease;
+    padding: 4px !important;
+    border-radius: 4px !important;
+    transition: transform 0.15s ease !important;
+    outline: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    box-shadow: none !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    line-height: 1 !important;
 }
 
-.sr-star-btn svg {
-    display: block;
-    fill: #D1D5DB;
-    transition: fill 0.15s ease;
+.sr-rating-form .sr-star-input button.sr-star-btn:focus,
+.sr-star-input button.sr-star-btn:focus,
+button.sr-star-btn[type="button"]:focus,
+.sr-star-btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
+.sr-rating-form .sr-star-input button.sr-star-btn:hover,
+.sr-star-input button.sr-star-btn:hover,
+button.sr-star-btn[type="button"]:hover,
 .sr-star-btn:hover {
     transform: scale(1.1);
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
+/* SVG Star styling */
+.sr-rating-form .sr-star-input button.sr-star-btn svg,
+.sr-star-input button.sr-star-btn svg,
+button.sr-star-btn[type="button"] svg,
+.sr-star-btn svg {
+    display: block;
+    width: 32px !important;
+    height: 32px !important;
+    fill: #D1D5DB !important;
+    stroke: none !important;
+    transition: fill 0.15s ease !important;
+}
+
+/* Hover state - lighter gold */
 .sr-star-btn:hover svg,
 .sr-star-btn.hover svg {
-    fill: #FCD34D;
+    fill: #FCD34D !important;
 }
 
+/* Active/Selected state - filled golden star */
 .sr-star-btn.active svg {
-    fill: #F59E0B;
+    fill: #F59E0B !important;
 }
 
+/* Rating text feedback */
 .sr-rating-text {
     display: block;
     margin-top: 8px;
@@ -323,33 +391,58 @@
 /* Comment Textarea */
 .sr-rating-form textarea {
     width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #D1D5DB;
-    border-radius: 8px;
+    padding: 14px 18px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
     font-family: inherit;
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.6;
     resize: vertical;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-height: 120px;
+    background: #FAFAFA;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.sr-rating-form textarea:hover {
+    border-color: #D1D5DB;
+    background: #FFFFFF;
 }
 
 .sr-rating-form textarea:focus {
     outline: none;
-    border-color: #2563EB;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: #f1c232;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(241, 194, 50, 0.15);
+}
+
+.sr-rating-form textarea::placeholder {
+    color: #9CA3AF;
 }
 
 .sr-field-hint {
-    margin: 8px 0 0 0;
+    margin: 10px 0 0 0;
     font-size: 13px;
     color: #9CA3AF;
+    line-height: 1.4;
 }
 
 /* Submit Button */
 .sr-submit-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    min-width: 180px;
+    padding: 14px 28px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+}
+
+.sr-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(241, 194, 50, 0.35);
 }
 
 .sr-btn-loading {
@@ -711,15 +804,15 @@
    Media Upload Field
    ==================== */
 .sr-media-upload {
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .sr-media-upload input[type="file"] {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px dashed #D1D5DB;
-    border-radius: 8px;
-    background: #F9FAFB;
+    padding: 20px 16px;
+    border: 2px dashed #E5E7EB;
+    border-radius: 12px;
+    background: #FAFAFA;
     cursor: pointer;
     font-size: 14px;
     color: #6B7280;
@@ -727,7 +820,7 @@
 }
 
 .sr-media-upload input[type="file"]:hover {
-    border-color: #F59E0B;
+    border-color: #f1c232;
     background: #FFFBEB;
 }
 
