@@ -372,3 +372,14 @@ add_filter( 'spezialist_seo_twitter_image', function( $image, $post ) {
     }
     return $image;
 }, 99, 2 );
+
+/**
+ * Disclaimer above Footer Widget Area
+ * "Alle Angaben ohne Gewähr." centered above footer
+ */
+add_action( 'generate_before_footer_content', 'sd_footer_disclaimer' );
+function sd_footer_disclaimer() { ?>
+    <div class="sd-footer-disclaimer" style="text-align: center; padding: 15px 0; font-size: 14px; color: #666;">
+        Alle Angaben ohne Gewähr.
+    </div>
+<?php }
