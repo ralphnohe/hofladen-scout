@@ -43,7 +43,7 @@ $bundeslaender = SD_User_Submissions::get_bundeslaender();
                         name="title"
                         class="sd-input"
                         required
-                        placeholder="<?php esc_attr_e( 'z.B. Max Mustermann oder Musterfirma GmbH', 'spezialist-directory' ); ?>"
+                        placeholder="<?php esc_attr_e( 'Hofladen Max Mustermann / Max Musterhofladen GbR', 'spezialist-directory' ); ?>"
                     >
                 </div>
             </div>
@@ -60,7 +60,6 @@ $bundeslaender = SD_User_Submissions::get_bundeslaender();
                         'quicktags'     => false,
                     ) );
                     ?>
-                    <p class="sd-field-description"><?php _e( 'Beschreibe Deine Dienstleistungen, Expertise und was Dich einzigartig macht.', 'spezialist-directory' ); ?></p>
                 </div>
             </div>
 
@@ -152,7 +151,7 @@ $bundeslaender = SD_User_Submissions::get_bundeslaender();
                         name="website"
                         class="sd-input"
                         required
-                        placeholder="https://example.com"
+                        placeholder="https://www.hofladen-mustermann.de"
                     >
                 </div>
             </div>
@@ -290,7 +289,7 @@ $bundeslaender = SD_User_Submissions::get_bundeslaender();
                     <!-- Services will be added here dynamically -->
                 </div>
                 <div class="sd-service-add-row">
-                    <input type="text" id="sd-new-service" class="sd-input" placeholder="<?php esc_attr_e( 'z.B. Beratung, Webdesign, Reparatur...', 'spezialist-directory' ); ?>">
+                    <input type="text" id="sd-new-service" class="sd-input" placeholder="<?php esc_attr_e( 'z.B. frisches Gemüse, Molkereiprodukte, Eiscreme', 'spezialist-directory' ); ?>">
                     <button type="button" class="sd-button sd-button-secondary sd-add-service">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
@@ -336,12 +335,18 @@ $bundeslaender = SD_User_Submissions::get_bundeslaender();
                                 <span class="sd-hours-day-name"><?php echo esc_html( $day_name ); ?></span>
                             </label>
                         </div>
+                        <div class="sd-hours-allday">
+                            <label class="sd-hours-allday-checkbox">
+                                <input type="checkbox" class="sd-allday-toggle" data-day="<?php echo esc_attr( $day_key ); ?>">
+                                <span><?php _e( 'ganztägig', 'spezialist-directory' ); ?></span>
+                            </label>
+                        </div>
                         <div class="sd-hours-times">
                             <div class="sd-hours-time-group">
                                 <label class="sd-hours-open-label"><?php _e( 'Geöffnet:', 'spezialist-directory' ); ?></label>
-                                <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][from]" class="sd-input sd-input-time" placeholder="09:00">
+                                <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][from]" class="sd-input sd-input-time sd-time-from" data-day="<?php echo esc_attr( $day_key ); ?>" placeholder="09:00">
                                 <span class="sd-hours-separator">-</span>
-                                <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][to]" class="sd-input sd-input-time" placeholder="18:00">
+                                <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][to]" class="sd-input sd-input-time sd-time-to" data-day="<?php echo esc_attr( $day_key ); ?>" placeholder="18:00">
                             </div>
                             <div class="sd-hours-break">
                                 <label class="sd-hours-break-label"><?php _e( 'Pause:', 'spezialist-directory' ); ?></label>

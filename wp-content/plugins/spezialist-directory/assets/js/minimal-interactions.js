@@ -246,6 +246,106 @@
     });
 
     /**
+     * All-Day Checkbox Handler for Business Hours
+     * Sets from/to fields to 00:00-24:00 when checked
+     */
+    $(document).ready(function() {
+        if ($('#sd-submission-form').length === 0) return;
+
+        // Handle all-day checkbox changes
+        $(document).on('change', '.sd-allday-toggle', function() {
+            var day = $(this).data('day');
+            var $fromInput = $('input.sd-time-from[data-day="' + day + '"]');
+            var $toInput = $('input.sd-time-to[data-day="' + day + '"]');
+
+            if ($(this).is(':checked')) {
+                $fromInput.val('00:00');
+                $toInput.val('23:59');
+            } else {
+                $fromInput.val('');
+                $toInput.val('');
+            }
+        });
+
+        // Add placeholder inside TinyMCE editor
+        var descriptionPlaceholder = 'Beschreibe hier möglichst detailliert Deinen Hofladen, Standort, Ausrichtung / Schwerpunkte, angebotene Produkte, Parkmöglichkeiten, akzeptierte Zahlungsmittel, usw.';
+
+        function setupDescriptionPlaceholder() {
+            if (typeof tinymce === 'undefined') return;
+
+            var editor = tinymce.get('sd_description');
+            if (!editor) return;
+
+            var $body = $(editor.getBody());
+            if (!$body.length) return;
+
+            // Add placeholder styles to editor iframe
+            var placeholderCSS =
+                'body.sd-placeholder-visible::before {' +
+                '  content: "' + descriptionPlaceholder + '";' +
+                '  color: #9CA3AF;' +
+                '  font-style: italic;' +
+                '  pointer-events: none;' +
+                '  position: absolute;' +
+                '  top: 0;' +
+                '  left: 0;' +
+                '  right: 0;' +
+                '}' +
+                'body.sd-placeholder-visible {' +
+                '  position: relative;' +
+                '}';
+
+            // Inject CSS into editor iframe
+            var $head = $(editor.getDoc()).find('head');
+            if ($head.find('#sd-placeholder-style').length === 0) {
+                $head.append('<style id="sd-placeholder-style">' + placeholderCSS + '</style>');
+            }
+
+            function updatePlaceholder() {
+                var content = editor.getContent({ format: 'text' }).trim();
+                if (content === '') {
+                    $body.addClass('sd-placeholder-visible');
+                } else {
+                    $body.removeClass('sd-placeholder-visible');
+                }
+            }
+
+            // Bind events
+            editor.on('keyup change SetContent init', updatePlaceholder);
+            editor.on('focus', function() {
+                // Keep placeholder visible until typing starts
+            });
+
+            // Initial check
+            updatePlaceholder();
+        }
+
+        // Try multiple strategies to setup placeholder
+        function trySetupPlaceholder() {
+            setupDescriptionPlaceholder();
+        }
+
+        setTimeout(trySetupPlaceholder, 1000);
+        setTimeout(trySetupPlaceholder, 2000);
+        setTimeout(trySetupPlaceholder, 3000);
+
+        $(window).on('load', function() {
+            setTimeout(trySetupPlaceholder, 500);
+            setTimeout(trySetupPlaceholder, 1500);
+        });
+
+        if (typeof tinymce !== 'undefined') {
+            tinymce.on('AddEditor', function(e) {
+                if (e.editor.id === 'sd_description') {
+                    e.editor.on('init', function() {
+                        setTimeout(trySetupPlaceholder, 100);
+                    });
+                }
+            });
+        }
+    });
+
+    /**
      * Social Media URL Helper
      * Converts usernames to full URLs for social media fields
      */
