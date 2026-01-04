@@ -311,33 +311,48 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
                         <div class="sd-contact-info-panel">
                             <?php if ( $phone ) : ?>
                                 <div class="sd-contact-item">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
-                                    </svg>
-                                    <a href="tel:<?php echo esc_attr( $phone ); ?>"><?php echo esc_html( $phone ); ?></a>
+                                    <div class="sd-contact-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                    <div class="sd-contact-details">
+                                        <span class="sd-contact-label"><?php _e( 'Telefon', 'spezialist-directory' ); ?></span>
+                                        <a href="tel:<?php echo esc_attr( $phone ); ?>" class="sd-contact-value"><?php echo esc_html( $phone ); ?></a>
+                                    </div>
                                 </div>
                             <?php endif; ?>
 
                             <?php if ( $email ) : ?>
                                 <div class="sd-contact-item">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/>
-                                    </svg>
-                                    <a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a>
+                                    <div class="sd-contact-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                    <div class="sd-contact-details">
+                                        <span class="sd-contact-label"><?php _e( 'E-Mail', 'spezialist-directory' ); ?></span>
+                                        <a href="mailto:<?php echo esc_attr( $email ); ?>" class="sd-contact-value"><?php echo esc_html( $email ); ?></a>
+                                    </div>
                                 </div>
                             <?php endif; ?>
 
                             <?php if ( $website ) : ?>
                                 <div class="sd-contact-item">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
-                                    </svg>
-                                    <a href="<?php echo esc_url( $website ); ?>" target="_blank" rel="noopener">
-                                        <?php echo esc_html( parse_url( $website, PHP_URL_HOST ) ); ?>
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #f1c232; margin-left: 5px; vertical-align: middle;">
-                                            <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" fill="currentColor"/>
+                                    <div class="sd-contact-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
                                         </svg>
-                                    </a>
+                                    </div>
+                                    <div class="sd-contact-details">
+                                        <span class="sd-contact-label"><?php _e( 'Website', 'spezialist-directory' ); ?></span>
+                                        <a href="<?php echo esc_url( $website ); ?>" target="_blank" rel="noopener" class="sd-contact-value">
+                                            <?php echo esc_html( parse_url( $website, PHP_URL_HOST ) ); ?>
+                                            <svg class="sd-contact-external-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" fill="currentColor"/>
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </div>
                             <?php endif; ?>
                         </div>

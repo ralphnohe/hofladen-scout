@@ -2165,39 +2165,111 @@ button.sd-tab {
     cursor: pointer;
 }
 
-/* Contact Info Panel (in Kontakt tab) */
+/* Contact Info Panel (in Kontakt tab) - Redesign */
 .sd-contact-info-panel {
     display: flex;
     flex-direction: column;
-    gap: var(--sd-spacing-lg);
+    gap: var(--sd-spacing-md);
 }
 
 .sd-contact-info-panel .sd-contact-item {
     display: flex;
     align-items: center;
     gap: var(--sd-spacing-md);
-    padding: var(--sd-spacing-md);
-    background: var(--sd-grey-50);
-    border-radius: var(--sd-radius-md);
+    padding: 20px;
+    background: var(--sd-white);
+    border-radius: var(--sd-radius-lg);
+    box-shadow: var(--sd-shadow-card);
+    transition: all var(--sd-transition-base);
+    border: none !important;
 }
 
-.sd-contact-info-panel .sd-contact-item svg {
+.sd-contact-info-panel .sd-contact-item:hover {
+    box-shadow: var(--sd-shadow-card-hover);
+    transform: translateY(-2px);
+}
+
+.sd-contact-info-panel .sd-contact-icon {
     flex-shrink: 0;
-    color: var(--sd-blue);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sd-yellow-light);
+    border-radius: var(--sd-radius-full);
+    color: var(--sd-yellow-dark);
+    transition: background-color var(--sd-transition-base);
 }
 
-.sd-contact-info-panel .sd-contact-item a {
-    color: var(--sd-black);
-    text-decoration: none;
+.sd-contact-info-panel .sd-contact-item:hover .sd-contact-icon {
+    background: var(--sd-yellow);
+}
+
+.sd-contact-info-panel .sd-contact-icon svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.sd-contact-info-panel .sd-contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.sd-contact-info-panel .sd-contact-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sd-grey-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sd-contact-info-panel .sd-contact-value {
+    font-size: 16px;
     font-weight: 500;
-    border: 3px solid #f1c233;
-    padding: 5px;
-    border-radius: 10px;
+    color: var(--sd-grey-700);
+    text-decoration: none;
+    word-break: break-all;
+    transition: color var(--sd-transition-base);
+    border: none !important;
+    padding: 0 !important;
+    background: none !important;
 }
 
-.sd-contact-info-panel .sd-contact-item a:hover {
-    color: var(--sd-blue);
-    background-color: #ffffd4;
+.sd-contact-info-panel .sd-contact-item:hover .sd-contact-value {
+    color: var(--sd-yellow-dark);
+}
+
+.sd-contact-info-panel .sd-contact-external-icon {
+    margin-left: 6px;
+    color: var(--sd-yellow);
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* Contact Info Panel - Mobile */
+@media (max-width: 768px) {
+    .sd-contact-info-panel .sd-contact-item {
+        padding: 16px;
+    }
+
+    .sd-contact-info-panel .sd-contact-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .sd-contact-info-panel .sd-contact-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .sd-contact-info-panel .sd-contact-value {
+        font-size: 15px;
+    }
 }
 
 /* Legacy styles kept for compatibility */
