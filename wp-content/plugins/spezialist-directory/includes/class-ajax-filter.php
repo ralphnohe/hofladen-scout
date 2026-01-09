@@ -195,19 +195,24 @@ class SD_Ajax_Filter {
         $bounds_east  = isset( $_POST['bounds_east'] ) ? floatval( $_POST['bounds_east'] ) : null;
         $bounds_west  = isset( $_POST['bounds_west'] ) ? floatval( $_POST['bounds_west'] ) : null;
 
+        // Global search flag - skip bounds filter for searching listings by name globally
+        $global_search = isset( $_POST['global_search'] ) && '1' === $_POST['global_search'];
+
         // Override per_page if provided via AJAX
         if ( isset( $_POST['per_page'] ) ) {
             $requested_per_page = absint( $_POST['per_page'] );
-            if ( in_array( $requested_per_page, array( 12, 50, 100 ), true ) ) {
+            if ( in_array( $requested_per_page, array( 12, 50, 100, 200, 500 ), true ) ) {
                 $per_page = $requested_per_page;
             }
         }
 
         // For map bounds queries, load more results to show all markers in view
-        // Limit to 200 for performance
+        // Limit to 200 for performance (500 for global search)
         $is_bounds_query = ( $bounds_north !== null && $bounds_south !== null && $bounds_east !== null && $bounds_west !== null );
-        if ( $is_bounds_query ) {
+        if ( $is_bounds_query && ! $global_search ) {
             $per_page = 200; // Load up to 200 results within bounds
+        } elseif ( $global_search ) {
+            $per_page = min( $per_page, 500 ); // Cap global search at 500
         }
 
         // Build query args
@@ -315,8 +320,8 @@ class SD_Ajax_Filter {
             }
         }
 
-        // Geo bounds filter - get post IDs within map bounds
-        if ( $bounds_north !== null && $bounds_south !== null && $bounds_east !== null && $bounds_west !== null ) {
+        // Geo bounds filter - get post IDs within map bounds (skip for global search)
+        if ( ! $global_search && $bounds_north !== null && $bounds_south !== null && $bounds_east !== null && $bounds_west !== null ) {
             $geo_post_ids = $this->get_posts_in_bounds( $bounds_north, $bounds_south, $bounds_east, $bounds_west );
             if ( ! empty( $geo_post_ids ) ) {
                 // Intersect with existing post__in if set

@@ -350,6 +350,61 @@ class SD_User_Submissions {
             $services = array_values( $services ); // Re-index array
             update_post_meta( $post_id, '_sd_services', $services );
         }
+
+        // Auto-geocode address to get coordinates
+        $address = isset( $data['address'] ) ? sanitize_text_field( $data['address'] ) : '';
+        $zip = isset( $data['zip'] ) ? sanitize_text_field( $data['zip'] ) : '';
+        $city = isset( $data['city'] ) ? sanitize_text_field( $data['city'] ) : '';
+
+        if ( ! empty( $address ) && ! empty( $zip ) && ! empty( $city ) ) {
+            $full_address = sprintf( '%s, %s %s, Deutschland', $address, $zip, $city );
+            $coordinates = $this->geocode_address( $full_address );
+            if ( $coordinates ) {
+                update_post_meta( $post_id, '_sd_latitude', $coordinates['lat'] );
+                update_post_meta( $post_id, '_sd_longitude', $coordinates['lng'] );
+            }
+        }
+    }
+
+    /**
+     * Geocode address using Nominatim API
+     *
+     * @param string $address Full address string
+     * @return array|false Array with 'lat' and 'lng' or false on failure
+     */
+    private function geocode_address( $address ) {
+        if ( empty( $address ) ) {
+            return false;
+        }
+
+        $url = add_query_arg( array(
+            'q'      => urlencode( $address ),
+            'format' => 'json',
+            'limit'  => 1,
+        ), 'https://nominatim.openstreetmap.org/search' );
+
+        $response = wp_remote_get( $url, array(
+            'timeout' => 10,
+            'headers' => array(
+                'User-Agent' => 'Hofladen-Scout.de/1.0 (https://www.hofladen-scout.de)',
+            ),
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( empty( $data ) || ! isset( $data[0]['lat'] ) || ! isset( $data[0]['lon'] ) ) {
+            return false;
+        }
+
+        return array(
+            'lat' => floatval( $data[0]['lat'] ),
+            'lng' => floatval( $data[0]['lon'] ),
+        );
     }
 
     /**

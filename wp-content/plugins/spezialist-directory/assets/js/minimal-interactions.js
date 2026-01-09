@@ -4689,6 +4689,8 @@
         mapMoveTimer: null, // Timer for debouncing map movement
         isLocationSearch: false, // Track if current search is location-based
         locationSearchTerm: null, // Store the location term for display
+        isGlobalSearchResult: false, // Prevent moveend handler during global search result display
+        hasActiveGlobalSearch: false, // Track if current view shows global search results (persists until search is cleared)
 
         init: function() {
             const $mapContainer = $('#sd-kartensuche-map');
@@ -4836,7 +4838,7 @@
         bindEvents: function() {
             const self = this;
 
-            // Search input with debounce - detect location vs product search
+            // Search input with debounce - global search for listings, then geocoding as fallback
             $('#sd-kartensuche-search').on('input', function() {
                 clearTimeout(self.debounceTimer);
 
@@ -4852,22 +4854,35 @@
 
                 self.debounceTimer = setTimeout(function() {
                     if (searchTerm.length >= 2) {
-                        // First, try to geocode the term
-                        self.geocodeLocation(searchTerm).then(function(location) {
-                            if (location) {
-                                // It's a location - center map on it
-                                self.centerOnLocation(location);
+                        // Show loading indicator
+                        self.showLoading();
+
+                        // First, try global search (searches all listings by name, ignoring map bounds)
+                        self.searchGlobally(searchTerm).then(function(results) {
+                            if (results) {
+                                // Found listings matching the search term - fit map to show them
+                                self.hideLoading();
+                                self.fitMapToResults(results);
                             } else {
-                                // Not a location - do normal product search
-                                self.isLocationSearch = false;
-                                self.locationSearchTerm = null;
-                                self.fetchListings();
+                                // No listings found - try geocoding as fallback (for location names)
+                                self.geocodeLocation(searchTerm).then(function(location) {
+                                    self.hideLoading();
+                                    if (location) {
+                                        // It's a location - center map on it
+                                        self.centerOnLocation(location);
+                                    } else {
+                                        // Neither listing nor location found
+                                        self.showNoResultsFeedback();
+                                    }
+                                });
                             }
                         });
                     } else if (searchTerm.length === 0) {
-                        // Empty search - reset and fetch all
+                        // Empty search - reset and fetch all in current view
                         self.isLocationSearch = false;
                         self.locationSearchTerm = null;
+                        self.isGlobalSearchResult = false;
+                        self.hasActiveGlobalSearch = false; // Allow moveend to work again
                         self.fetchListings();
                     }
                 }, 400);
@@ -4953,6 +4968,14 @@
 
             // Map move/zoom events - update markers based on visible bounds
             this.map.on('moveend', function() {
+                // Don't fetch if showing global search results (handled separately)
+                if (self.isGlobalSearchResult) {
+                    return;
+                }
+                // Don't fetch if we have active global search results (prevents overriding name search results)
+                if (self.hasActiveGlobalSearch) {
+                    return;
+                }
                 // Don't fetch if a popup is currently open (prevents popup closing on marker click)
                 if (self.map._popup && self.map._popup.isOpen()) {
                     return;
@@ -4960,7 +4983,10 @@
                 // Debounce map movement to avoid too many requests
                 clearTimeout(self.mapMoveTimer);
                 self.mapMoveTimer = setTimeout(function() {
-                    // Double-check popup state after debounce
+                    // Double-check states after debounce
+                    if (self.isGlobalSearchResult || self.hasActiveGlobalSearch) {
+                        return;
+                    }
                     if (self.map._popup && self.map._popup.isOpen()) {
                         return;
                     }
@@ -5659,6 +5685,111 @@
         hideLoading: function() {
             $('#sd-kartensuche-loading').removeClass('active');
             this.isLoading = false;
+        },
+
+        // Global search without bounds filter - finds listings by name anywhere
+        searchGlobally: function(term) {
+            const self = this;
+            return new Promise(function(resolve) {
+                $.ajax({
+                    url: sdAjax.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'sd_filter_listings',
+                        nonce: sdAjax.filterNonce,
+                        search: term,
+                        category: $('#sd-kartensuche-category').val() || '',
+                        premium: $('.sd-kartensuche-premium-toggle input').is(':checked') ? '1' : '',
+                        global_search: '1',
+                        per_page: 500
+                    },
+                    success: function(response) {
+                        if (response.success && response.data.html) {
+                            const coords = self.extractCoordinates(response.data.html);
+                            resolve(coords.length > 0 ? {
+                                coords: coords,
+                                html: response.data.html,
+                                count: response.data.found_posts
+                            } : null);
+                        } else {
+                            resolve(null);
+                        }
+                    },
+                    error: function() {
+                        resolve(null);
+                    }
+                });
+            });
+        },
+
+        // Extract coordinates from response HTML
+        extractCoordinates: function(html) {
+            const coords = [];
+            const $temp = $('<div>').html(html);
+            const $cards = $temp.find('.sd-listing-card');
+            $cards.each(function() {
+                const $card = $(this);
+                const hasLat = $card.attr('data-lat');
+                const hasLng = $card.attr('data-lng');
+                if (hasLat && hasLng) {
+                    const lat = parseFloat(hasLat);
+                    const lng = parseFloat(hasLng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        coords.push([lat, lng]);
+                    }
+                }
+            });
+            return coords;
+        },
+
+        // Fit map to show all search results
+        fitMapToResults: function(results) {
+            const self = this;
+
+            // Temporarily disable moveend handler to prevent double fetch
+            this.isGlobalSearchResult = true;
+            // Mark that we have active global search results (prevents moveend from overriding)
+            this.hasActiveGlobalSearch = true;
+
+            // Update markers and list IMMEDIATELY - don't wait for moveend
+            // This fixes the bug where flyTo might not trigger moveend if map doesn't need to move much
+            this.updateMarkers(results.html);
+            this.updateListContent(results.html);
+            this.updateCounts(results.count);
+
+            // Show feedback
+            const countText = results.count === 1 ? '1 Hofladen gefunden' : results.count + ' Hofläden gefunden';
+            this.showLocationFeedback(countText);
+
+            if (results.coords.length === 1) {
+                // Single result - zoom directly to it
+                this.map.flyTo(results.coords[0], 14, { duration: 0.8 });
+            } else {
+                // Multiple results - fit all in view
+                const bounds = L.latLngBounds(results.coords);
+                this.map.flyToBounds(bounds, { padding: [50, 50], duration: 0.8 });
+            }
+
+            // Re-enable moveend handler after animation completes
+            this.map.once('moveend', function() {
+                // Re-enable moveend handler after a short delay
+                setTimeout(function() {
+                    self.isGlobalSearchResult = false;
+                }, 100);
+            });
+
+            // Fallback: re-enable handler even if moveend doesn't fire (e.g., if map already at position)
+            setTimeout(function() {
+                self.isGlobalSearchResult = false;
+            }, 1500);
+        },
+
+        // Show no results feedback
+        showNoResultsFeedback: function() {
+            this.showLocationFeedback('Keine Ergebnisse gefunden');
+            this.clearMarkers();
+            this.updateListContent('');
+            this.updateCounts(0);
         }
     };
 
