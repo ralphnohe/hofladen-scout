@@ -575,6 +575,7 @@ article.sd-listing-card.sd-listing-premium {
     display: flex;
     flex-direction: column;
     gap: 0;
+    padding: 15px;
 }
 
 .sd-form-section {

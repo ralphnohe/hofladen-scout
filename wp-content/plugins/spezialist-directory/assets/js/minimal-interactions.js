@@ -916,16 +916,6 @@
                 });
             }
 
-            // Populate location dropdown
-            const $locationSelect = $('#sd-edit-location');
-            $locationSelect.empty();
-            if (data.all_locations && data.all_locations.length) {
-                data.all_locations.forEach(function(loc) {
-                    const selected = data.locations && data.locations.includes(loc.id) ? 'selected' : '';
-                    $locationSelect.append('<option value="' + loc.id + '" ' + selected + '>' + loc.name + '</option>');
-                });
-            }
-
             // Business hours
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             days.forEach(function(day) {
@@ -1078,11 +1068,9 @@
             formData.append('twitter', SDSocialMediaHelper.buildUrl($('#sd-edit-twitter').val(), 'twitter'));
             formData.append('youtube', SDSocialMediaHelper.buildUrl($('#sd-edit-youtube').val(), 'youtube'));
 
-            // Categories and locations
+            // Categories
             const categories = $('#sd-edit-category').val() || [];
-            const locations = $('#sd-edit-location').val() || [];
             categories.forEach(cat => formData.append('category[]', cat));
-            locations.forEach(loc => formData.append('location[]', loc));
 
             // Collect services data
             $('#sd-edit-services-list .sd-service-item').each(function() {
@@ -1173,6 +1161,24 @@
     // Initialize Edit Modal on document ready
     $(document).ready(function() {
         SDEditModal.init();
+    });
+
+    /**
+     * All-Day Checkbox Handler for Edit Modal Business Hours
+     * Sets from/to fields to 00:00-23:59 when checked
+     */
+    $(document).on('change', '.sd-allday-toggle-edit', function() {
+        var day = $(this).data('day');
+        var $fromInput = $('#sd-edit-hours-' + day + '-from');
+        var $toInput = $('#sd-edit-hours-' + day + '-to');
+
+        if ($(this).is(':checked')) {
+            $fromInput.val('00:00');
+            $toInput.val('23:59');
+        } else {
+            $fromInput.val('');
+            $toInput.val('');
+        }
     });
 
     /**

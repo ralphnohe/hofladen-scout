@@ -125,6 +125,7 @@ mysqldump -u wpuser -pwp_secure_pass_2025 hofladen_db1 > db-dumps/Local-DB_$(dat
 - **Registrierung:** `/registrieren`
 - **Dashboard:** `/mein-dashboard/`
 - **Submission-Formular:** `/spezialist-hinzufuegen/` (lokale DB) bzw. `/hofladen-hinzufuegen/` (Production)
+- **Test-Credentials:** Siehe `.env.local` für lokale Test-Zugangsdaten
 
 ## Important Notes
 

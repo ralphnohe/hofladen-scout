@@ -119,6 +119,8 @@ wp-content/plugins/wp-mail-smtp/
 wp-content/plugins/insert-php-code-snippet/
 wp-content/plugins/wp-file-manager/
 wp-content/plugins/wpforms-lite/
+wp-content/plugins/updraftplus/
+
 
 # Litespeed cache files
 wp-content/litespeed/

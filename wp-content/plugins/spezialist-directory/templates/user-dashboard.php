@@ -933,19 +933,11 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
                         <textarea id="sd-edit-description" name="description" rows="6" required class="sd-form-textarea"></textarea>
                     </div>
 
-                    <div class="sd-form-row">
-                        <div class="sd-form-group sd-form-half">
-                            <label for="sd-edit-category"><?php _e( 'Kategorie', 'spezialist-directory' ); ?></label>
-                            <select id="sd-edit-category" name="category[]" multiple class="sd-form-select">
-                                <!-- Options loaded via JS -->
-                            </select>
-                        </div>
-                        <div class="sd-form-group sd-form-half">
-                            <label for="sd-edit-location"><?php _e( 'Standort', 'spezialist-directory' ); ?></label>
-                            <select id="sd-edit-location" name="location[]" multiple class="sd-form-select">
-                                <!-- Options loaded via JS -->
-                            </select>
-                        </div>
+                    <div class="sd-form-group">
+                        <label for="sd-edit-category"><?php _e( 'Bundesland', 'spezialist-directory' ); ?></label>
+                        <select id="sd-edit-category" name="category[]" multiple class="sd-form-select">
+                            <!-- Options loaded via JS -->
+                        </select>
                     </div>
 
                     <div class="sd-form-group">
@@ -1083,11 +1075,18 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
                                         <span class="sd-hours-day-name"><?php echo esc_html( $day_name ); ?></span>
                                     </label>
                                 </div>
+                                <div class="sd-hours-allday">
+                                    <label class="sd-hours-allday-checkbox">
+                                        <input type="checkbox" class="sd-allday-toggle-edit" data-day="<?php echo esc_attr( $day_key ); ?>">
+                                        <span><?php _e( 'ganztägig', 'spezialist-directory' ); ?></span>
+                                    </label>
+                                </div>
                                 <div class="sd-hours-times">
                                     <div class="sd-hours-time-group">
-                                        <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][from]" class="sd-form-input sd-input-time" id="sd-edit-hours-<?php echo esc_attr( $day_key ); ?>-from">
+                                        <label class="sd-hours-open-label"><?php _e( 'Geöffnet:', 'spezialist-directory' ); ?></label>
+                                        <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][from]" class="sd-form-input sd-input-time sd-time-from-edit" data-day="<?php echo esc_attr( $day_key ); ?>" id="sd-edit-hours-<?php echo esc_attr( $day_key ); ?>-from">
                                         <span class="sd-hours-separator">-</span>
-                                        <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][to]" class="sd-form-input sd-input-time" id="sd-edit-hours-<?php echo esc_attr( $day_key ); ?>-to">
+                                        <input type="time" name="business_hours[<?php echo esc_attr( $day_key ); ?>][to]" class="sd-form-input sd-input-time sd-time-to-edit" data-day="<?php echo esc_attr( $day_key ); ?>" id="sd-edit-hours-<?php echo esc_attr( $day_key ); ?>-to">
                                     </div>
                                     <div class="sd-hours-break">
                                         <label class="sd-hours-break-label"><?php _e( 'Pause:', 'spezialist-directory' ); ?></label>
