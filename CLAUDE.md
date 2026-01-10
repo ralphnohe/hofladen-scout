@@ -119,10 +119,17 @@ mysqldump -u wpuser -pwp_secure_pass_2025 hofladen_db1 > db-dumps/Local-DB_$(dat
 - `DB_USER` auf `wpuser`
 - `DB_PASSWORD` auf `wp_secure_pass_2025`
 
+## Authentication
+
+- **Login-URL:** `/einloggen` (NICHT `/wp-login.php` - Custom Login Plugin installiert)
+- **Registrierung:** `/registrieren`
+- **Dashboard:** `/mein-dashboard/`
+- **Submission-Formular:** `/spezialist-hinzufuegen/` (lokale DB) bzw. `/hofladen-hinzufuegen/` (Production)
+
 ## Important Notes
 
 - Production + Local Development möglich
-- All UI strings in German
+- All UI strings in German (Du-Form)
 - User registration enabled for directory submissions
 - Premium listings via Stripe subscription model
 - LiteSpeed Cache enabled for performance

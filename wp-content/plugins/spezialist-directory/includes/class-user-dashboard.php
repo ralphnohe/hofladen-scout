@@ -590,6 +590,15 @@ class SD_User_Dashboard {
             $services = array_values( $services ); // Re-index array
             update_post_meta( $post_id, '_sd_services', $services );
         }
+
+        // Handle coordinates from location picker
+        $manual_lat = isset( $data['latitude'] ) ? floatval( $data['latitude'] ) : 0;
+        $manual_lng = isset( $data['longitude'] ) ? floatval( $data['longitude'] ) : 0;
+
+        if ( $manual_lat && $manual_lng ) {
+            update_post_meta( $post_id, '_sd_latitude', $manual_lat );
+            update_post_meta( $post_id, '_sd_longitude', $manual_lng );
+        }
     }
 
     /**
@@ -621,7 +630,7 @@ class SD_User_Dashboard {
         $meta_fields = array(
             'phone', 'email', 'website', 'address', 'zip', 'city',
             'facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'xing',
-            'is_premium', 'premium_until'
+            'is_premium', 'premium_until', 'latitude', 'longitude'
         );
 
         foreach ( $meta_fields as $field ) {

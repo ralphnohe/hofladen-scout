@@ -351,17 +351,27 @@ class SD_User_Submissions {
             update_post_meta( $post_id, '_sd_services', $services );
         }
 
-        // Auto-geocode address to get coordinates
-        $address = isset( $data['address'] ) ? sanitize_text_field( $data['address'] ) : '';
-        $zip = isset( $data['zip'] ) ? sanitize_text_field( $data['zip'] ) : '';
-        $city = isset( $data['city'] ) ? sanitize_text_field( $data['city'] ) : '';
+        // Handle coordinates - use manual if provided, otherwise auto-geocode
+        $manual_lat = isset( $data['latitude'] ) ? floatval( $data['latitude'] ) : 0;
+        $manual_lng = isset( $data['longitude'] ) ? floatval( $data['longitude'] ) : 0;
 
-        if ( ! empty( $address ) && ! empty( $zip ) && ! empty( $city ) ) {
-            $full_address = sprintf( '%s, %s %s, Deutschland', $address, $zip, $city );
-            $coordinates = $this->geocode_address( $full_address );
-            if ( $coordinates ) {
-                update_post_meta( $post_id, '_sd_latitude', $coordinates['lat'] );
-                update_post_meta( $post_id, '_sd_longitude', $coordinates['lng'] );
+        if ( $manual_lat && $manual_lng ) {
+            // Use user-provided coordinates from location picker
+            update_post_meta( $post_id, '_sd_latitude', $manual_lat );
+            update_post_meta( $post_id, '_sd_longitude', $manual_lng );
+        } else {
+            // Fallback to auto-geocode address
+            $address = isset( $data['address'] ) ? sanitize_text_field( $data['address'] ) : '';
+            $zip = isset( $data['zip'] ) ? sanitize_text_field( $data['zip'] ) : '';
+            $city = isset( $data['city'] ) ? sanitize_text_field( $data['city'] ) : '';
+
+            if ( ! empty( $address ) && ! empty( $zip ) && ! empty( $city ) ) {
+                $full_address = sprintf( '%s, %s %s, Deutschland', $address, $zip, $city );
+                $coordinates = $this->geocode_address( $full_address );
+                if ( $coordinates ) {
+                    update_post_meta( $post_id, '_sd_latitude', $coordinates['lat'] );
+                    update_post_meta( $post_id, '_sd_longitude', $coordinates['lng'] );
+                }
             }
         }
     }

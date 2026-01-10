@@ -212,6 +212,23 @@ $bundeslaender = SD_User_Submissions::get_bundeslaender();
                     </select>
                 </div>
             </div>
+
+            <!-- Location Picker Map -->
+            <div class="sd-location-picker-container" id="sd-location-picker-container" style="display:none;">
+                <label><?php _e( 'Bestätige den Standort auf der Karte', 'spezialist-directory' ); ?></label>
+                <p class="sd-form-hint"><?php _e( 'Verschiebe den Pin, um den exakten Standort festzulegen', 'spezialist-directory' ); ?></p>
+                <div id="sd-submission-map" class="sd-location-picker-map"></div>
+                <div class="sd-coords-inputs">
+                    <div class="sd-coord-field">
+                        <label for="sd-latitude"><?php _e( 'Breitengrad (Lat)', 'spezialist-directory' ); ?></label>
+                        <input type="number" name="latitude" id="sd-latitude" step="0.0000001" placeholder="z.B. 51.1657">
+                    </div>
+                    <div class="sd-coord-field">
+                        <label for="sd-longitude"><?php _e( 'Längengrad (Lng)', 'spezialist-directory' ); ?></label>
+                        <input type="number" name="longitude" id="sd-longitude" step="0.0000001" placeholder="z.B. 10.4515">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Gallery (Premium) -->

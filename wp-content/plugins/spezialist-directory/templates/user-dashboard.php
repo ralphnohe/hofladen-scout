@@ -1000,6 +1000,23 @@ $listings_rankings = SD_Analytics::get_rankings_for_listings( $all_listing_ids )
                             <input type="text" id="sd-edit-city" name="city" class="sd-form-input">
                         </div>
                     </div>
+
+                    <!-- Location Picker Map -->
+                    <div class="sd-location-picker-container sd-form-group" id="sd-edit-location-picker-container">
+                        <label><?php _e( 'Bestätige den Standort auf der Karte', 'spezialist-directory' ); ?></label>
+                        <p class="sd-form-hint"><?php _e( 'Verschiebe den Pin, um den exakten Standort festzulegen', 'spezialist-directory' ); ?></p>
+                        <div id="sd-edit-map" class="sd-location-picker-map"></div>
+                        <div class="sd-coords-inputs">
+                            <div class="sd-coord-field">
+                                <label for="sd-edit-latitude"><?php _e( 'Breitengrad (Lat)', 'spezialist-directory' ); ?></label>
+                                <input type="number" name="latitude" id="sd-edit-latitude" step="0.0000001" placeholder="z.B. 51.1657">
+                            </div>
+                            <div class="sd-coord-field">
+                                <label for="sd-edit-longitude"><?php _e( 'Längengrad (Lng)', 'spezialist-directory' ); ?></label>
+                                <input type="number" name="longitude" id="sd-edit-longitude" step="0.0000001" placeholder="z.B. 10.4515">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Services Section (Premium) -->

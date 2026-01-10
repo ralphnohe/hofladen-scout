@@ -8207,3 +8207,123 @@ button.sr-star-btn:focus,
     background: #FAFAFA !important;
     cursor: pointer !important;
 }
+
+/* ==========================================
+   LOCATION PICKER - DRAGGABLE MAP PIN
+   ========================================== */
+
+.sd-location-picker-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.sd-location-picker-container > label:first-child {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 15px;
+}
+
+.sd-location-picker-container .sd-form-hint {
+    color: #666;
+    font-size: 14px;
+    margin: 5px 0 15px;
+}
+
+.sd-location-picker-map {
+    height: 300px;
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #dee2e6;
+    background: #eee;
+}
+
+/* Coordinate input fields */
+.sd-coords-inputs {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.sd-coord-field {
+    flex: 1;
+}
+
+.sd-coord-field label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.sd-coord-field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    transition: border-color 0.2s ease;
+}
+
+.sd-coord-field input:focus {
+    outline: none;
+    border-color: #f1c232;
+    box-shadow: 0 0 0 3px rgba(241, 194, 50, 0.15);
+}
+
+/* Draggable marker styling */
+.sd-location-picker-marker-wrapper {
+    background: transparent !important;
+    border: none !important;
+}
+
+.sd-location-picker-marker {
+    width: 40px;
+    height: 40px;
+    cursor: grab;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.15s ease;
+}
+
+.sd-location-picker-marker:hover {
+    transform: scale(1.1);
+}
+
+.sd-location-picker-marker svg {
+    width: 100%;
+    height: 100%;
+}
+
+.leaflet-dragging .sd-location-picker-marker {
+    cursor: grabbing;
+    transform: scale(1.15);
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+    .sd-coords-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .sd-location-picker-map {
+        height: 250px;
+    }
+}
+
+/* Edit modal specific adjustments */
+#sd-edit-location-picker-container {
+    margin-top: 15px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+}
+
+#sd-edit-location-picker-container .sd-location-picker-map {
+    height: 280px;
+}

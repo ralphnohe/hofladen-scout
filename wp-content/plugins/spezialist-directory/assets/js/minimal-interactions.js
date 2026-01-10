@@ -1043,6 +1043,9 @@
 
             // Clear video file input
             $('#sd-edit-video').val('');
+
+            // Trigger custom event for location picker with data including coordinates
+            $(document).trigger('sd-edit-form-populated', [data]);
         },
 
         submitForm: function() {
@@ -1064,6 +1067,9 @@
             formData.append('address', $('#sd-edit-address').val());
             formData.append('zip', $('#sd-edit-zip').val());
             formData.append('city', $('#sd-edit-city').val());
+            // Include coordinates from location picker
+            formData.append('latitude', $('#sd-edit-latitude').val());
+            formData.append('longitude', $('#sd-edit-longitude').val());
             // Convert social media usernames to full URLs
             formData.append('facebook', SDSocialMediaHelper.buildUrl($('#sd-edit-facebook').val(), 'facebook'));
             formData.append('instagram', SDSocialMediaHelper.buildUrl($('#sd-edit-instagram').val(), 'instagram'));
@@ -1167,6 +1173,303 @@
     // Initialize Edit Modal on document ready
     $(document).ready(function() {
         SDEditModal.init();
+    });
+
+    /**
+     * SDLocationPicker - Draggable Map Pin for Precise Location Setting
+     * Used in submission form and dashboard edit modal
+     */
+    const SDLocationPicker = {
+        map: null,
+        marker: null,
+        defaultCenter: [51.1657, 10.4515], // Germany center
+        defaultZoom: 6,
+        maxZoom: 18,
+        context: null, // 'submission' or 'edit'
+        debounceTimer: null,
+
+        init: function(context) {
+            if (typeof L === 'undefined') {
+                return; // Leaflet not loaded
+            }
+
+            this.context = context;
+            const self = this;
+
+            if (context === 'submission') {
+                this.initSubmissionForm();
+            } else if (context === 'edit') {
+                this.initEditForm();
+            }
+        },
+
+        initSubmissionForm: function() {
+            const self = this;
+            const $container = $('#sd-location-picker-container');
+            const $mapDiv = $('#sd-submission-map');
+            const $latInput = $('#sd-latitude');
+            const $lngInput = $('#sd-longitude');
+            const $addressInput = $('#sd_address');
+            const $zipInput = $('#sd_zip');
+            const $cityInput = $('#sd_city');
+
+            if (!$container.length || !$mapDiv.length) return;
+
+            // Listen for address field changes (with debounce)
+            $addressInput.add($zipInput).add($cityInput).on('blur', function() {
+                clearTimeout(self.debounceTimer);
+                self.debounceTimer = setTimeout(function() {
+                    self.tryGeocodeAndShowMap('submission');
+                }, 500);
+            });
+
+            // Listen for manual coordinate input changes
+            $latInput.add($lngInput).on('change', function() {
+                self.updateMarkerFromInputs('submission');
+            });
+        },
+
+        initEditForm: function() {
+            const self = this;
+
+            // Watch for modal opening - the form gets populated
+            $(document).on('sd-edit-form-populated', function(e, data) {
+                self.initEditMapWithData(data);
+            });
+
+            // Listen for manual coordinate input changes in edit form
+            $(document).on('change', '#sd-edit-latitude, #sd-edit-longitude', function() {
+                self.updateMarkerFromInputs('edit');
+            });
+
+            // Listen for address field changes in edit form
+            $(document).on('blur', '#sd-edit-address, #sd-edit-zip, #sd-edit-city', function() {
+                clearTimeout(self.debounceTimer);
+                self.debounceTimer = setTimeout(function() {
+                    self.tryGeocodeAndShowMap('edit');
+                }, 500);
+            });
+        },
+
+        initEditMapWithData: function(data) {
+            const self = this;
+            const $container = $('#sd-edit-location-picker-container');
+            const $mapDiv = $('#sd-edit-map');
+            const $latInput = $('#sd-edit-latitude');
+            const $lngInput = $('#sd-edit-longitude');
+
+            if (!$container.length || !$mapDiv.length) return;
+
+            // Show container
+            $container.show();
+
+            // Populate coordinate inputs from data
+            if (data.latitude && data.longitude) {
+                $latInput.val(data.latitude);
+                $lngInput.val(data.longitude);
+            }
+
+            // Destroy previous map if exists
+            if (this.map) {
+                this.map.remove();
+                this.map = null;
+                this.marker = null;
+            }
+
+            // Delay to ensure modal is visible before creating map
+            setTimeout(function() {
+                if (data.latitude && data.longitude) {
+                    // Use existing coordinates
+                    self.createMap('edit', parseFloat(data.latitude), parseFloat(data.longitude));
+                } else {
+                    // Try geocoding from address fields
+                    self.tryGeocodeAndShowMap('edit');
+                }
+            }, 300);
+        },
+
+        tryGeocodeAndShowMap: function(context) {
+            const self = this;
+            let address, zip, city, $container, $mapDiv;
+
+            if (context === 'submission') {
+                address = $('#sd_address').val();
+                zip = $('#sd_zip').val();
+                city = $('#sd_city').val();
+                $container = $('#sd-location-picker-container');
+                $mapDiv = $('#sd-submission-map');
+            } else {
+                address = $('#sd-edit-address').val();
+                zip = $('#sd-edit-zip').val();
+                city = $('#sd-edit-city').val();
+                $container = $('#sd-edit-location-picker-container');
+                $mapDiv = $('#sd-edit-map');
+            }
+
+            // Need at least city or zip to geocode
+            if (!city && !zip) {
+                return;
+            }
+
+            // Build full address
+            const fullAddress = [address, zip, city, 'Deutschland'].filter(Boolean).join(', ');
+
+            // Show container
+            $container.show();
+
+            // Geocode via Nominatim
+            this.geocodeAddress(fullAddress, function(result) {
+                if (result) {
+                    self.createMap(context, result.lat, result.lng);
+                    self.updateInputs(context, result.lat, result.lng);
+                } else {
+                    // Geocoding failed - show map at Germany center
+                    self.createMap(context, self.defaultCenter[0], self.defaultCenter[1], true);
+                }
+            });
+        },
+
+        geocodeAddress: function(address, callback) {
+            const url = 'https://nominatim.openstreetmap.org/search?' +
+                'q=' + encodeURIComponent(address) +
+                '&format=json&limit=1&addressdetails=1';
+
+            fetch(url, {
+                headers: {
+                    'User-Agent': 'Hofladen-Scout.de/1.0'
+                }
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data && data.length > 0) {
+                    callback({
+                        lat: parseFloat(data[0].lat),
+                        lng: parseFloat(data[0].lon)
+                    });
+                } else {
+                    callback(null);
+                }
+            })
+            .catch(function() {
+                callback(null);
+            });
+        },
+
+        createMap: function(context, lat, lng, isFallback) {
+            const self = this;
+            let mapId = context === 'submission' ? 'sd-submission-map' : 'sd-edit-map';
+            const $mapDiv = $('#' + mapId);
+
+            if (!$mapDiv.length) return;
+
+            // Destroy previous map if exists
+            if (this.map) {
+                this.map.remove();
+            }
+
+            // Create map
+            this.map = L.map(mapId).setView([lat, lng], isFallback ? this.defaultZoom : this.maxZoom);
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(this.map);
+
+            // Create custom draggable marker icon
+            const markerHtml = '<div class="sd-location-picker-marker"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#f1c232"/><circle cx="12" cy="9" r="3" fill="#fff"/></svg></div>';
+
+            const markerIcon = L.divIcon({
+                html: markerHtml,
+                className: 'sd-location-picker-marker-wrapper',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40]
+            });
+
+            // Create draggable marker
+            this.marker = L.marker([lat, lng], {
+                icon: markerIcon,
+                draggable: true
+            }).addTo(this.map);
+
+            // Update coordinates on drag end
+            this.marker.on('dragend', function(e) {
+                const position = e.target.getLatLng();
+                self.updateInputs(context, position.lat, position.lng);
+            });
+
+            // Also allow clicking on map to move marker
+            this.map.on('click', function(e) {
+                self.marker.setLatLng(e.latlng);
+                self.updateInputs(context, e.latlng.lat, e.latlng.lng);
+            });
+
+            // Invalidate size after a short delay (for modals)
+            setTimeout(function() {
+                self.map.invalidateSize();
+            }, 100);
+        },
+
+        updateInputs: function(context, lat, lng) {
+            let $latInput, $lngInput;
+
+            if (context === 'submission') {
+                $latInput = $('#sd-latitude');
+                $lngInput = $('#sd-longitude');
+            } else {
+                $latInput = $('#sd-edit-latitude');
+                $lngInput = $('#sd-edit-longitude');
+            }
+
+            $latInput.val(lat.toFixed(7));
+            $lngInput.val(lng.toFixed(7));
+        },
+
+        updateMarkerFromInputs: function(context) {
+            let $latInput, $lngInput;
+
+            if (context === 'submission') {
+                $latInput = $('#sd-latitude');
+                $lngInput = $('#sd-longitude');
+            } else {
+                $latInput = $('#sd-edit-latitude');
+                $lngInput = $('#sd-edit-longitude');
+            }
+
+            const lat = parseFloat($latInput.val());
+            const lng = parseFloat($lngInput.val());
+
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                if (this.marker && this.map) {
+                    this.marker.setLatLng([lat, lng]);
+                    this.map.setView([lat, lng], this.maxZoom);
+                } else {
+                    // Create map if not exists
+                    this.tryGeocodeAndShowMap(context);
+                }
+            }
+        },
+
+        destroy: function() {
+            if (this.map) {
+                this.map.remove();
+                this.map = null;
+                this.marker = null;
+            }
+        }
+    };
+
+    // Initialize SDLocationPicker on document ready
+    $(document).ready(function() {
+        // For submission form
+        if ($('#sd-location-picker-container').length) {
+            SDLocationPicker.init('submission');
+        }
+
+        // For edit form - initialized via custom event when form is populated
+        if ($('#sd-edit-location-picker-container').length) {
+            SDLocationPicker.init('edit');
+        }
     });
 
     /**

@@ -275,9 +275,11 @@ final class Spezialist_Directory {
             SD_VERSION
         );
 
-        // Enqueue Leaflet CSS and JS for pages with maps (listings page + single spezialist + kartensuche)
+        // Enqueue Leaflet CSS and JS for pages with maps (listings page + single spezialist + kartensuche + submission form + dashboard)
         $needs_leaflet = is_singular( 'hofladen' ) ||
                          has_shortcode( $post_content, 'spezialist_listings' ) ||
+                         has_shortcode( $post_content, 'spezialist_submit' ) ||
+                         has_shortcode( $post_content, 'spezialist_dashboard' ) ||
                          is_front_page() ||
                          is_page_template( 'page-kartensuche.php' );
 
