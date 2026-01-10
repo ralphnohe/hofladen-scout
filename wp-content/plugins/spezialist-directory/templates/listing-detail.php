@@ -374,9 +374,12 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
             <!-- Tab Panel: Standort (Location + Map) -->
             <?php if ( $address || $zip || $city ) : ?>
                 <?php
-                // Build full address for geocoding
+                // Build full address for geocoding fallback
                 $full_address_parts = array_filter( array( $address, $zip, $city, 'Deutschland' ) );
                 $full_address = implode( ', ', $full_address_parts );
+                // Get stored coordinates from database (preferred over geocoding)
+                $latitude = get_post_meta( $post_id, '_sd_latitude', true );
+                $longitude = get_post_meta( $post_id, '_sd_longitude', true );
                 ?>
                 <div class="sd-tab-content" data-tab="standort">
                     <div class="sd-detail-section">
@@ -390,7 +393,10 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
                             <?php endif; ?>
                         </div>
                         <div class="sd-map-container">
-                            <div id="sd-map" data-address="<?php echo esc_attr( $full_address ); ?>"></div>
+                            <div id="sd-map"
+                                 data-address="<?php echo esc_attr( $full_address ); ?>"
+                                 data-lat="<?php echo esc_attr( $latitude ); ?>"
+                                 data-lng="<?php echo esc_attr( $longitude ); ?>"></div>
                         </div>
                     </div>
                 </div>
@@ -710,7 +716,8 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
         if (!mapContainer) return;
 
         var address = mapContainer.getAttribute('data-address');
-        if (!address) return;
+        var storedLat = mapContainer.getAttribute('data-lat');
+        var storedLng = mapContainer.getAttribute('data-lng');
 
         mapInitialized = true;
 
@@ -723,28 +730,43 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
             maxZoom: 19
         }).addTo(map);
 
-        // Geocode address using Nominatim (OpenStreetMap)
-        var encodedAddress = encodeURIComponent(address);
-        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodedAddress + '&limit=1')
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data && data.length > 0) {
-                    var lat = parseFloat(data[0].lat);
-                    var lon = parseFloat(data[0].lon);
+        // Helper function to add marker
+        function addMarker(lat, lon) {
+            map.setView([lat, lon], 15);
+            L.marker([lat, lon]).addTo(map)
+                .bindPopup('<?php echo esc_js( get_the_title() ); ?>')
+                .openPopup();
+        }
 
-                    map.setView([lat, lon], 15);
-
-                    L.marker([lat, lon]).addTo(map)
-                        .bindPopup('<?php echo esc_js( get_the_title() ); ?>')
-                        .openPopup();
-                } else {
-                    // If geocoding fails, hide the map container
+        // Use stored coordinates from database if available (preferred)
+        if (storedLat && storedLng && storedLat !== '' && storedLng !== '') {
+            var lat = parseFloat(storedLat);
+            var lng = parseFloat(storedLng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                addMarker(lat, lng);
+            }
+        } else if (address) {
+            // Fallback: Geocode address using Nominatim (OpenStreetMap)
+            var encodedAddress = encodeURIComponent(address);
+            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodedAddress + '&limit=1')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data && data.length > 0) {
+                        var lat = parseFloat(data[0].lat);
+                        var lon = parseFloat(data[0].lon);
+                        addMarker(lat, lon);
+                    } else {
+                        // If geocoding fails, hide the map container
+                        mapContainer.parentElement.style.display = 'none';
+                    }
+                })
+                .catch(function() {
                     mapContainer.parentElement.style.display = 'none';
-                }
-            })
-            .catch(function() {
-                mapContainer.parentElement.style.display = 'none';
-            });
+                });
+        } else {
+            // No coordinates and no address - hide map
+            mapContainer.parentElement.style.display = 'none';
+        }
 
         // Invalidate map size after tab switch (Leaflet needs this)
         setTimeout(function() {
