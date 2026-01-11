@@ -360,12 +360,9 @@ class SD_User_Dashboard {
             }
         }
 
-        // Handle gallery updates (Premium only)
-        $is_premium = get_post_meta( $post_id, '_sd_is_premium', true );
-        if ( $is_premium ) {
-            $this->handle_gallery_update( $post_id );
-            $this->handle_video_update( $post_id );
-        }
+        // Handle gallery and video updates (available for all listings - premium display is controlled on detail page)
+        $this->handle_gallery_update( $post_id );
+        $this->handle_video_update( $post_id );
 
         // Handle profile image upload
         $this->handle_profile_image_update( $post_id );

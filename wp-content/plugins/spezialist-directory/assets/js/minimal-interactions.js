@@ -936,46 +936,35 @@
                 });
             }
 
-            // Gallery section (Premium only)
+            // Gallery section (available for all listings - premium display is controlled on detail page)
             const $gallerySection = $('#sd-edit-gallery-section');
             const $galleryContainer = $('.sd-gallery-edit-container');
             const $galleryNotPremium = $('#sd-edit-gallery-not-premium');
             const $galleryCurrent = $('#sd-edit-gallery-current');
 
-            // Show gallery section
+            // Show gallery section for all users
             $gallerySection.show();
+            $galleryContainer.show();
+            $galleryNotPremium.hide();
 
-            if (data.is_premium) {
-                // Show gallery editing for premium users
-                $galleryContainer.show();
-                $galleryNotPremium.hide();
-
-                // Populate existing gallery images
-                $galleryCurrent.empty();
-                if (data.gallery_images && data.gallery_images.length) {
-                    data.gallery_images.forEach(function(img) {
-                        $galleryCurrent.append(
-                            '<div class="sd-gallery-edit-item" data-id="' + img.id + '">' +
-                                '<img src="' + img.thumbnail + '" alt="">' +
-                                '<button type="button" class="sd-gallery-remove" data-id="' + img.id + '" title="Entfernen">&times;</button>' +
-                            '</div>'
-                        );
-                    });
-                } else {
-                    $galleryCurrent.append('<p class="sd-no-gallery">' + (sdAjax.i18n?.noGalleryImages || 'Keine Bilder in der Galerie.') + '</p>');
-                }
-
-                // Store original gallery IDs for tracking removed images
-                self.originalGalleryIds = data.gallery_images ? data.gallery_images.map(img => img.id) : [];
-                self.removedGalleryIds = [];
+            // Populate existing gallery images
+            $galleryCurrent.empty();
+            if (data.gallery_images && data.gallery_images.length) {
+                data.gallery_images.forEach(function(img) {
+                    $galleryCurrent.append(
+                        '<div class="sd-gallery-edit-item" data-id="' + img.id + '">' +
+                            '<img src="' + img.thumbnail + '" alt="">' +
+                            '<button type="button" class="sd-gallery-remove" data-id="' + img.id + '" title="Entfernen">&times;</button>' +
+                        '</div>'
+                    );
+                });
             } else {
-                // Show upgrade prompt for non-premium users
-                $galleryContainer.hide();
-                $galleryNotPremium.show();
-                $galleryCurrent.empty();
-                self.originalGalleryIds = [];
-                self.removedGalleryIds = [];
+                $galleryCurrent.append('<p class="sd-no-gallery">' + (sdAjax.i18n?.noGalleryImages || 'Keine Bilder in der Galerie.') + '</p>');
             }
+
+            // Store original gallery IDs for tracking removed images
+            self.originalGalleryIds = data.gallery_images ? data.gallery_images.map(img => img.id) : [];
+            self.removedGalleryIds = [];
 
             // Clear file input
             $('#sd-edit-gallery').val('');
@@ -993,41 +982,32 @@
             // Clear profile image file input
             $('#sd-edit-profile-image').val('');
 
-            // Video section (Premium only)
+            // Video section (available for all listings - premium display is controlled on detail page)
             const $videoSection = $('#sd-edit-video-section');
             const $videoContainer = $('.sd-video-edit-container');
             const $videoNotPremium = $('#sd-edit-video-not-premium');
             const $videoCurrent = $('#sd-edit-video-current');
 
-            if (data.is_premium) {
-                // Show video section for premium users
-                $videoSection.show();
-                $videoContainer.show();
-                $videoNotPremium.hide();
+            // Show video section for all users
+            $videoSection.show();
+            $videoContainer.show();
+            $videoNotPremium.hide();
 
-                // Show current video if exists
-                $videoCurrent.empty();
-                if (data.video_url) {
-                    $videoCurrent.append(
-                        '<div class="sd-video-preview">' +
-                            '<video controls preload="metadata" style="max-width: 100%; max-height: 200px;">' +
-                                '<source src="' + data.video_url + '" type="video/mp4">' +
-                                'Dein Browser unterstützt keine Video-Wiedergabe.' +
-                            '</video>' +
-                            '<button type="button" class="sd-video-remove" id="sd-edit-video-remove" title="Video entfernen">&times; Video entfernen</button>' +
-                        '</div>'
-                    );
-                    self.removeVideo = false;
-                } else {
-                    $videoCurrent.append('<p class="sd-no-video">' + (sdAjax.i18n?.noVideo || 'Kein Video vorhanden.') + '</p>');
-                    self.removeVideo = false;
-                }
+            // Show current video if exists
+            $videoCurrent.empty();
+            if (data.video_url) {
+                $videoCurrent.append(
+                    '<div class="sd-video-preview">' +
+                        '<video controls preload="metadata" style="max-width: 100%; max-height: 200px;">' +
+                            '<source src="' + data.video_url + '" type="video/mp4">' +
+                            'Dein Browser unterstützt keine Video-Wiedergabe.' +
+                        '</video>' +
+                        '<button type="button" class="sd-video-remove" id="sd-edit-video-remove" title="Video entfernen">&times; Video entfernen</button>' +
+                    '</div>'
+                );
+                self.removeVideo = false;
             } else {
-                // Show upgrade prompt for non-premium users
-                $videoSection.show();
-                $videoContainer.hide();
-                $videoNotPremium.show();
-                $videoCurrent.empty();
+                $videoCurrent.append('<p class="sd-no-video">' + (sdAjax.i18n?.noVideo || 'Kein Video vorhanden.') + '</p>');
                 self.removeVideo = false;
             }
 

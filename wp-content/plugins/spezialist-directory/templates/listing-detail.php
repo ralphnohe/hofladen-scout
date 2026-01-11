@@ -242,9 +242,9 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
                 </div>
 
                 <?php
-                // Services/Offerings Display
+                // Services/Offerings Display (Premium feature only)
                 $services = get_post_meta( $post_id, '_sd_services', true );
-                if ( is_array( $services ) && ! empty( $services ) ) :
+                if ( $is_premium && is_array( $services ) && ! empty( $services ) ) :
                 ?>
                     <div class="sd-detail-section sd-services-section">
                         <h2><?php _e( 'Angebotene Leistungen', 'spezialist-directory' ); ?></h2>
@@ -358,8 +358,8 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
                         </div>
 
                         <?php
-                        // Business Hours Display
-                        if ( class_exists( 'SD_Business_Hours' ) && SD_Business_Hours::has_hours( $post_id ) ) :
+                        // Business Hours Display (Premium feature only)
+                        if ( $is_premium && class_exists( 'SD_Business_Hours' ) && SD_Business_Hours::has_hours( $post_id ) ) :
                         ?>
                             <div class="sd-business-hours-section">
                                 <h3><?php _e( 'Öffnungszeiten', 'spezialist-directory' ); ?></h3>
@@ -415,7 +415,7 @@ if ( class_exists( 'SDSEO_Breadcrumbs' ) ) {
 
         <div class="sd-detail-sidebar">
 
-            <?php if ( $facebook || $twitter || $instagram || $linkedin || $youtube || $xing ) : ?>
+            <?php if ( $is_premium && ( $facebook || $twitter || $instagram || $linkedin || $youtube || $xing ) ) : ?>
                 <div class="sd-detail-sidebar-box sd-social-box">
                     <h3><?php _e( 'Social Media', 'spezialist-directory' ); ?></h3>
                     <div class="sd-social-links">
