@@ -2132,9 +2132,12 @@ h1.sd-favorites-title,
     margin-left: 4px;
 }
 
-/* Business Hours Table */
+/* Business Hours Table - Compact Professional Design */
 .sd-business-hours {
     margin-top: 12px;
+    background: var(--sd-grey-50, #fafafa);
+    border-radius: 10px;
+    padding: 4px 4px 0 4px;
 }
 
 .sd-hours-table {
@@ -2143,59 +2146,77 @@ h1.sd-favorites-title,
 }
 
 .sd-hours-table tr {
-    border-bottom: 1px solid #F3F4F6;
-}
-
-.sd-hours-table tr:last-child {
     border-bottom: none;
 }
 
 .sd-hours-table td {
-    padding: 10px 0;
+    padding: 10px 14px;
+    vertical-align: middle;
 }
 
-.sd-hours-day {
+.sd-hours-table .sd-hours-day {
     font-weight: 500;
-    color: #374151;
-}
-
-.sd-today-marker {
-    font-weight: 400;
-    font-size: 12px;
-    color: #2563EB;
-    margin-left: 6px;
-}
-
-.sd-hours-today {
-    background: #EFF6FF;
-    border-radius: 6px;
-}
-
-.sd-hours-today td {
-    padding: 10px 8px;
-}
-
-.sd-hours-today .sd-hours-day {
-    color: #1D4ED8;
-    font-weight: 600;
+    color: var(--sd-grey-700, #333333);
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .sd-hours-time {
     text-align: right;
-    color: #4B5563;
+    color: var(--sd-grey-600, #525252);
+    font-size: 14px;
     font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    white-space: nowrap;
+}
+
+.sd-today-marker {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--sd-black, #1A1A1A);
+    background: var(--sd-yellow, #f1c232);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.sd-hours-today {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.sd-hours-today td:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+.sd-hours-today td:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+.sd-hours-today .sd-hours-day {
+    color: var(--sd-black, #1A1A1A);
+    font-weight: 600;
 }
 
 .sd-hours-closed {
-    color: #9CA3AF;
-    font-style: italic;
+    color: var(--sd-grey-400, #a3a3a3);
 }
 
 .sd-hours-break {
-    display: block;
+    display: inline;
     font-size: 12px;
-    color: #9CA3AF;
-    margin-top: 2px;
+    color: var(--sd-grey-500, #737373);
+    margin-left: 6px;
+}
+
+.sd-hours-break::before {
+    content: "·";
+    margin-right: 6px;
 }
 
 /* Card Badge - Open Now */
