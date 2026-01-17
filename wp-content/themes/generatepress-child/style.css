@@ -6929,6 +6929,7 @@ a.wp-block-button__link:not(.has-background) {
     position: relative;
     width: 100%;
     min-height: calc(100vh - 64px);
+    min-height: calc(var(--real-vh, 1vh) * 100 - 64px); /* JS-based viewport for iPadOS Safari */
     overflow: hidden;
     background: var(--sd-grey-100);
 }
@@ -7174,6 +7175,7 @@ a.wp-block-button__link:not(.has-background) {
     position: relative;
     width: 100%;
     height: calc(100vh - 80px); /* Full viewport minus sticky header height */
+    height: calc(var(--real-vh, 1vh) * 100 - 80px); /* JS-based viewport for iPadOS Safari */
     z-index: 1;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -7340,9 +7342,9 @@ a.wp-block-button__link:not(.has-background) {
     to { transform: rotate(360deg); }
 }
 
-/* Floating List Toggle Button - positioned 20px above bottom of .sd-kartensuche-wrapper */
+/* Floating List Toggle Button - fixed to viewport bottom */
 .sd-kartensuche-list-toggle {
-    position: absolute !important;
+    position: fixed !important;
     bottom: 20px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
@@ -7909,6 +7911,18 @@ a.wp-block-button__link:not(.has-background) {
         width: 100% !important;
     }
 
+    /* Tablet map container height fix - use dvh for proper viewport on iPads */
+    .sd-kartensuche-map-container {
+        height: calc(100vh - 80px); /* Fallback */
+        height: calc(100dvh - 80px);
+    }
+
+    @supports (height: 100dvh) {
+        .sd-kartensuche-map-container {
+            height: calc(100dvh - 80px) !important;
+        }
+    }
+
     .sd-list-drag-handle {
         display: block;
         width: 50px;
@@ -8107,10 +8121,22 @@ a.wp-block-button__link:not(.has-background) {
     }
 }
 
-/* iPad Landscape - controls positioning */
+/* iPad Landscape - controls positioning and viewport fix */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
     .sd-kartensuche-controls {
         bottom: 100px !important;
+    }
+
+    /* iPad Landscape viewport fix - ensures map and toggle button stay in viewport */
+    .sd-kartensuche-wrapper {
+        min-height: calc(100dvh - 64px) !important;
+        max-height: calc(100dvh - 64px) !important;
+        overflow: hidden !important;
+    }
+
+    .sd-kartensuche-map-container {
+        height: calc(100dvh - 64px) !important;
+        max-height: calc(100dvh - 64px) !important;
     }
 }
 
