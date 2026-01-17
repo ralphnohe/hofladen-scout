@@ -6929,7 +6929,7 @@ a.wp-block-button__link:not(.has-background) {
     position: relative;
     width: 100%;
     min-height: calc(100vh - 64px);
-    min-height: calc(var(--real-vh, 1vh) * 100 - 64px); /* JS-based viewport for iPadOS Safari */
+    min-height: calc(100dvh - 64px); /* dvh for iPadOS Safari */
     overflow: hidden;
     background: var(--sd-grey-100);
 }
@@ -7175,7 +7175,7 @@ a.wp-block-button__link:not(.has-background) {
     position: relative;
     width: 100%;
     height: calc(100vh - 80px); /* Full viewport minus sticky header height */
-    height: calc(var(--real-vh, 1vh) * 100 - 80px); /* JS-based viewport for iPadOS Safari */
+    height: calc(100dvh - 80px); /* dvh for iPadOS Safari */
     z-index: 1;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
